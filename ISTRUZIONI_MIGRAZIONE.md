@@ -20,7 +20,7 @@ Il gioco vive interamente dentro `piccoli_imperi.html`: non ci sono database, se
 2. Allega `piccoli_imperi.html` (e, se vuoi continuare con i test automatici, anche `stub.js` e i file `*test*.js`).
 3. Spiega a Claude, in breve, cosa è già stato fatto e la regola più importante seguita finora:
 
-   > "Questo è un gioco di strategia a turni in stile Polytopia, con una mappa geografica reale e deterministica (seed fisso) che copre gran parte d'Europa, il Nord Africa e la Russia europea fino agli Urali. **Non rigenerare mai tutta la mappa da zero**: se serve una modifica, cambiala chirurgicamente e verifica che il resto della mappa resti identico prima/dopo."
+   > "Questo è un gioco di strategia a turni in stile Polytopia, con una mappa geografica reale e deterministica (seed fisso) che copre gran parte d'Europa, il Nord Africa e la Russia europea fino agli Urali. Dalla v57 i biomi vengono da OpenStreetMap e sono fissi per ogni grandezza (riga `const BIOMI` nel file, rigenerabile con `build_biomi.py`); verifica ogni modifica con `mappatest.js`."
 
 4. Da lì Claude può leggere direttamente il codice dentro `piccoli_imperi.html` (è tutto in un unico tag `<script>`) e continuare a modificarlo.
 

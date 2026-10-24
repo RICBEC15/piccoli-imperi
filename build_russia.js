@@ -11,6 +11,10 @@ const ru = geo.features.find(f => f.id === '643'); // Russia, codice ISO numeric
 // agli Urali (~61E, un filo oltre GRECIA_EST=60.7 per sicurezza sul bordo), dal
 // Caucaso (~40N, sotto il vecchio RU_POLY) al Mar Glaciale Artico (~71N, un filo
 // oltre SCOZIA_NORD=69.35 per non tagliare la costa)
+// ATTENZIONE (v56): l'anello principale attraversa il 180° meridiano (Chukotka) e il
+// ritaglio lascia in coda un giro di ritorno lungo i bordi del rettangolo
+// ([61.2,69.003],[18,68.999],[18,65.05],[61.2,65.046]) che inverte la Lapponia nel test
+// pari/dispari: quei 4 punti vanno tolti dal risultato (in piccoli_imperi.html sono gia' tolti).
 const LON_MIN = 18.0, LON_MAX = 61.2, LAT_MIN = 40.5, LAT_MAX = 71.2;
 
 function clipRect(ring) {
