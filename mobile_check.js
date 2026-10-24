@@ -17,6 +17,7 @@ const path = require('path');
       const t0 = performance.now();
       setMapSize(taglia); newGame();
       if (typeof chiudiSceltaPaese === 'function') chiudiSceltaPaese(); // il menu dei paesi coprirebbe la mappa
+      if (placing && !players.p.country) cambiaPaese('IT'); // il paese si sceglie toccandolo sulla mappa
       if (placing && placeSet.length) placePlayerCapital(placeSet[0]);
       const tGen = performance.now() - t0;
       const w = document.getElementById('mapwrap');

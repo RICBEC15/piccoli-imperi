@@ -1,7 +1,18 @@
 "use strict";
 // Stub DOM minimale per eseguire game.js sotto Node, a scopo di test.
 // IMPORTANTE: setTimeout deve essere sincrono, altrimenti i turni IA non avanzano nei test.
-global.setTimeout = (fn) => { if (typeof fn === 'function') fn(); return 0; };
+// I callback si eseguono in coda ("a trampolino") e non uno dentro l'altro: con un impero
+// per paese il giro dei turni IA fa migliaia di passi e la pila delle chiamate esploderebbe.
+const _coda = [];
+let _inCoda = false;
+global.setTimeout = (fn) => {
+  if (typeof fn !== 'function') return 0;
+  _coda.push(fn);
+  if (_inCoda) return 0;
+  _inCoda = true;
+  try { while (_coda.length) _coda.shift()(); } finally { _inCoda = false; _coda.length = 0; }
+  return 0;
+};
 global.clearTimeout = () => {};
 global.requestAnimationFrame = (fn) => { if (typeof fn === 'function') fn(); return 0; };
 
