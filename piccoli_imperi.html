@@ -144,6 +144,8 @@
   .paese-btn:hover { background:#3a4d6b; }
   .paese-btn.sel { border-color:#ffd76e; background:#3a5a8c; }
   .paese-btn small { display:block; font-size:11px; color:#aeb9cb; margin-top:2px; }
+  #iaSel, #iaSelIntro { padding:3px 6px; font-size:12px; border-radius:6px; background:#1c2738; color:#fff; border:1px solid #3a4a63; }
+  #iaSelIntro { font-size:14px; padding:6px; max-width:100%; }
   #paeseNemico { width:100%; padding:8px; font-size:14px; border-radius:8px; background:#1c2738; color:#fff; border:1px solid #3a4a63; }
   .ov-play { background:#3a5a8c; } .ov-play:hover { background:#4a6fa8; }
   .ov-rules { background:#2c3a52; } .ov-rules:hover { background:#3a4a66; }
@@ -185,6 +187,10 @@
       <button class="btn small" onclick="saveGame()" title="Tasto S">💾 Salva <kbd>S</kbd></button>
       <button class="btn small" onclick="document.getElementById('loadfile').click()" title="Tasto C">📂 Carica <kbd>C</kbd></button>
       <input type="file" id="loadfile" accept=".json,application/json" style="display:none" onchange="loadGameFile(event)">
+      <label class="stat" title="Difficoltà dell'IA: puoi cambiarla quando vuoi, vale dal prossimo turno del nemico">🤖 IA
+        <select id="iaSel" onchange="setDifficolta(this.value)">
+          <option value="facile">Facile</option><option value="normale" selected>Normale</option><option value="difficile">Difficile</option>
+        </select></label>
       <button class="btn small" id="undoBtn" onclick="undoMove()" title="Tasto U o Z">↩️ Annulla <kbd>U</kbd></button>
       <button class="btn end" id="endBtn" title="Spazio o Invio">✅ Fine turno <kbd>␣</kbd></button>
     </div>
@@ -248,6 +254,13 @@
         <li>⛺ Porta un'unità su un <b>villaggio neutrale</b> per conquistarlo e aumentare le entrate.</li>
         <li>🏆 Vinci conquistando la <b>capitale nemica</b>.</li>
       </ul>
+      <h4>Difficoltà dell'IA
+        <select id="iaSelIntro" onchange="setDifficolta(this.value)">
+          <option value="facile">Facile — si espande piano e non attacca prima del turno 60</option>
+          <option value="normale" selected>Normale — attacca dal turno 30, economia ridotta</option>
+          <option value="difficile">Difficile — attacca appena è forte, a piena economia</option>
+        </select></h4>
+      <p style="margin:4px 0 0"><small>La puoi cambiare anche durante la partita, dal menu 🤖 IA in alto.</small></p>
       <h4>Scegli la grandezza della mappa</h4>
       <div class="ovrow">
         <button class="ov-play" onclick="startGame('piccola')">▶️ Mappa piccola<br><small>esagoni grandi · 249×210</small></button>
@@ -2502,7 +2515,8 @@ function serialize() {
     });
   }
   return { v: 16, rows: ROWS, cols: COLS, turn, stars: { p: players.p.stars, a: players.a.stars },
-           paesi: { p: players.p.country || null, a: players.a.country || null }, tiles };
+           paesi: { p: players.p.country || null, a: players.a.country || null },
+           ia: aiLivello, tiles };
 }
 
 function applySave(data) {
@@ -2610,6 +2624,8 @@ function applySave(data) {
     const cap = o === 'p' ? pCapital() : aCapital();
     players[o].country = (typeof cc === 'string' && COUNTRY_NAMES[cc]) ? cc : (cap && cap.country) || null;
   }
+  // la difficoltà dell'IA (campo facoltativo): i salvataggi che non ce l'hanno giocano a Normale
+  setDifficolta(AI_LIVELLI[data.ia] ? data.ia : 'normale');
   document.getElementById('paesi').style.display = 'none';
   current = 'p'; gameOver = false; tutorial = false; tutStep = -1;
   placing = false; placeSet = [];
@@ -2845,9 +2861,40 @@ function hideRules() { document.getElementById('rules').style.display = 'none'; 
 // ============ IA (una mossa alla volta) ============
 const AI_DELAY = 700; // ms fra una mossa e l'altra
 
+// ============ DIFFICOLTÀ DELL'IA ============
+// Si sceglie a inizio partita e si può cambiare in qualsiasi momento: vale dal turno nemico successivo.
+//  economia: quota della rendita che l'IA incassa davvero
+//  spesa:    quota della rendita che l'IA può spendere nel mantenimento dell'esercito
+//  soglia/rapporto: soldati minimi (e rapporto con i tuoi) per passare all'offensiva
+//  tregua:   fino a questo turno l'IA non attacca: si espande e difende solo il suo territorio
+//  coloni:   probabilità di addestrare un Cittadino per espandersi
+const AI_LIVELLI = {
+  facile:    { nome: 'Facile',    economia: 0.7,  spesa: 0.35, soglia: 16, rapporto: 1.5, tregua: 60, coloni: 0.3 },
+  normale:   { nome: 'Normale',   economia: 0.85, spesa: 0.5,  soglia: 10, rapporto: 1.1, tregua: 30, coloni: 0.4 },
+  difficile: { nome: 'Difficile', economia: 1,    spesa: 0.6,  soglia: 6,  rapporto: 0.8, tregua: 0,  coloni: 0.5 } // l'IA della v54
+};
+let aiLivello = 'normale';
+try { const v = localStorage.getItem('piccoliImperi.ia'); if (AI_LIVELLI[v]) aiLivello = v; } catch (e) {}
+function aiDiff() { return AI_LIVELLI[aiLivello] || AI_LIVELLI.normale; }
+function aiTregua() { return turn < aiDiff().tregua; }
+// la rendita che l'IA incassa davvero, secondo la difficoltà
+function aiEntrata() { return Math.round(income('a') * aiDiff().economia); }
+function aggiornaSelIA() {
+  for (const id of ['iaSel', 'iaSelIntro']) { const el = document.getElementById(id); if (el) el.value = aiLivello; }
+}
+function setDifficolta(liv) {
+  if (!AI_LIVELLI[liv]) return;
+  const cambiata = liv !== aiLivello;
+  aiLivello = liv;
+  try { localStorage.setItem('piccoliImperi.ia', liv); } catch (e) {}
+  aggiornaSelIA();
+  if (cambiata && map && !placing && !gameOver)
+    msg(`🤖 Difficoltà dell'IA: ${aiDiff().nome}. Vale dal prossimo turno del nemico.`);
+}
+
 function aiTurn() {
   if (gameOver) return;
-  players.a.stars += income('a');
+  players.a.stars += aiEntrata();
   let congedati = 0;
   while (upkeep('a') > players.a.stars) {    // anche il nemico congeda: prima i più malridotti
     const mil = unitsOf('a').filter(x => !UNIT_TYPES[x.unit.type].ship && UNIT_TYPES[x.unit.type].atk > 0);
@@ -2861,7 +2908,7 @@ function aiTurn() {
   players.a.stars = Math.max(0, players.a.stars - upkeep('a'));
   aiPreparaTurno();
   aiLog = [];
-  aiLogAdd(`— Turno ${turn}: l'Impero Cremisi incassa +${income('a')} ⭐, paga ${upkeep('a')} di mantenimento —`);
+  aiLogAdd(`— Turno ${turn}: l'Impero Cremisi (${aiDiff().nome}) incassa +${aiEntrata()} ⭐, paga ${upkeep('a')} di mantenimento —`);
   if (congedati) aiLogAdd(`💸 Il nemico non riusciva a pagare l'esercito: congedate ${congedati} truppe`);
   runAiQueue(unitsOf('a'), 0);
 }
@@ -2898,14 +2945,16 @@ function aiTrainPhase() {
   for (const ct of cts) {
     if (ct.unit) continue;
     const stelle = players.a.stars;
-    // mantenimento ancora sostenibile: l'esercito non deve mangiarsi più del 60% della rendita
-    // (con la cassa piena si può spendere di più: le stelle ferme non servono a nulla)
-    const margine = Math.floor(income('a') * 0.6) - upkeep('a') + Math.floor(stelle / 15);
+    // mantenimento ancora sostenibile: l'esercito non deve mangiarsi più di una quota della rendita
+    // (60% in difficile; con la cassa piena si può spendere di più: le stelle ferme non servono a nulla)
+    // in tregua l'esercito resta piccolo: metà della quota e niente spese extra con la cassa piena
+    const margine = aiTregua() ? Math.floor(aiEntrata() * aiDiff().spesa / 2) - upkeep('a')
+      : Math.floor(aiEntrata() * aiDiff().spesa) - upkeep('a') + Math.floor(stelle / 15);
     let pick = null;
     if (capThreat && ct.city.capital && stelle >= 2) pick = 'warrior'; // presidio d'emergenza
     else if (!capThreat && (aiBisogni.ponti.size || aiSenzaPorto.length) && builders < (stelle >= 30 ? 3 : 2) && stelle >= 6) pick = 'builder';
     else if (!capThreat && builders < 1 && stelle >= 6 && Math.random() < 0.3) pick = 'builder';
-    else if (!capThreat && settlers < 3 && spazio && stelle >= 3 && Math.random() < 0.5) pick = 'citizen';
+    else if (!capThreat && settlers < 3 && spazio && stelle >= 3 && Math.random() < aiDiff().coloni) pick = 'citizen';
     else if (stelle >= 6 && Math.random() < 0.15 && unitsOf('a').length >= 3 && medics < 2) pick = 'medic';
     else if (risparmio && !capThreat) pick = null;
     else if (margine >= 1 || capThreat) {
@@ -3093,9 +3142,11 @@ function aiPreparaTurno() {
   const att = pigro(() => aiCampo(cities('p'))), esp = pigro(() => aiCampo(cities(null)));
   const terra = pigro(() => aiCampo(cities('p'), aiCosti.map(c => c === 1 ? 60 : c)));
   aiCampi = { get attacco() { return att(); }, get espansione() { return esp(); }, get attaccoTerra() { return terra(); } };
-  // offensiva quando l'esercito è abbastanza forte (con isteresi, per non tentennare)
-  const mie = aiSoldati('a'), soglia = Math.max(6, Math.ceil(aiSoldati('p') * 0.8));
-  aiOffensiva = aiOffensiva ? mie >= Math.ceil(soglia / 2) : mie >= soglia;
+  // offensiva quando l'esercito è abbastanza forte (con isteresi, per non tentennare),
+  // e mai prima della fine della tregua decisa dalla difficoltà
+  const D = aiDiff();
+  const mie = aiSoldati('a'), soglia = Math.max(D.soglia, Math.ceil(aiSoldati('p') * D.rapporto));
+  aiOffensiva = !aiTregua() && (aiOffensiva ? mie >= Math.ceil(soglia / 2) : mie >= soglia);
 }
 // le armate che aspettano davvero una nave (chi nel frattempo si è mosso non conta più)
 function aiAttese() {
@@ -3119,7 +3170,7 @@ function aiRiservata(x) {
 // la mappa da seguire per un'unità militare: villaggi neutrali finché non si va all'attacco
 function aiCampoMilitare(t) {
   if (!aiCampi) aiPreparaTurno();
-  if (aiOffensiva || aiCampi.espansione[aiIdx(t)] >= AI_INF)
+  if (aiOffensiva || (aiCampi.espansione[aiIdx(t)] >= AI_INF && !aiTregua()))
     return t.unit && t.unit.aiAttesa > AI_PAZIENZA ? aiCampi.attaccoTerra : aiCampi.attacco;
   return aiCampi.espansione;
 }
@@ -3128,9 +3179,10 @@ function aiPasso(t, campo) {
   const qui = campo[aiIdx(t)];
   if (qui >= AI_INF) return null;
   let best = null, bv = qui;
-  const civile = UNIT_TYPES[t.unit.type].builder;
+  const civile = UNIT_TYPES[t.unit.type].builder, tregua = aiTregua();
   for (const m of movesFor(t)) {
     if (!civile && aiRiservata(m)) continue;
+    if (tregua && m.city && m.city.owner === 'p') continue; // in tregua non prende le tue città
     const v = campo[aiIdx(m)];
     if (v < bv) { bv = v; best = m; }
   }
@@ -3396,7 +3448,9 @@ function aiActUnit(t) {
 // attacco IA con scelta del bersaglio a punteggio; restituisce la casella colpita o null
 function aiTryAttack(tile) {
   if (!tile.unit || tile.unit.attacked) return null;
-  const atks = attacksFor(tile);
+  let atks = attacksFor(tile);
+  // in tregua l'IA colpisce solo chi entra nel suo territorio, e mai dentro le tue città
+  if (aiTregua()) atks = atks.filter(to => !(to.city && to.city.owner === 'p') && cities('a').some(c => dist(c, to) <= aiR(3)));
   if (!atks.length) return null;
   const u = tile.unit, d = UNIT_TYPES[u.type];
   const myDmg = to => Math.max(1, Math.round(d.atk * 3 * (u.hp / d.hp)) - (to.unit ? defOf(to) : 1));
@@ -4143,6 +4197,7 @@ function ui() {
 }
 
 setMapSize('piccola');
+aggiornaSelIA(); // la difficoltà scelta l'ultima volta
 newGame(); // la partita parte sotto la schermata di benvenuto
 </script>
 </body>

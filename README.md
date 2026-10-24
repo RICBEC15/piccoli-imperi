@@ -12,7 +12,7 @@ In locale: apri `piccoli_imperi.html` nel browser con un doppio clic. Non serve 
 
 - `piccoli_imperi.html`: il gioco completo (HTML, CSS e JavaScript in un unico file).
 - `index.html`: pagina d'ingresso per GitHub Pages, rimanda subito a `piccoli_imperi.html`.
-- `stub.js`, `shiptest.js`, `savetest.js`, `playtest.js`, `aitest.js`, `paesitest.js`, `browser_check.js`, `mobile_check.js`: test automatici (`mobile_check.js` prova il gioco su un iPhone emulato con Playwright).
+- `stub.js`, `shiptest.js`, `savetest.js`, `playtest.js`, `aitest.js`, `paesitest.js`, `difficoltatest.js`, `browser_check.js`, `mobile_check.js`: test automatici (`mobile_check.js` prova il gioco su un iPhone emulato con Playwright).
 - `build_russia.js`: script che ha estratto il confine della Russia dal dataset Natural Earth.
 - `ISTRUZIONI_MIGRAZIONE.md`: note di sviluppo, storia delle ultime versioni e istruzioni dettagliate.
 
@@ -25,6 +25,7 @@ cat stub.js game.js savetest.js > _run.js && node _run.js
 cat stub.js game.js playtest.js > _run.js && node _run.js
 cat stub.js game.js paesitest.js > _run.js && node _run.js
 cat stub.js game.js aitest.js > _run.js && node _run.js   # IA: 150 turni, circa un minuto
+cat stub.js game.js difficoltatest.js > _run.js && node _run.js   # difficoltà IA: circa 40 secondi
 ```
 
 ## Regola importante
@@ -38,3 +39,5 @@ v56 (formato di salvataggio v16).
 Dalla v56 ogni impero gioca un paese reale: a inizio partita scegli il tuo (dalla lista o toccandolo sulla mappa), il nemico prende un paese vicino o quello che scegli tu. In patria le unità si difendono meglio (+1) e i paesi con pochi villaggi partono con qualche stella in più.
 
 Dalla v55 la mappa si disegna a tessere, come le mappe online: il canvas è grande quanto lo schermo e il terreno viene preparato in quadrati da 256 pixel, uno per livello di zoom, solo dove serve. Prima il canvas era grande quanto tutta la mappa (circa 241 milioni di pixel) e su telefono non funzionava.
+
+La difficoltà dell'IA (Facile, Normale, Difficile) si sceglie nella schermata iniziale e si può cambiare in qualsiasi momento dal menu 🤖 IA in alto: vale dal turno nemico successivo e viene salvata nel file della partita (i salvataggi precedenti si caricano a Normale). Difficile è l'IA della v54, che attacca appena è forte; Normale non attacca prima del turno 30 e ha un'economia ridotta; Facile non attacca prima del turno 60, tiene un esercito piccolo e incassa il 70% della rendita.
