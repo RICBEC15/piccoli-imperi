@@ -8,7 +8,7 @@ const path = require('path');
   page.on('console', msg => { if (msg.type() === 'error') errors.push(msg.text()); });
   page.on('pageerror', err => errors.push('pageerror: ' + err.message));
 
-  await page.goto('file://' + path.resolve('piccoli_imperi_53.html'));
+  await page.goto('file://' + path.resolve('piccoli_imperi.html'));
   await page.waitForTimeout(1500);
 
   // chiudi l'intro se presente
