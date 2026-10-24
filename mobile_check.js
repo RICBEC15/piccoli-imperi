@@ -30,7 +30,7 @@ const path = require('path');
       applyZoom(1); scrollToTile(pCapital(), false); render();
       deselect();
       const cap = pCapital(), p = center(cap), rr = w.getBoundingClientRect();
-      const cx = rr.left + p.x * zoom - w.scrollLeft, cy = rr.top + p.y * zoom - w.scrollTop;
+      const cx = rr.left + p.x * zoom - viewX(w), cy = rr.top + p.y * zoom - viewY(w);
       return { taglia, COLS, ROWS, mondo: WORLD_W + 'x' + WORLD_H, canvas: cv.width + 'x' + cv.height,
                tessere: tileCache.size, tGen: Math.round(tGen), times, cx, cy };
     }, taglia);
