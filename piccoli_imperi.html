@@ -27,9 +27,10 @@
   #msg { flex:1; min-width:240px; min-height:20px; font-size:14px; color:#9fd8ff; }
   #mapzone { position:relative; flex:1; min-height:0; }
   #mapwrap {
-    width:100%; height:100%; overflow:auto;
-    scrollbar-color:#3a5a8c #16202e;
+    position:absolute; inset:0; z-index:1; overflow:auto;
+    scrollbar-color:#3a5a8c #16202e; cursor:pointer;
   }
+  #mapsizer { width:1px; height:1px; }
   #loading {
     position:fixed; inset:0; z-index:200; display:flex;
     align-items:center; justify-content:center;
@@ -63,6 +64,8 @@
   .zbtn:hover { background:#4a6fa8; }
   .zbtn.zsmall { font-size:13px; }
   canvas { background:#16202e; cursor:pointer; display:block; }
+  /* il canvas e' grande quanto la parte visibile: resta fermo sotto l'area che scorre */
+  #cv { position:absolute; left:0; top:0; z-index:0; }
   #panel { display:flex; gap:8px; align-items:center; flex-wrap:wrap; font-size:13.5px; }
   .btn {
     display:inline-block; width:auto; margin:0; padding:7px 11px;
@@ -183,7 +186,7 @@
     </div>
   </div>
   <div id="mapzone">
-    <div id="mapwrap"><canvas id="cv"></canvas></div>
+    <canvas id="cv"></canvas><div id="mapwrap"><div id="mapsizer"></div></div>
     <div id="zoomctl">
       <button class="zbtn" onclick="zoomIn()" title="Ingrandisci (+)">＋</button>
       <button class="zbtn" onclick="zoomOut()" title="Rimpicciolisci (−)">－</button>
@@ -376,7 +379,9 @@ function aliveCount(u) { return Math.max(1, Math.ceil(u.hp / UNIT_TYPES[u.type].
 function uIcon(u) { const d = UNIT_TYPES[u.type]; return u.count > 1 ? d.gicon : d.icon; }
 function uName(u) { const d = UNIT_TYPES[u.type]; return u.count > 1 ? `${d.gname} ×${aliveCount(u)}` : d.name; }
 
-let baseCanvas = null, terrainDirty = true; // cache del terreno per il rendering veloce
+let terrainDirty = true; // la cache delle tessere di terreno va ricostruita
+// dimensioni in pixel dell'intera mappa (il "mondo"); il canvas invece e' grande quanto lo schermo
+let WORLD_W = 1, WORLD_H = 1;
 const cv = document.getElementById('cv');
 const ctx = cv.getContext('2d');
 // l'estensione atlantica: colonne a ovest e righe a sud per le isole Canarie e il
@@ -401,12 +406,9 @@ function setMapSize(mode) {
   EXTN = Math.max(0, Math.ceil(-geoToPx(0, SCOZIA_NORD, g0).y / (S * 1.5)));
   if (EXTN % 2) EXTN++;
   COLS = FITCOLS + EXTC + EXTE; ROWS = FITROWS + EXTR + EXTN;
-  cv.width = Math.ceil(OFFX * 2 + S * SQ3 * (COLS - 0.5));
-  cv.height = Math.ceil(OFFY * 2 + S * 1.5 * (ROWS - 1));
-  if (typeof zoom !== 'undefined') { // riapplica lo zoom corrente alla nuova taglia
-    cv.style.width = Math.round(cv.width * zoom) + 'px';
-    cv.style.height = Math.round(cv.height * zoom) + 'px';
-  }
+  WORLD_W = Math.ceil(OFFX * 2 + S * SQ3 * (COLS - 0.5));
+  WORLD_H = Math.ceil(OFFY * 2 + S * 1.5 * (ROWS - 1));
+  if (typeof zoom !== 'undefined') sizeWorld(); // riapplica lo zoom corrente alla nuova taglia
   terrainDirty = true;
 }
 function showLoading(txt) {
@@ -495,7 +497,16 @@ function scrollToTile(t, smooth = true) {
 
 // ============ ZOOM ============
 let zoom = 1;
-const ZOOM_MIN = 0.08, ZOOM_MAX = 3;
+// minimo basso: anche su un telefono "tutta la mappa" entra nello schermo
+// (a zoom piccoli si disegnano tessere a bassa risoluzione, quindi costa poco)
+const ZOOM_MIN = 0.02, ZOOM_MAX = 3;
+// l'area che scorre ha la misura della mappa zoomata; il disegno lo fa il canvas sotto
+function sizeWorld() {
+  const sz = document.getElementById('mapsizer');
+  if (!sz) return;
+  sz.style.width = Math.round(WORLD_W * zoom) + 'px';
+  sz.style.height = Math.round(WORLD_H * zoom) + 'px';
+}
 function applyZoom(z, cx, cy) {
   const wrap = document.getElementById('mapwrap');
   z = Math.max(ZOOM_MIN, Math.min(ZOOM_MAX, z));
@@ -504,18 +515,18 @@ function applyZoom(z, cx, cy) {
   if (cx === undefined) { cx = (wrap.clientWidth || 0) / 2; cy = (wrap.clientHeight || 0) / 2; }
   const mx = ((wrap.scrollLeft || 0) + cx) / zoom, my = ((wrap.scrollTop || 0) + cy) / zoom;
   zoom = z;
-  cv.style.width = Math.round(cv.width * zoom) + 'px';
-  cv.style.height = Math.round(cv.height * zoom) + 'px';
+  sizeWorld();
   wrap.scrollLeft = Math.max(0, mx * zoom - cx);
   wrap.scrollTop = Math.max(0, my * zoom - cy);
+  scheduleRender();
 }
 function zoomIn() { applyZoom(zoom * 1.25); }
 function zoomOut() { applyZoom(zoom / 1.25); }
 function zoomReset() { applyZoom(1); }
 function zoomFit() { // tutta la mappa nello schermo
   const wrap = document.getElementById('mapwrap');
-  if (!wrap || !cv.width) return;
-  applyZoom(Math.min((wrap.clientWidth || 1) / cv.width, (wrap.clientHeight || 1) / cv.height));
+  if (!wrap || !WORLD_W) return;
+  applyZoom(Math.min((wrap.clientWidth || 1) / WORLD_W, (wrap.clientHeight || 1) / WORLD_H));
   wrap.scrollLeft = 0; wrap.scrollTop = 0;
 }
 
@@ -3273,13 +3284,27 @@ function aiActMedic(t) {
     applyZoom(zoom * (e.deltaY < 0 ? 1.13 : 1 / 1.13), e.clientX - r.left, e.clientY - r.top);
   }, { passive: false });
 })();
-cv.addEventListener('click', e => {
+// dal punto cliccato (coordinate della finestra) alle coordinate della mappa intera
+function screenToWorld(e) {
+  const wrap = document.getElementById('mapwrap');
+  const r = wrap.getBoundingClientRect();
+  return { x: (e.clientX - r.left + (wrap.scrollLeft || 0)) / zoom,
+           y: (e.clientY - r.top + (wrap.scrollTop || 0)) / zoom };
+}
+// caselle (righe e colonne) che toccano un rettangolo della mappa, con un margine
+function tileRange(x0, y0, x1, y1, m) {
+  return {
+    r0: Math.max(0, Math.floor((y0 - OFFY) / (S * 1.5)) - m),
+    r1: Math.min(ROWS - 1, Math.ceil((y1 - OFFY) / (S * 1.5)) + m),
+    c0: Math.max(0, Math.floor((x0 - OFFX) / (S * SQ3)) - m),
+    c1: Math.min(COLS - 1, Math.ceil((x1 - OFFX) / (S * SQ3)) + m)
+  };
+}
+document.getElementById('mapwrap').addEventListener('click', e => {
   if (gameOver || current !== 'p') return;
   if (congedo) {
     // durante il congedo il click sceglie l'armata da ridurre
-    const rect0 = cv.getBoundingClientRect();
-    const sc0 = cv.width / rect0.width;
-    const x0 = (e.clientX - rect0.left) * sc0, y0 = (e.clientY - rect0.top) * sc0;
+    const w0 = screenToWorld(e), x0 = w0.x, y0 = w0.y;
     let best = null, bd = Infinity;
     for (const t of map.flat()) {
       if (!t.unit || t.unit.owner !== 'p') continue;
@@ -3290,11 +3315,10 @@ cv.addEventListener('click', e => {
     if (best && bd <= (S * 1.3) ** 2) congedaClick(best); else congedoMsg();
     return;
   }
-  const rect = cv.getBoundingClientRect();
-  const scale = cv.width / rect.width;
-  const x = (e.clientX - rect.left) * scale, y = (e.clientY - rect.top) * scale;
+  const { x, y } = screenToWorld(e);
   let tile = null, min = Infinity;
-  for (let r = 0; r < ROWS; r++) for (let c = 0; c < COLS; c++) {
+  const tr = tileRange(x, y, x, y, 1);
+  for (let r = tr.r0; r <= tr.r1; r++) for (let c = tr.c0; c <= tr.c1; c++) {
     const p = center(map[r][c]);
     const d = (p.x-x)**2 + (p.y-y)**2;
     if (d < min) { min = d; tile = map[r][c]; }
@@ -3481,16 +3505,40 @@ function hexPathOn(g, x, y) {
   g.closePath();
 }
 
-// disegna una sola volta il terreno statico (esagoni, boschi, montagne, ponti)
-function renderBase() {
-  if (!baseCanvas) baseCanvas = document.createElement('canvas');
-  baseCanvas.width = cv.width; baseCanvas.height = cv.height;
-  const b = baseCanvas.getContext('2d');
+// Il terreno statico (esagoni, boschi, montagne, ponti, confini) si disegna a
+// TESSERE, come le mappe online: quadrati di TILE_PX pixel dello schermo, per
+// livelli di zoom a potenze di 2. Si preparano solo le tessere visibili e se ne
+// tiene in memoria un numero limitato: nessuna superficie gigante.
+const TILE_PX = 256, TILE_CACHE_MAX = 120;
+const tileCache = new Map(); // "livello|tx|ty" -> canvas (ordine = uso recente)
+function terrainLevel(scale) { // scala disegno (pixel schermo per pixel mappa) -> livello
+  return Math.max(-7, Math.min(2, Math.round(Math.log2(scale))));
+}
+function terrainTile(lv, tx, ty) {
+  const id = lv + '|' + tx + '|' + ty;
+  let tc = tileCache.get(id);
+  if (tc) { tileCache.delete(id); tileCache.set(id, tc); return tc; }
+  tc = document.createElement('canvas');
+  tc.width = TILE_PX; tc.height = TILE_PX;
+  const s = Math.pow(2, lv), span = TILE_PX / s;
+  const x0 = tx * span, y0 = ty * span;
+  const b = tc.getContext('2d');
+  b.setTransform(s, 0, 0, s, -x0 * s, -y0 * s);
+  drawTerrain(b, tileRange(x0, y0, x0 + span, y0 + span, 2));
+  tileCache.set(id, tc);
+  while (tileCache.size > TILE_CACHE_MAX) tileCache.delete(tileCache.keys().next().value);
+  return tc;
+}
+// la cache va svuotata quando cambia il terreno (ponti, nuova mappa...)
+function renderBase() { tileCache.clear(); terrainDirty = false; }
+// disegna il terreno delle caselle comprese in tr (righe r0..r1, colonne c0..c1)
+function drawTerrain(b, tr) {
   const k = S / 42;
   b.textAlign = 'center'; b.textBaseline = 'middle';
   // tutti i deserti hanno lo stesso colore di sabbia: cambiano solo i piccoli
   // segni (creste di dune, pietre, crepe di sale)
-  for (const t of map.flat()) {
+  for (let r = tr.r0; r <= tr.r1; r++) for (let c = tr.c0; c <= tr.c1; c++) {
+    const t = map[r][c];
     const p = center(t);
     hexPathOn(b, p.x, p.y);
     // il "deserto glaciale" della tundra artica e' l'unica variante con un colore
@@ -3552,7 +3600,8 @@ function renderBase() {
   b.lineWidth = Math.max(1.4, 4.8*k);
   b.setLineDash([7*k, 5*k]);
   b.beginPath();
-  for (const t of map.flat()) {
+  for (let r = tr.r0; r <= tr.r1; r++) for (let c = tr.c0; c <= tr.c1; c++) {
+    const t = map[r][c];
     if (!t.country) continue;
     for (const n of neighbors(t)) {
       if (!n.country || n.country === t.country) continue;
@@ -3565,13 +3614,53 @@ function renderBase() {
   }
   b.stroke();
   b.setLineDash([]);
-  terrainDirty = false;
 }
 
+// il canvas segue la misura dell'area visibile (e la densita' di pixel dello schermo)
+function fitCanvas() {
+  const wrap = document.getElementById('mapwrap');
+  const dpr = Math.min(3, window.devicePixelRatio || 1);
+  const w = Math.max(1, wrap.clientWidth || 800), h = Math.max(1, wrap.clientHeight || 600);
+  const W = Math.round(w * dpr), H = Math.round(h * dpr);
+  if (cv.width !== W || cv.height !== H) {
+    cv.width = W; cv.height = H;
+    cv.style.width = w + 'px'; cv.style.height = h + 'px';
+  }
+  return { wrap, dpr, w, h };
+}
+let renderQueued = false;
+function scheduleRender() {
+  if (renderQueued) return;
+  renderQueued = true;
+  requestAnimationFrame(() => { renderQueued = false; render(); });
+}
+(function () {
+  const wrap = document.getElementById('mapwrap');
+  if (wrap && typeof wrap.addEventListener === 'function') wrap.addEventListener('scroll', scheduleRender, { passive: true });
+  if (typeof window.addEventListener === 'function') window.addEventListener('resize', scheduleRender);
+})();
+
 function render() {
-  if (terrainDirty || !baseCanvas) renderBase();
+  if (terrainDirty) renderBase();
+  const { wrap, dpr, w, h } = fitCanvas();
+  const sl = wrap.scrollLeft || 0, st = wrap.scrollTop || 0;
+  const vx0 = sl / zoom, vy0 = st / zoom, vx1 = (sl + w) / zoom, vy1 = (st + h) / zoom;
+  ctx.setTransform(1, 0, 0, 1, 0, 0);
   ctx.clearRect(0, 0, cv.width, cv.height);
-  ctx.drawImage(baseCanvas, 0, 0);
+  // terreno: le tessere del livello piu' vicino alla scala attuale, scalate al volo
+  const scale = zoom * dpr, lv = terrainLevel(scale), span = TILE_PX / Math.pow(2, lv);
+  const tx0 = Math.max(0, Math.floor(vx0 / span)), tx1 = Math.floor(Math.min(vx1, WORLD_W) / span);
+  const ty0 = Math.max(0, Math.floor(vy0 / span)), ty1 = Math.floor(Math.min(vy1, WORLD_H) / span);
+  ctx.imageSmoothingEnabled = true;
+  for (let ty = ty0; ty <= ty1; ty++) for (let tx = tx0; tx <= tx1; tx++) {
+    // bordi arrotondati al pixel: niente fessure sottili fra una tessera e l'altra
+    const dx = Math.round((tx * span - vx0) * scale), dy = Math.round((ty * span - vy0) * scale);
+    const dx2 = Math.round(((tx + 1) * span - vx0) * scale), dy2 = Math.round(((ty + 1) * span - vy0) * scale);
+    ctx.drawImage(terrainTile(lv, tx, ty), dx, dy, dx2 - dx, dy2 - dy);
+  }
+  // da qui in poi si disegna in coordinate della mappa intera
+  ctx.setTransform(scale, 0, 0, scale, -vx0 * scale, -vy0 * scale);
+  const vis = tileRange(vx0, vy0, vx1, vy1, 2);
   const k = S / 42;
   ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
   // evidenziazioni: solo sulle caselle interessate
@@ -3606,8 +3695,9 @@ function render() {
     ctx.lineWidth = Math.max(1.5, 4*k); ctx.strokeStyle = '#ff9d3a';
     ctx.setLineDash([6*k, 4*k]); ctx.stroke(); ctx.setLineDash([]);
   }
-  // strutture e unità (caselle sparse)
-  for (const t of map.flat()) {
+  // strutture e unità (caselle sparse), solo quelle sullo schermo
+  for (let r = vis.r0; r <= vis.r1; r++) for (let c = vis.c0; c <= vis.c1; c++) {
+    const t = map[r][c];
     if (!t.city && !t.hosp && !t.port && !t.unit) continue;
     const p = center(t);
     // bordo di proprietà

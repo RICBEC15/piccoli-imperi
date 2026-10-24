@@ -9,7 +9,7 @@ Apri `piccoli_imperi.html` nel browser con un doppio clic. Non serve installare 
 ## Contenuto
 
 - `piccoli_imperi.html`: il gioco completo (HTML, CSS e JavaScript in un unico file).
-- `stub.js`, `shiptest.js`, `savetest.js`, `playtest.js`, `aitest.js`, `browser_check.js`: test automatici.
+- `stub.js`, `shiptest.js`, `savetest.js`, `playtest.js`, `aitest.js`, `browser_check.js`, `mobile_check.js`: test automatici (`mobile_check.js` prova il gioco su un iPhone emulato con Playwright).
 - `build_russia.js`: script che ha estratto il confine della Russia dal dataset Natural Earth.
 - `ISTRUZIONI_MIGRAZIONE.md`: note di sviluppo, storia delle ultime versioni e istruzioni dettagliate.
 
@@ -29,4 +29,6 @@ La mappa è deterministica. Non rigenerarla mai da zero: ogni modifica va fatta 
 
 ## Versione
 
-v54 (formato di salvataggio v15).
+v55 (formato di salvataggio v15).
+
+Dalla v55 la mappa si disegna a tessere, come le mappe online: il canvas è grande quanto lo schermo e il terreno viene preparato in quadrati da 256 pixel, uno per livello di zoom, solo dove serve. Prima il canvas era grande quanto tutta la mappa (circa 241 milioni di pixel) e su telefono non funzionava.
