@@ -16,5 +16,23 @@ for (const taglia of ['piccola', 'media']) {
   check(fantasma === 0, `${taglia}: nessuna terra finta a nord fra Svezia e Finlandia (${fantasma})`);
   check(kolaTot > 0 && kola / kolaTot > 0.9, `${taglia}: la penisola di Kola e' terra russa (${kola}/${kolaTot})`);
 }
+// determinismo: una sola mappa per taglia, uguale a ogni partita (cambia solo la capitale nemica)
+const realRandom = Math.random;
+function firma() {
+  // terreno e villaggi neutrali di tutta la mappa, casella per casella
+  return map.map(row => row.map(t => t.terrain[0] + (t.city && t.city.owner === null ? '*' : '')).join('')).join('|');
+}
+for (const taglia of ['piccola', 'media', 'gigante']) {
+  setMapSize(taglia);
+  Math.random = mulberry32(1); newGame(); const a = firma();
+  Math.random = mulberry32(99); newGame(); const b = firma();
+  check(a === b, `${taglia}: due partite con sorteggi diversi hanno la stessa mappa`);
+  const land = map.flat().filter(t => t.terrain !== 'water' && t.terrain !== 'river');
+  const conDati = land.filter(t => biomaDi(t)).length;
+  check(conDati / land.length > 0.99, `${taglia}: il bioma OSM copre la terraferma (${conDati}/${land.length})`);
+  const tipi = new Set(land.map(t => t.terrain));
+  check(['grass', 'forest', 'mountain', 'hill', 'desert'].every(x => tipi.has(x)), `${taglia}: ci sono prati, boschi, colline, montagne e deserti`);
+}
+Math.random = realRandom;
 console.log(fail ? fail + ' TEST MAPPA FALLITI' : 'TUTTI I TEST MAPPA SUPERATI');
 if (fail) process.exit(1);
