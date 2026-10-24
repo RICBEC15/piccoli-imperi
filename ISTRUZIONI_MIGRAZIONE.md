@@ -87,3 +87,4 @@ Il file di salvataggio è passato alla versione 15 (compatibile con i salvataggi
 - **v57**: una mappa fissa per ogni grandezza. I biomi vengono da OpenStreetMap e sono scritti nella riga `const BIOMI` (rigenerabile con `build_biomi.py` ed `export_tiles.js`); le vecchie regole del terreno scritte a mano sono state tolte. Nuovo test `mappatest.js`.
 - **Difficoltà dell'IA** (Facile, Normale, Difficile) da scegliere all'inizio e cambiabile in partita dal menu 🤖 IA; viene salvata nel file. Nuovo test `difficoltatest.js`.
 - **v58**: riunisce in una sola versione la mappa fissa, la scelta del paese e la difficoltà dell'IA. Salvataggio v16.
+- **v59**: ci si sposta nella mappa a qualunque zoom (trascinamento col mouse, frecce, dito). `#mapsizer` ha un bordo di mezzo schermo per lato (`PADX`/`PADY`): per passare da scroll a coordinate della mappa usare sempre `viewX(wrap)`/`viewY(wrap)`, mai `scrollLeft`/`scrollTop` direttamente. Test `pantest.js` (Playwright).
