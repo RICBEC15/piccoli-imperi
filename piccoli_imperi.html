@@ -225,9 +225,9 @@
       </ul>
       <h4>Scegli la grandezza della mappa</h4>
       <div class="ovrow">
-        <button class="ov-play" onclick="startGame('piccola')">▶️ Mappa piccola<br><small>esagoni grandi · 50×76</small></button>
-        <button class="ov-play" onclick="startGame('media')">▶️ Mappa media<br><small>esagoni a metà · 100×152</small></button>
-        <button class="ov-play" onclick="startGame('gigante')">▶️ Mappa gigante<br><small>esagoni a un quinto · 250×380</small></button>
+        <button class="ov-play" onclick="startGame('piccola')">▶️ Mappa piccola<br><small>esagoni grandi · 249×210</small></button>
+        <button class="ov-play" onclick="startGame('media')">▶️ Mappa media<br><small>esagoni a metà · 500×420</small></button>
+        <button class="ov-play" onclick="startGame('gigante')">▶️ Mappa gigante<br><small>esagoni a un terzo · 750×632</small></button>
       </div>
       <div class="ovrow">
         <button class="ov-tut" onclick="startTutorial()">🎓 Tutorial guidato</button>
@@ -332,7 +332,7 @@
 const MAP_SIZES = {
   piccola: { S: 42,  COLS: 122, ROWS: 132 },  // esagoni attuali
   media:   { S: 21,  COLS: 244, ROWS: 264 },  // esagoni a metà
-  gigante: { S: 8.4, COLS: 610, ROWS: 660 }   // esagoni a un quinto
+  gigante: { S: 14,  COLS: 366, ROWS: 396 }   // esagoni a un terzo
 };
 let mapMode = 'piccola';
 let S = MAP_SIZES.piccola.S, COLS = MAP_SIZES.piccola.COLS, ROWS = MAP_SIZES.piccola.ROWS;
@@ -2663,6 +2663,7 @@ function aiTurn() {
     congedati++;
   }
   players.a.stars = Math.max(0, players.a.stars - upkeep('a'));
+  aiPreparaTurno();
   aiLog = [];
   aiLogAdd(`— Turno ${turn}: l'Impero Cremisi incassa +${income('a')} ⭐, paga ${upkeep('a')} di mantenimento —`);
   if (congedati) aiLogAdd(`💸 Il nemico non riusciva a pagare l'esercito: congedate ${congedati} truppe`);
@@ -2677,6 +2678,7 @@ function runAiQueue(queue, i) {
   if (t.unit && t.unit.owner === 'a') {
     const before = aiLog.length;
     aiActive = aiActUnit(t) || t;   // evidenzia la casella dove l'unità ha agito
+    aiLiberaCitta(t);
     acted = aiLog.length > before;
     if (acted) scrollToTile(aiActive);
     render();
@@ -2688,37 +2690,46 @@ function aiTrainPhase() {
   if (gameOver) return;
   const cap = aCapital();
   const capThreat = cap && unitsOf('p').some(e => dist(cap, e) <= aiR(5));
+  aiFaseNavi();
+  const conta = f => unitsOf('a').filter(x => f(UNIT_TYPES[x.unit.type])).length;
+  let settlers = conta(d => d.settler), builders = conta(d => d.builder), medics = conta(d => d.medic);
+  const spazio = cities('a').some(x => (x.city.pop || 1) < MAX_POP) || cities(null).length > 0;
+  // si mettono da parte le stelle per la nave che l'esercito aspetta sulla costa
+  const naveLibera = unitsOf('a').some(x => UNIT_TYPES[x.unit.type].ship && !x.unit.cargo);
+  const risparmio = aiAttese().length > 0 && !naveLibera && ports('a').length > 0;
   // capitale per prima, così le stelle vanno prima alla difesa
   const cts = cities('a').sort((a, b) => (b.city.capital ? 1 : 0) - (a.city.capital ? 1 : 0));
   for (const ct of cts) {
     if (ct.unit) continue;
+    const stelle = players.a.stars;
+    // mantenimento ancora sostenibile: l'esercito non deve mangiarsi più del 60% della rendita
+    // (con la cassa piena si può spendere di più: le stelle ferme non servono a nulla)
+    const margine = Math.floor(income('a') * 0.6) - upkeep('a') + Math.floor(stelle / 15);
     let pick = null;
-    if (capThreat && ct.city.capital && players.a.stars >= 2) pick = 'warrior'; // presidio d'emergenza
-    else if (players.a.stars >= 6 && Math.random() < 0.25
-             && unitsOf('a').length >= 3
-             && unitsOf('a').filter(x => UNIT_TYPES[x.unit.type].medic).length < 2) pick = 'medic';
-    else if (!capThreat && players.a.stars >= 6 && Math.random() < 0.2
-             && unitsOf('a').filter(x => UNIT_TYPES[x.unit.type].builder).length < 1
-             && map.flat().some(x => x.terrain === 'river' && !x.bridge)) pick = 'builder';
-    else if (!capThreat && players.a.stars >= 5 && Math.random() < 0.3
-             && unitsOf('a').filter(x => UNIT_TYPES[x.unit.type].settler).length < 3
-             && (cities('a').some(x => (x.city.pop || 1) < MAX_POP) || cities(null).length > 0)) pick = 'citizen';
-    else if (players.a.stars >= 5 && Math.random() < 0.55) pick = 'knight';
-    else if (players.a.stars >= 3 && Math.random() < 0.55) pick = 'archer';
-    else if (players.a.stars >= 2) pick = 'warrior';
-    // niente spese folli se il mantenimento sta già mangiando la rendita
-    if (pick && !capThreat && income('a') - upkeep('a') <= 0) pick = null;
+    if (capThreat && ct.city.capital && stelle >= 2) pick = 'warrior'; // presidio d'emergenza
+    else if (!capThreat && (aiBisogni.ponti.size || aiSenzaPorto.length) && builders < (stelle >= 30 ? 3 : 2) && stelle >= 6) pick = 'builder';
+    else if (!capThreat && builders < 1 && stelle >= 6 && Math.random() < 0.3) pick = 'builder';
+    else if (!capThreat && settlers < 3 && spazio && stelle >= 3 && Math.random() < 0.5) pick = 'citizen';
+    else if (stelle >= 6 && Math.random() < 0.15 && unitsOf('a').length >= 3 && medics < 2) pick = 'medic';
+    else if (risparmio && !capThreat) pick = null;
+    else if (margine >= 1 || capThreat) {
+      if (stelle >= 5 && Math.random() < 0.55) pick = 'knight';
+      else if (stelle >= 3 && Math.random() < 0.55) pick = 'archer';
+      else if (stelle >= 2) pick = 'warrior';
+    }
     if (pick) {
       const d = UNIT_TYPES[pick];
       let n = 1;
-      if (d.atk > 0 && !d.ship) { // anche il nemico compra armate già in gruppo
-        n = Math.min(5, Math.floor(players.a.stars / d.cost), 1 + Math.floor(Math.random() * 3));
+      if (d.atk > 0 && !d.ship) { // anche il nemico compra armate già in gruppo, se può mantenerle
+        n = Math.min(AI_ARMATA_MAX, Math.floor(stelle / d.cost), 1 + Math.floor(Math.random() * 3));
+        if (!capThreat) n = Math.min(n, margine * 2);
         n = Math.max(1, n);
       }
       players.a.stars -= d.cost * n;
       const u = mkUnit(pick, 'a');
       u.count = n; u.maxHp = d.hp * n; u.hp = u.maxHp;
       ct.unit = u;
+      if (d.settler) settlers++; else if (d.builder) builders++; else if (d.medic) medics++;
       aiLogAdd(n > 1 ? `${d.gicon} Il nemico arruola una ${d.gname} ×${n} ${ct.city.capital ? 'nella capitale' : 'in una città'}!`
                      : `${d.icon} Il nemico addestra un ${d.name} ${ct.city.capital ? 'nella capitale' : 'in una città'}`);
     }
@@ -2810,6 +2821,382 @@ function ports(owner) { return map.flat().filter(t => t.port && t.port.owner ===
 // raggio IA scalato sulla taglia della mappa (FIX: su media/gigante l'IA "vedeva" troppo corto)
 function aiR(x) { return Math.max(x, Math.round(x * tileScale())); }
 
+// ============ IA: STRATEGIA DI MARCIA ============
+// Una "mappa di marcia" per turno: per ogni casella, quanto costa arrivare
+// all'obiettivo più vicino contando fiumi (servono ponti), mare (servono navi)
+// e montagne (la scalata). Le unità scendono lungo la mappa invece di puntare
+// in linea d'aria, che le faceva incastrare contro fiumi e coste.
+const AI_INF = 1e9;
+const AI_ARMATA_MAX = 3;  // le armate in marcia si fermano a 3: entrano in una nave di livello 1
+let aiCosti = null, aiMareIdx = null, aiCampi = null, aiOffensiva = false;
+// fiumi da attraversare (servono ponti) e armate ferme sulla costa (servono navi)
+let aiBisogni = { ponti: new Map(), imbarchi: new Map() };
+const aiFronte = new Map(); // per ogni armata in attesa, il mare su cui vuole salpare
+let aiSenzaPorto = []; // armate sulla costa di un mare dove l'IA non ha porti
+function aiIdx(t) { return t.r * COLS + t.c; }
+// costo in "terzi di turno": a piedi una casella al turno, in nave tre
+function aiCostoCasella(t) {
+  if (t.terrain === 'mountain') return 9;                 // scalata: si resta fermi un turno
+  if (t.terrain === 'river') return t.bridge ? 3 : 12;    // senza ponte serve il Costruttore
+  if (t.terrain === 'water') return t.bridge ? 3 : 1;
+  if (t.hosp && t.hosp.level > 0 && t.hosp.owner === 'p') return 18;
+  return 3;
+}
+const AI_PAZIENZA = 6; // turni d'attesa sulla costa prima di cercare una strada via terra
+const AI_IMBARCO = 9; // passare fra terra e mare costa l'attesa della nave
+function aiMare(t) { return t.terrain === 'water' && !t.bridge; }
+// Dijkstra a secchi dagli obiettivi verso tutta la mappa (vicini calcolati in linea:
+// sulla mappa gigante sono centinaia di migliaia di caselle)
+const AI_DIR = [[[1,0],[-1,0],[0,-1],[-1,-1],[0,1],[-1,1]], [[1,0],[-1,0],[1,-1],[0,-1],[1,1],[0,1]]];
+function aiCampo(sorgenti, costi = aiCosti) {
+  const d = new Int32Array(ROWS * COLS).fill(AI_INF);
+  const secchi = [[]];
+  for (const t of sorgenti) { const i = aiIdx(t); if (d[i]) { d[i] = 0; secchi[0].push(i); } }
+  for (let k = 0; k < secchi.length; k++) {
+    const b = secchi[k];
+    if (!b) continue;
+    for (const i of b) {
+      if (d[i] !== k) continue;
+      const r = (i / COLS) | 0, c = i % COLS, mare = aiMareIdx[i];
+      for (const [dc, dr] of AI_DIR[r & 1]) {
+        const rr = r + dr, cc = c + dc;
+        if (rr < 0 || rr >= ROWS || cc < 0 || cc >= COLS) continue;
+        const ni = rr * COLS + cc;
+        const nd = k + costi[i] + (aiMareIdx[ni] !== mare ? AI_IMBARCO : 0);
+        if (nd < d[ni]) { d[ni] = nd; (secchi[nd] || (secchi[nd] = [])).push(ni); }
+      }
+    }
+    secchi[k] = null;
+  }
+  return d;
+}
+function aiSoldati(owner) {
+  let s = 0;
+  for (const t of unitsOf(owner)) {
+    const u = t.unit, d = UNIT_TYPES[u.type];
+    if (d.ship) { if (u.cargo && UNIT_TYPES[u.cargo.type].atk > 0) s += aliveCount(u.cargo); }
+    else if (d.atk > 0) s += aliveCount(u);
+  }
+  return s;
+}
+// all'inizio del turno IA: ripulisce i bisogni vecchi e ricalcola le mappe di marcia
+function aiPreparaTurno() {
+  const vivo = t => map[t.r] && map[t.r][t.c] === t;
+  for (const [k, t] of aiBisogni.ponti) if (!vivo(t) || t.bridge) aiBisogni.ponti.delete(k);
+  for (const [k, t] of aiBisogni.imbarchi)
+    if (!vivo(t) || !t.unit || t.unit.owner !== 'a' || UNIT_TYPES[t.unit.type].ship) aiBisogni.imbarchi.delete(k);
+  aiCosti = new Uint8Array(ROWS * COLS);
+  aiMareIdx = new Uint8Array(ROWS * COLS);
+  for (let r = 0; r < ROWS; r++) for (let c = 0; c < COLS; c++) {
+    aiCosti[r * COLS + c] = aiCostoCasella(map[r][c]);
+    aiMareIdx[r * COLS + c] = aiMare(map[r][c]) ? 1 : 0;
+  }
+  // la stessa mappa ma "via terra": il mare costa carissimo, per chi ha aspettato troppo una nave
+  // calcolate solo quando servono davvero
+  const pigro = f => { let v = null; return () => v || (v = f()); };
+  const att = pigro(() => aiCampo(cities('p'))), esp = pigro(() => aiCampo(cities(null)));
+  const terra = pigro(() => aiCampo(cities('p'), aiCosti.map(c => c === 1 ? 60 : c)));
+  aiCampi = { get attacco() { return att(); }, get espansione() { return esp(); }, get attaccoTerra() { return terra(); } };
+  // offensiva quando l'esercito è abbastanza forte (con isteresi, per non tentennare)
+  const mie = aiSoldati('a'), soglia = Math.max(6, Math.ceil(aiSoldati('p') * 0.8));
+  aiOffensiva = aiOffensiva ? mie >= Math.ceil(soglia / 2) : mie >= soglia;
+}
+// le armate che aspettano davvero una nave (chi nel frattempo si è mosso non conta più)
+function aiAttese() {
+  for (const [k, t] of aiBisogni.imbarchi)
+    if (!t.unit || t.unit.owner !== 'a' || UNIT_TYPES[t.unit.type].ship) aiBisogni.imbarchi.delete(k);
+  return [...aiBisogni.imbarchi.values()];
+}
+// x è un buon approdo per l'armata in a: accanto a lei e sullo stesso mare che vuole attraversare
+// (una costa può dare su due mari: salire dalla parte sbagliata non porta da nessuna parte)
+function aiApprodo(a, x) {
+  const fr = aiFronte.get(key(a));
+  if (!fr || dist(a, x) !== 1) return false;
+  const campo = aiCampoMilitare(a);
+  return campo[aiIdx(x)] <= campo[aiIdx(fr)] + 2;
+}
+// le rive dei ponti da gettare restano libere per i Costruttori
+function aiRiservata(x) {
+  if (!aiBisogni.ponti.size || !passable(x)) return false;
+  return neighbors(x).some(n => aiBisogni.ponti.has(key(n)));
+}
+// la mappa da seguire per un'unità militare: villaggi neutrali finché non si va all'attacco
+function aiCampoMilitare(t) {
+  if (!aiCampi) aiPreparaTurno();
+  if (aiOffensiva || aiCampi.espansione[aiIdx(t)] >= AI_INF)
+    return t.unit && t.unit.aiAttesa > AI_PAZIENZA ? aiCampi.attaccoTerra : aiCampi.attacco;
+  return aiCampi.espansione;
+}
+// il passo migliore lungo la mappa; se la strada è sbarrata da un fiume o dal mare lo annota
+function aiPasso(t, campo) {
+  const qui = campo[aiIdx(t)];
+  if (qui >= AI_INF) return null;
+  let best = null, bv = qui;
+  const civile = UNIT_TYPES[t.unit.type].builder;
+  for (const m of movesFor(t)) {
+    if (!civile && aiRiservata(m)) continue;
+    const v = campo[aiIdx(m)];
+    if (v < bv) { bv = v; best = m; }
+  }
+  if (best) return best;
+  let fronte = null, fv = qui;
+  for (const n of neighbors(t)) { const v = campo[aiIdx(n)]; if (v < fv) { fv = v; fronte = n; } }
+  if (fronte && fronte.terrain === 'river' && !fronte.bridge) aiBisogni.ponti.set(key(fronte), fronte);
+  else if (fronte && fronte.terrain === 'water' && !fronte.bridge) {
+    aiBisogni.imbarchi.set(key(t), t); aiFronte.set(key(t), fronte);
+    if (t.unit) t.unit.aiAttesa = (t.unit.aiAttesa || 0) + 1; // dopo troppa attesa si prova via terra
+    // ...e se nemmeno via terra si passa, il Costruttore getta un ponte sullo stretto
+    if (t.unit && t.unit.aiAttesa > AI_PAZIENZA) aiBisogni.ponti.set(key(fronte), fronte);
+  }
+  return null;
+}
+// percorso in ampiezza da t alla meta più vicina (costruttori, cittadini, navi vuote)
+function aiPercorso(t, ok, meta) {
+  const limite = Math.round(8000 * tileScale() * tileScale());
+  const prev = new Map([[key(t), null]]);
+  const q = [t];
+  for (let h = 0; h < q.length && q.length < limite; h++) {
+    const x = q[h];
+    if (x !== t && meta(x)) {
+      const path = [];
+      for (let y = x; y !== t; y = prev.get(key(y))) path.unshift(y);
+      return path;
+    }
+    for (const n of neighbors(x)) {
+      if (prev.has(key(n)) || !ok(n)) continue;
+      prev.set(key(n), x);
+      q.push(n);
+    }
+  }
+  return null;
+}
+// muove l'unità lungo il percorso, il più avanti possibile in questo turno
+function aiSegui(t, path) {
+  if (!path) return null;
+  const moves = new Set(movesFor(t));
+  for (let i = path.length - 1; i >= 0; i--) if (moves.has(path[i])) { doMove(t, path[i]); return path[i]; }
+  return null;
+}
+// chi è rimasto fermo in una propria città ne esce, così la città può addestrare
+// (tranne il presidio della capitale minacciata)
+function aiLiberaCitta(t) {
+  const u = t.unit;
+  if (!u || u.owner !== 'a' || u.moved || !t.city || t.city.owner !== 'a') return;
+  if (t.city.capital && unitsOf('p').some(e => dist(t, e) <= aiR(6))) return;
+  const fuori = movesFor(t).find(m => !m.city && m.terrain !== 'mountain');
+  if (fuori) doMove(t, fuori);
+}
+// acqua navigabile e libera
+function aiAcqua(n) { return (n.terrain === 'water' || n.terrain === 'river') && !n.unit; }
+// navi: varate quando un'armata aspetta sulla costa, potenziate se l'armata non ci sta
+function aiFaseNavi() {
+  const navi = unitsOf('a').filter(x => UNIT_TYPES[x.unit.type].ship);
+  const attese = aiAttese();
+  if (!attese.length) return;
+  const piuGrande = Math.max(...attese.map(a => aliveCount(a.unit)));
+  for (const n of navi) {
+    if (!n.unit.cargo && navCap(n.unit.lvl) < piuGrande && players.a.stars >= shipUpgradeCost(n.unit.lvl) + 3 && upgradeShip(n, 'a'))
+      aiLogAdd(`🚢⬆️ Il nemico potenzia una nave (livello ${n.unit.lvl})`);
+  }
+  const libere = navi.filter(x => !x.unit.cargo).length;
+  aiSenzaPorto = [];
+  if (attese.length > libere && navi.length < 6) {
+    // solo da un porto che per mare arriva davvero fino all'armata (non da un fiume o un lago chiuso)
+    for (const a of attese.slice(0, 3)) {
+      const porti = ports('a').filter(p => canBuyShip(p, 'a')).sort((x, y) => dist(x, a) - dist(y, a)).slice(0, 3);
+      const porto = porti.find(p => aiPercorso(freeSeaAround(p)[0], aiAcqua, x => aiApprodo(a, x)));
+      if (porto) { buyShip(porto, 'a'); aiLogAdd('🚢 Il nemico vara una nave per trasportare le truppe'); break; }
+      if (players.a.stars >= SHIP_COST) aiSenzaPorto.push(a); // nessun porto su quel mare: serve un Costruttore
+    }
+  }
+}
+function aiActShip(t) {
+  const u = t.unit;
+  if (u.cargo) {
+    const campo = aiCampoMilitare(t);
+    // la costa accanto che avvicina di più all'obiettivo
+    const sbarco = s => disembarksFor(s).filter(n => campo[aiIdx(n)] < campo[aiIdx(s)])
+      .sort((a, b) => campo[aiIdx(a)] - campo[aiIdx(b)])[0];
+    let dove = t, terra = sbarco(t);
+    if (!terra) {
+      let bv = campo[aiIdx(t)];
+      for (const m of movesFor(t)) { const v = campo[aiIdx(m)]; if (v < bv) { bv = v; dove = m; } }
+      if (dove !== t) { aiLogAdd(`🚢 Una nave nemica trasporta truppe verso ${dirName(t, dove)}`); doMove(t, dove); terra = sbarco(dove); }
+      else terra = disembarksFor(t)[0]; // bloccata: meglio scendere che restare in mare
+    }
+    if (terra) { aiLogAdd('⚓ Una nave nemica sbarca truppe!'); doDisembark(dove, terra); return terra; }
+    return dove;
+  }
+  // nave vuota: raggiungi l'armata che aspetta d'imbarcarsi
+  const attese = aiAttese();
+  if (!attese.length || attese.some(a => aiApprodo(a, t))) return t;
+  const rotta = aiPercorso(t, aiAcqua, x => attese.some(a => aiApprodo(a, x)));
+  if (rotta) return aiSegui(t, rotta) || t;
+  // nessuna armata raggiungibile per mare: la nave costa mantenimento, meglio congedarla
+  aiLogAdd('🚢 Il nemico congeda una nave inutile');
+  congedaUno(t);
+  return t;
+}
+
+// comportamento del Costruttore IA: ponti dove l'esercito è sbarrato, porti sulle coste
+function aiActBuilder(t) {
+  const u = t.unit;
+  const pontiUtili = x => bridgesFor(x).filter(s => aiBisogni.ponti.has(key(s)));
+  // 1. getta il ponte che serve all'esercito
+  const subito = pontiUtili(t);
+  if (subito.length) { doBuildBridge(t, subito[0]); aiBisogni.ponti.delete(key(subito[0])); return t; }
+  // 2. porto: +1⭐ a turno e un posto dove varare le navi
+  const portoVicino = x => ports('a').some(p => dist(p, x) <= aiR(5));
+  if (canBuildPort(t) && !portoVicino(t) && (aiAttese().length || Math.random() < 0.7)) { doBuildPort(t); return t; }
+  const terra = n => passable(n) && !n.unit && !(n.hosp && n.hosp.level > 0 && n.hosp.owner !== 'a')
+    && !(n.city && n.city.owner && n.city.owner !== 'a');
+  // 3. raggiungi il fiume che sbarra la strada all'esercito
+  if (aiBisogni.ponti.size) {
+    const dove = aiSegui(t, aiPercorso(t, terra, x => neighbors(x).some(n => aiBisogni.ponti.has(key(n)))));
+    if (dove) { aiLogAdd('👷 Il Costruttore nemico va a gettare un ponte'); return dove; }
+  }
+  // 4. armate ferme sulla costa di un mare senza porti: vai ad aprirne uno su quella costa
+  const attese = aiSenzaPorto.filter(a => a.unit && a.unit.owner === 'a');
+  if (attese.length) {
+    const costa = x => (x.terrain === 'grass' || x.terrain === 'forest' || x.terrain === 'desert') && !x.city && !x.port && !x.hosp
+      && neighbors(x).some(n => n.terrain === 'water' && attese.some(a => aiFronte.has(key(a)) && dist(aiFronte.get(key(a)), n) <= 2));
+    if (canBuildPort(t) && costa(t)) { doBuildPort(t); return t; }
+    const dove = aiSegui(t, aiPercorso(t, terra, costa));
+    if (dove) { aiLogAdd('👷 Il Costruttore nemico va ad aprire un porto'); return dove; }
+  }
+  // 5. con la cassa piena, ponti sui fiumi ancora sguarniti (come prima)
+  if (players.a.stars < 8) return t;
+  const allBridges = map.flat().filter(x => x.bridge);
+  const farFromBridges = x => !allBridges.some(b => dist(x, b) <= aiR(4));
+  const good = bridgesFor(t).find(s => s.terrain === 'river' && farFromBridges(s));
+  if (good) { doBuildBridge(t, good); return t; }
+  const dove = aiSegui(t, aiPercorso(t, terra, x => neighbors(x).some(n => n.terrain === 'river' && !n.bridge && farFromBridges(n))));
+  if (dove) { aiLogAdd('👷 Il Costruttore nemico è al lavoro sul fiume'); return dove; }
+  return t;
+}
+
+// comportamento del Cittadino IA: si insedia, forma carovane, fonda villaggi
+function aiActCitizen(t) {
+  const u = t.unit;
+  const danger = unitsOf('p').some(e => dist(t, e) <= aiR(2));
+  // 0. appena addestrato in una propria città con spazio: si insedia subito lì
+  if (t.city && t.city.owner === 'a' && (t.city.pop || 1) < MAX_POP) { settleIfCitizen(t); return t; }
+  // 1. carovana pronta: fonda un villaggio (qui o su una casella raggiungibile)
+  if (u.count >= FOUND_MIN) {
+    if (canFoundTile(t)) { foundVillage(t); return t; }
+    const spot = movesFor(t).find(canFoundTile);
+    if (spot) { doMove(t, spot); if (spot.unit && canFound(spot)) foundVillage(spot); return spot; }
+  }
+  // 2. in sicurezza, unisciti agli altri cittadini per formare una carovana
+  if (!danger && u.count < 6) {
+    const ms = mergesFor(t);
+    if (ms.length && Math.random() < 0.6) { doMerge(t, ms[0]); return ms[0]; }
+  }
+  // 3. vai a insediarti: villaggio neutrale o città propria con spazio, per la strada vera
+  const meta = x => !x.unit && x.city && (x.city.owner === null || (x.city.owner === 'a' && (x.city.pop || 1) < MAX_POP));
+  const direct = movesFor(t).find(meta);
+  if (direct) { doMove(t, direct); return direct; }
+  const terra = n => passable(n) && !n.unit && !(n.hosp && n.hosp.level > 0 && n.hosp.owner !== 'a')
+    && !(n.city && n.city.owner && n.city.owner !== 'a');
+  const dove = aiSegui(t, aiPercorso(t, terra, meta));
+  if (dove) { aiLogAdd('👨‍🌾 Un Cittadino nemico è in viaggio'); return dove; }
+  return t;
+}
+
+function aiActUnit(t) {
+  const u = t.unit;
+  const icon = uIcon(u), name = uName(u);
+
+  // Medici, Costruttori, Cittadini e Navi hanno una logica tutta loro
+  if (UNIT_TYPES[u.type].medic) return aiActMedic(t);
+  if (UNIT_TYPES[u.type].builder) return aiActBuilder(t);
+  if (UNIT_TYPES[u.type].civil) return aiActCitizen(t);
+  if (UNIT_TYPES[u.type].ship) return aiActShip(t);
+
+  // 0. unisce le truppe quando il nemico è vicino (anche l'IA forma gruppi!)
+  if (u.count < MAX_STACK) {
+    const enemyNear = unitsOf('p').some(e => dist(t, e) <= aiR(6));
+    if (enemyNear && Math.random() < 0.65) {
+      const ms = mergesFor(t).filter(m => u.count + m.unit.count <= MAX_STACK);
+      if (ms.length) {
+        ms.sort((a, b) => b.unit.count - a.unit.count);
+        doMerge(t, ms[0]); // il messaggio finisce nella cronaca
+        return ms[0];
+      }
+    }
+  }
+
+  // 1. attacca il bersaglio migliore
+  const hitTile = aiTryAttack(t);
+  if (hitTile) return t.unit ? t : hitTile; // in mischia può aver occupato la casella del bersaglio
+
+  // 2. difesa della capitale: se è minacciata e sguarnita, le unità vicine ripiegano
+  const cap = aCapital();
+  if (cap) {
+    const threats = unitsOf('p').filter(e => dist(cap, e) <= aiR(4)).length;
+    const defenders = unitsOf('a').filter(f => f !== t && dist(cap, f) <= aiR(2)).length;
+    // chi presidia la capitale minacciata non la lascia
+    if (t === cap && unitsOf('p').some(e => dist(cap, e) <= aiR(6))) return t;
+    if (threats > defenders && dist(t, cap) >= 1 && dist(t, cap) <= aiR(8)) {
+      const moves = movesFor(t);
+      const back = moves.filter(m => dist(m, cap) < dist(t, cap)).sort((a, b) => dist(a, cap) - dist(b, cap))[0];
+      if (back) {
+        aiLogAdd(`${icon} Il ${name} nemico ripiega a difesa della capitale`);
+        doMove(t, back);
+        aiTryAttack(back);
+        return back;
+      }
+    }
+  }
+
+  // 3. intercetta i nemici entrati nel proprio territorio
+  const invasori = unitsOf('p').filter(e => dist(t, e) <= aiR(4) && cities('a').some(c => dist(c, e) <= aiR(5)));
+  if (invasori.length) {
+    const e = invasori.sort((a, b) => dist(t, a) - dist(t, b))[0];
+    const step = movesFor(t).filter(m => dist(m, e) < dist(t, e)).sort((a, b) => dist(a, e) - dist(b, e))[0];
+    if (step) {
+      aiLogAdd(`${icon} Il ${name} nemico corre incontro ai tuoi invasori`);
+      doMove(t, step);
+      aiTryAttack(step);
+      return step;
+    }
+  }
+
+  // 4. marcia lungo la mappa: villaggi neutrali, poi (in offensiva) le tue città
+  const campo = aiCampoMilitare(t);
+  // 4z. chi sta sulla riva di un ponte da gettare si sposta, per far lavorare il Costruttore
+  if (aiRiservata(t)) {
+    const via = movesFor(t).filter(m => !aiRiservata(m) && m.terrain !== 'mountain')
+      .sort((a, b) => campo[aiIdx(a)] - campo[aiIdx(b)])[0];
+    if (via) { doMove(t, via); return via; }
+  }
+  // 4a. raggiungi i compagni più avanti per formare un'armata (che stia ancora in una nave)
+  if (u.count < AI_ARMATA_MAX && Math.random() < 0.5) {
+    const ms = mergesFor(t).filter(m => u.count + m.unit.count <= AI_ARMATA_MAX && campo[aiIdx(m)] < campo[aiIdx(t)]);
+    if (ms.length) { doMerge(t, ms[0]); return ms[0]; }
+  }
+  const dove = aiPasso(t, campo);
+  if (dove) {
+    const capturing = dove.city && dove.city.owner !== 'a';
+    if (!capturing) aiLogAdd(`${icon} Il ${name} nemico avanza verso ${dirName(t, dove)}`);
+    doMove(t, dove); // se conquista, il messaggio arriva da captureIfCity
+    aiTryAttack(dove);
+    return dove;
+  }
+  // 4b. sbarrato dal mare: sale sulla nave che lo aspetta
+  if (aiBisogni.imbarchi.has(key(t))) {
+    const navi = embarksFor(t).filter(s => aiApprodo(t, s));
+    if (navi.length) {
+      aiBisogni.imbarchi.delete(key(t));
+      aiLogAdd(`🚢 ${icon} Il ${name} nemico si imbarca`);
+      doEmbark(t, navi[0]);
+      return navi[0];
+    }
+  }
+  return t;
+}
+
+
 // attacco IA con scelta del bersaglio a punteggio; restituisce la casella colpita o null
 function aiTryAttack(tile) {
   if (!tile.unit || tile.unit.attacked) return null;
@@ -2832,75 +3219,6 @@ function aiTryAttack(tile) {
   atks.sort((x, y) => score(y) - score(x));
   doAttack(tile, atks[0]);
   return atks[0];
-}
-
-// comportamento del Costruttore IA: getta ponti dove mancano
-function aiActBuilder(t) {
-  const u = t.unit;
-  const allBridges = map.flat().filter(x => x.bridge);
-  const farFromBridges = x => !allBridges.some(b => dist(x, b) <= aiR(4));
-  // 1. costruisci se adiacente a un fiume sguarnito (o a uno stretto che avvicina al nemico)
-  const spots = bridgesFor(t);
-  const pc = pCapital();
-  const utile = s => s.terrain !== 'water'
-    || (pc && dist(s, pc) < dist(t, pc) && neighbors(s).some(n => n !== t && (n.bridge || (n.terrain !== 'water' && n.terrain !== 'river'))));
-  const good = spots.filter(utile).find(farFromBridges) || (spots.length && Math.random() < 0.3 && utile(spots[0]) ? spots[0] : null);
-  if (good) { doBuildBridge(t, good); return t; }
-  // 1b. porto: se è su una costa/riva libera e non ha porti vicini
-  if (canBuildPort(t) && !ports('a').some(x => dist(x, t) <= aiR(5)) && Math.random() < 0.5) {
-    doBuildPort(t); return t;
-  }
-  // 2. muovi verso il tratto di fiume senza ponti più vicino
-  const targets = map.flat().filter(x => x.terrain === 'river' && !x.bridge && farFromBridges(x));
-  if (targets.length) {
-    targets.sort((a, b) => dist(a, t) - dist(b, t));
-    const goal = targets[0];
-    const moves = movesFor(t).sort((a, b) => dist(a, goal) - dist(b, goal));
-    if (moves.length && dist(moves[0], goal) < dist(t, goal)) {
-      aiLogAdd('👷 Il Costruttore nemico è al lavoro sul fiume');
-      doMove(t, moves[0]);
-      const spots2 = bridgesFor(moves[0]);
-      const g2 = spots2.find(farFromBridges);
-      if (g2) doBuildBridge(moves[0], g2);
-      return moves[0];
-    }
-  }
-  return t;
-}
-
-// comportamento del Cittadino IA: si insedia, forma carovane, fonda villaggi
-function aiActCitizen(t) {
-  const u = t.unit;
-  const danger = unitsOf('p').some(e => dist(t, e) <= aiR(2));
-  // 1. carovana pronta: fonda un villaggio (qui o su una casella raggiungibile)
-  if (u.count >= FOUND_MIN) {
-    if (canFoundTile(t)) { foundVillage(t); return t; }
-    const spot = movesFor(t).find(canFoundTile);
-    if (spot) { doMove(t, spot); if (spot.unit && canFound(spot)) foundVillage(spot); return spot; }
-  }
-  // 2. in sicurezza, unisciti agli altri cittadini per formare una carovana
-  if (!danger && u.count < 6) {
-    const ms = mergesFor(t);
-    if (ms.length && Math.random() < 0.6) { doMerge(t, ms[0]); return ms[0]; }
-  }
-  // 3. vai a insediarti: villaggio neutrale o città propria con spazio
-  const goals = [
-    ...cities(null).filter(x => !x.unit),
-    ...cities('a').filter(x => (x.city.pop || 1) < MAX_POP && !x.unit)
-  ];
-  if (goals.length) {
-    const moves = movesFor(t);
-    // se una meta è direttamente raggiungibile, entra (cattura/insediamento automatici)
-    const direct = moves.find(m => goals.includes(m));
-    if (direct) { doMove(t, direct); return direct; }
-    let best = null, bestD = Math.min(...goals.map(g => dist(t, g)));
-    for (const m of moves) for (const g of goals) {
-      const dd = dist(m, g);
-      if (dd < bestD) { bestD = dd; best = m; }
-    }
-    if (best) { aiLogAdd('👨‍🌾 Un Cittadino nemico è in viaggio'); doMove(t, best); return best; }
-  }
-  return t;
 }
 
 // comportamento del Medico IA: fonda ospedali nelle retrovie, segue e cura i feriti
@@ -2939,76 +3257,6 @@ function aiActMedic(t) {
       const moves = movesFor(t).sort((a, b) => dist(a, near) - dist(b, near));
       if (moves.length && dist(moves[0], near) < dist(t, near)) { doMove(t, moves[0]); return moves[0]; }
     }
-  }
-  return t;
-}
-
-function aiActUnit(t) {
-  const u = t.unit;
-  const icon = uIcon(u), name = uName(u);
-
-  // Medici, Costruttori e Cittadini hanno una logica tutta loro
-  if (UNIT_TYPES[u.type].medic) return aiActMedic(t);
-  if (UNIT_TYPES[u.type].builder) return aiActBuilder(t);
-  if (UNIT_TYPES[u.type].civil) return aiActCitizen(t);
-
-  // 0. unisce le truppe quando il nemico è vicino (anche l'IA forma gruppi!)
-  if (u.count < MAX_STACK) {
-    const enemyNear = unitsOf('p').some(e => dist(t, e) <= aiR(6));
-    if (enemyNear && Math.random() < 0.65) {
-      const ms = mergesFor(t).filter(m => u.count + m.unit.count <= MAX_STACK);
-      if (ms.length) {
-        ms.sort((a, b) => b.unit.count - a.unit.count);
-        doMerge(t, ms[0]); // il messaggio finisce nella cronaca
-        return ms[0];
-      }
-    }
-  }
-
-  // 1. attacca il bersaglio migliore
-  const hitTile = aiTryAttack(t);
-  if (hitTile) return t.unit ? t : hitTile; // in mischia può aver occupato la casella del bersaglio
-
-  // 2. difesa della capitale: se è minacciata e sguarnita, le unità vicine ripiegano
-  const cap = aCapital();
-  if (cap) {
-    const threats = unitsOf('p').filter(e => dist(cap, e) <= aiR(4)).length;
-    const defenders = unitsOf('a').filter(f => f !== t && dist(cap, f) <= aiR(2)).length;
-    if (threats > defenders && dist(t, cap) >= 1 && dist(t, cap) <= aiR(8)) {
-      const moves = movesFor(t);
-      const back = moves.filter(m => dist(m, cap) < dist(t, cap)).sort((a, b) => dist(a, cap) - dist(b, cap))[0];
-      if (back) {
-        aiLogAdd(`${icon} Il ${name} nemico ripiega a difesa della capitale`);
-        doMove(t, back);
-        aiTryAttack(back);
-        return back;
-      }
-    }
-  }
-
-  // 3. avanza verso l'obiettivo più conveniente (villaggi > città > unità)
-  const goals = [
-    ...cities(null).filter(x => !x.unit),
-    ...cities('p'),
-    ...unitsOf('p')
-  ];
-  if (!goals.length) return t;
-  const moves = movesFor(t);
-  if (!moves.length) return t;
-  let best = null, bestScore = Infinity;
-  for (const m of moves) {
-    for (const g of goals) {
-      const d = dist(m, g) + (g.city && g.city.owner === null ? -1.5 : 0);
-      if (d < bestScore) { bestScore = d; best = m; }
-    }
-  }
-  const curBest = Math.min(...goals.map(g => dist(t, g)));
-  if (best && bestScore < curBest) {
-    const capturing = best.city && best.city.owner !== 'a';
-    if (!capturing) aiLogAdd(`${icon} Il ${name} nemico avanza verso ${dirName(t, best)}`);
-    doMove(t, best); // se conquista, il messaggio arriva da captureIfCity
-    aiTryAttack(best);
-    return best;
   }
   return t;
 }

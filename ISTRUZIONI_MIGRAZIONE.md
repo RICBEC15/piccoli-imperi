@@ -55,3 +55,16 @@ Ripartendo dall'ultima versione scaricata (`piccoli_imperi_52.html`, che si ferm
 - **Russia europea fino agli Urali**: confine reale (dataset Natural Earth, ritagliato agli Urali e al Circolo Polare), catena degli Urali e delle Khibiny, gradiente steppa→foresta mista→taiga→tundra, deserto glaciale bianco oltre il Circolo Polare (dove non ci sono vere montagne), fiumi Volga/Don/Dvina Settentrionale/Oka/Kama, laghi Ladoga e Onega, colline di Valdai/altopiano centrale russo/rilievi del Volga, e 10 città storiche (Mosca, San Pietroburgo, Nizhny Novgorod, Kazan, Volgograd, Voronež, Arcangelo, Vologda, Perm, Murmansk). La mappa storica e tutte le altre estensioni precedenti sono state verificate tassello per tassello: restano identiche.
 
 Il file di salvataggio è passato alla versione 15 (compatibile con i salvataggi precedenti, dalla v6 in su).
+
+## Cosa è cambiato nella v54
+
+- **IA strategica**: l'Impero Cremisi non si blocca più verso il turno 50. Prima i fiumi lo chiudevano in una zona con pochi villaggi, non gettava ponti dove servivano, non usava mai le navi, e una regola gli impediva di addestrare perfino cittadini e costruttori quando il mantenimento pareggiava la rendita. Ora:
+  - calcola ogni turno una "mappa di marcia" (Dijkstra) che tiene conto di fiumi (ponti), mare (navi) e montagne, e le unità la seguono invece di puntare in linea d'aria;
+  - i Costruttori gettano i ponti dove l'esercito è sbarrato (anche sugli stretti di mare, se l'attesa della nave si allunga) e aprono porti sulle coste dove le armate aspettano;
+  - vara e potenzia le navi solo da porti collegati per mare all'armata che aspetta, imbarca le armate e le sbarca vicino all'obiettivo; le navi inutili vengono congedate;
+  - tiene l'economia in positivo (l'esercito non si mangia più del 60% della rendita, la cassa piena si spende), e prima di andare all'attacco conquista i villaggi neutrali;
+  - forma armate fino a 3 (entrano in una nave di livello 1) e va all'offensiva quando è abbastanza forte;
+  - difende la capitale: presidio d'emergenza, ripiegamento e intercettazione degli invasori.
+- **Mappa gigante** ridotta da 5 a 3 volte la piccola (esagoni a un terzo, 750×632 caselle): il turno dell'IA lì è circa 3 volte più veloce. Le mappe piccola e media sono identiche casella per casella. I salvataggi fatti sulla vecchia mappa gigante non si possono più caricare.
+- Corrette le etichette delle dimensioni nel menu iniziale (erano rimaste quelle di una versione vecchia).
+- Nuovo test `aitest.js`: con il giocatore fermo l'IA deve continuare a crescere dopo il turno 50, minacciare o prendere la capitale entro il turno 150, e presidiare la propria capitale quando è minacciata. Nelle prove su 18 partite simulate l'IA ha preso la capitale in 16 entro il turno 150.

@@ -9,7 +9,7 @@ Apri `piccoli_imperi.html` nel browser con un doppio clic. Non serve installare 
 ## Contenuto
 
 - `piccoli_imperi.html`: il gioco completo (HTML, CSS e JavaScript in un unico file).
-- `stub.js`, `shiptest.js`, `savetest.js`, `playtest.js`, `browser_check.js`: test automatici.
+- `stub.js`, `shiptest.js`, `savetest.js`, `playtest.js`, `aitest.js`, `browser_check.js`: test automatici.
 - `build_russia.js`: script che ha estratto il confine della Russia dal dataset Natural Earth.
 - `ISTRUZIONI_MIGRAZIONE.md`: note di sviluppo, storia delle ultime versioni e istruzioni dettagliate.
 
@@ -20,6 +20,7 @@ python3 -c "import re; h=open('piccoli_imperi.html',encoding='utf-8').read(); op
 cat stub.js game.js shiptest.js > _run.js && node _run.js
 cat stub.js game.js savetest.js > _run.js && node _run.js
 cat stub.js game.js playtest.js > _run.js && node _run.js
+cat stub.js game.js aitest.js > _run.js && node _run.js   # IA: 150 turni, circa un minuto
 ```
 
 ## Regola importante
@@ -28,4 +29,4 @@ La mappa è deterministica. Non rigenerarla mai da zero: ogni modifica va fatta 
 
 ## Versione
 
-v53 (formato di salvataggio v15).
+v54 (formato di salvataggio v15).
