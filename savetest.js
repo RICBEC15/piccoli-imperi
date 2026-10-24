@@ -17,18 +17,18 @@ buyShip(portTile, 'p');
 const shipTile = neighbors(portTile).find(n => n.unit && UNIT_TYPES[n.unit.type].ship);
 shipTile.unit.lvl = 4; // livello arbitrario per il test
 
-// round trip v15 con carico
+// round trip v16 con carico
 const w = mkUnit('warrior', 'p'); w.count = 5; w.maxHp = UNIT_TYPES.warrior.hp*5; w.hp = w.maxHp;
 shipTile.unit.cargo = w;
 
 const data = serialize();
-assert(data.v === 15, 'versione salvataggio = 15');
+assert(data.v === 16, 'versione salvataggio = 16');
 
 // distruggi lo stato e ricarica
 const savedLvl = shipTile.unit.lvl, savedCargoCount = shipTile.unit.cargo.count;
 newGame();
 const ok = applySave(data);
-assert(ok === true, 'applySave riesce su salvataggio v15');
+assert(ok === true, 'applySave riesce su salvataggio v16');
 const shipTile2 = map.flat().find(t => t.unit && UNIT_TYPES[t.unit.type].ship && t.unit.owner === 'p');
 assert(!!shipTile2, 'nave ritrovata dopo il caricamento');
 assert(shipTile2.unit.lvl === savedLvl, `livello nave preservato dal salvataggio (${savedLvl})`);

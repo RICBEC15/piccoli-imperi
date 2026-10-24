@@ -137,6 +137,14 @@
     cursor:pointer; color:#fff; font-weight:bold;
   }
   .ov-tut { background:#a8632a; } .ov-tut:hover { background:#c47a38; }
+  #paesi { z-index:50; } /* sopra i pulsanti dello zoom */
+  .paesi-grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(140px, 1fr)); gap:6px; margin-top:12px; }
+  .paese-btn { background:#2f3e57; color:#fff; border:2px solid transparent; border-radius:8px; padding:7px 8px;
+    font-size:14px; text-align:left; cursor:pointer; }
+  .paese-btn:hover { background:#3a4d6b; }
+  .paese-btn.sel { border-color:#ffd76e; background:#3a5a8c; }
+  .paese-btn small { display:block; font-size:11px; color:#aeb9cb; margin-top:2px; }
+  #paeseNemico { width:100%; padding:8px; font-size:14px; border-radius:8px; background:#1c2738; color:#fff; border:1px solid #3a4a63; }
   .ov-play { background:#3a5a8c; } .ov-play:hover { background:#4a6fa8; }
   .ov-rules { background:#2c3a52; } .ov-rules:hover { background:#3a4a66; }
   @keyframes pulse { 0%,100%{ box-shadow:0 0 0 0 #ffd76e88; } 50%{ box-shadow:0 0 0 8px #ffd76e00; } }
@@ -212,13 +220,27 @@
     <button onclick="newGame()">🔄 Nuova partita</button>
   </div>
 
+  <!-- Scelta del paese, all'inizio della partita -->
+  <div class="bigov" id="paesi">
+    <div class="ovbox">
+      <h2>🌍 Scegli il tuo paese</h2>
+      <p>Il tuo territorio è il paese che scegli: lì fondi la capitale e lì le tue unità si difendono meglio (+1 🛡️ in patria).
+      I paesi con pochi villaggi partono con qualche stella in più. Puoi anche toccare un paese direttamente sulla mappa.</p>
+      <div class="paesi-grid" id="paesiLista"></div>
+      <h4>Il nemico: <span id="paesiNemicoOra"></span></h4>
+      <select id="paeseNemico" onchange="scegliNemico(this.value)"></select>
+      <div class="ovrow"><button class="ov-play" onclick="chiudiSceltaPaese()">🏛️ Avanti: fonda la capitale</button></div>
+    </div>
+  </div>
+
   <!-- Schermata di benvenuto -->
   <div class="bigov" id="intro" style="display:flex">
     <div class="ovbox">
       <h2>⚔️ Piccoli Imperi</h2>
       <p>Un piccolo gioco di strategia a turni ispirato a Civilization e Polytopia.
       Guidi l'<b style="color:#4da3ff">Impero Azzurro</b>: scegli dove fondare la capitale, espanditi, conquista i villaggi,
-      addestra un esercito e trova e prendi la capitale dell'<b style="color:#ff6b5e">Impero Cremisi</b> — nascosta in un punto casuale dell'Italia — prima che lui prenda la tua.</p>
+      addestra un esercito e trova e prendi la capitale dell'<b style="color:#ff6b5e">Impero Cremisi</b> — nascosta da qualche parte nel suo paese — prima che lui prenda la tua.
+      All'inizio scegli il <b>paese</b> da guidare: il suo territorio è la tua patria.</p>
       <h4>In breve</h4>
       <ul>
         <li>🏛️ Le tue <b>città</b> producono <b>stelle ⭐</b> a ogni turno: sono la tua moneta.</li>
@@ -246,7 +268,11 @@
       <h2>📖 Come si gioca</h2>
       <h4>🎯 Obiettivo</h4>
       <p>Conquistare la capitale nemica 🏛️ (bordo rosso). Se il nemico conquista la tua, hai perso.
-      <b>A inizio partita scegli tu dove fondare la capitale</b>: ovunque sulla terraferma — isole comprese — tranne che su <b>montagne e deserto</b>, e a distanza di sicurezza dal nemico (caselle evidenziate). La capitale nemica è in un <b>punto casuale</b> della mappa: esplora per scoprirla!</p>
+      <b>A inizio partita scegli il tuo paese</b> (dalla lista o toccandolo sulla mappa) e poi <b>dove fondare la capitale</b>: ovunque nel tuo paese — isole comprese — tranne che su <b>montagne e deserto</b>, e a distanza di sicurezza dal nemico (caselle evidenziate). Il nemico gioca un altro paese, di solito vicino al tuo (puoi anche sceglierlo tu): la sua capitale è in un <b>punto casuale</b> del suo paese, esplora per scoprirla!</p>
+      <h4>🏳️ Territori</h4>
+      <p>Il <b>territorio</b> di ogni impero è il suo paese, contornato sulla mappa nel suo colore (azzurro il tuo, rosso il nemico).
+      In patria le unità hanno <b>+1 🛡️ in difesa</b> (in città il bonus è lo stesso, non si somma).
+      Un paese con meno di 4 villaggi neutrali parte con <b>2⭐ in più per ogni villaggio mancante</b>.</p>
       <h4>🗺️ La mappa</h4>
       <ul>
         <li><b>Prato</b> (verde chiaro): terreno normale.</li>
@@ -451,19 +477,22 @@ function newGame(tut = false) {
   aiLog = []; aiActive = null; updateAiLog();
   undoStack = [];
   players = {
-    p: { stars: 7, color:'#4da3ff', dark:'#1f5fa8', name:'Tu' },
-    a: { stars: 7, color:'#ff6b5e', dark:'#a83a2f', name:'Impero Cremisi' }
+    p: { stars: 7, color:'#4da3ff', dark:'#1f5fa8', name:'Tu', country: null },
+    a: { stars: 7, color:'#ff6b5e', dark:'#a83a2f', name:'Impero Cremisi', country: null }
   };
   genMap();
   if (tutorial) {
-    // nel tutorial la capitale del giocatore viene piazzata in automatico
-    // (in un punto "comodo": collegato al continente e con spazio intorno)
+    // nel tutorial giochi l'Italia contro un vicino di terra; la capitale viene piazzata
+    // in automatico (in un punto "comodo": collegato al continente e con spazio intorno)
+    const vicini = PAESI_TUTORIAL.filter(cc => paesiInfo()[cc]);
+    assegnaPaesi('IT', vicini[Math.floor(Math.random() * vicini.length)]);
     placing = false;
     const flood = aCapital() ? floodFrom(aCapital()) : new Set();
     const spots = computePlaceSet().filter(t =>
       t.terrain === 'grass' && flood.has(key(t))
       && neighbors(t).filter(n => passable(n)).length >= 3);
-    placePlayerCapital(spots.length ? spots[Math.floor(Math.random() * spots.length)] : randomCapitalSpot());
+    placePlayerCapital(spots.length ? spots[Math.floor(Math.random() * spots.length)]
+      : placeSet.length ? placeSet[Math.floor(Math.random() * placeSet.length)] : randomCapitalSpot());
     ensureTutorialVillage();
     tutStep = -1;
     nextTutStep();
@@ -473,13 +502,15 @@ function newGame(tut = false) {
     tutStep = -1;
     document.getElementById('tutbar').style.display = 'none';
     document.getElementById('endBtn').classList.remove('pulse');
-    // fase di piazzamento: l'IA ha già la sua capitale in un punto casuale,
-    // il giocatore sceglie dove fondare la propria
+    // fase di piazzamento: si sceglie il paese (all'inizio l'ultimo scelto, o uno a caso),
+    // l'IA fonda la capitale nel suo, il giocatore sceglie dove fondare la propria in patria
     placing = true;
-    placeSet = computePlaceSet();
-    msg('🏛️ FONDA LA TUA CAPITALE dove vuoi: ovunque tranne montagne e deserto, lontano dal nemico (caselle evidenziate — isole comprese!).');
+    const lista = Object.keys(paesiInfo());
+    assegnaPaesi(paesiInfo()[paeseScelto] ? paeseScelto : lista[Math.floor(Math.random() * lista.length)], paeseNemicoScelto);
+    msgPiazzamento();
     render(); ui();
     scrollToTile(placeSet.length ? placeSet[Math.floor(Math.random() * placeSet.length)] : map[Math.floor(ROWS/2)][Math.floor(COLS/2)], false);
+    if (!overlayVisible('intro')) apriSceltaPaese(); // sotto la schermata di benvenuto si aspetta il "gioca"
   }
 }
 
@@ -1599,14 +1630,16 @@ function floodFrom(t) {
 }
 
 // --- fase di piazzamento della capitale del giocatore ---
-// Puoi fondare la capitale OVUNQUE sulla terraferma (isole comprese!),
+// La capitale si fonda in PATRIA, nel paese scelto (isole comprese!),
 // tranne che su montagne e deserto — e mai troppo vicino al nemico.
 function computePlaceSet() {
   const ac = aCapital();
   const minD = Math.round(10 * tileScale());
+  const cc = players.p.country;
   return map.flat().filter(t =>
     (t.terrain === 'grass' || t.terrain === 'forest' || t.terrain === 'hill')
     && !t.city && !t.hosp && !t.port && !t.unit
+    && (!cc || t.country === cc)
     && ac && dist(t, ac) >= minD);
 }
 function placePlayerCapital(t) {
@@ -1618,6 +1651,150 @@ function placePlayerCapital(t) {
   msg('🏛️ Capitale fondata! Espanditi e conquista. Tocca a te.');
   ui(); render();
   scrollToTile(t, false);
+}
+
+// ============ PAESI E TERRITORI ============
+// Ogni impero gioca un paese reale: il suo territorio sono tutte le caselle di quel
+// paese. La capitale si fonda in patria, e in patria le unità si difendono meglio.
+const PAESE_VILL_BASE = 4;   // sotto questo numero di villaggi neutrali il paese riceve stelle di compenso
+const PAESE_VILL_STELLE = 2; // stelle in piu' per ogni villaggio mancante
+const PAESI_VICINI = 5;      // l'IA "a caso" pesca fra i paesi piu' vicini al tuo
+const PAESI_TUTORIAL = ['FR', 'CH', 'AT', 'SI']; // nel tutorial giochi l'Italia contro un vicino di terra
+let paeseScelto = null;       // il paese del giocatore, ricordato fra una partita e l'altra
+let paeseNemicoScelto = null; // null = l'IA prende un paese vicino, a caso
+let paesiCache = null, mainCache = null;
+
+function bandiera(cc) {
+  const c = cc === 'UK' ? 'GB' : cc;
+  return String.fromCodePoint(...[...c].map(ch => 0x1F1E6 + ch.charCodeAt(0) - 65));
+}
+function nomePaese(cc) { return cc ? (COUNTRY_NAMES[cc] || cc) : '—'; }
+function paeseLibero(t) { return !t.city && !t.hosp && !t.port && !t.unit; }
+
+// i paesi giocabili: quelli con almeno una casella dove fondare la capitale
+function paesiInfo() {
+  if (paesiCache && paesiCache.map === map) return paesiCache.info;
+  const info = {};
+  for (const t of map.flat()) {
+    if (!t.country || t.terrain === 'water' || t.terrain === 'river') continue;
+    const p = info[t.country] || (info[t.country] = { caselle: 0, vill: 0, spots: [], x: 0, y: 0 });
+    p.caselle++;
+    if (t.city && !t.city.capital && t.city.owner === null) p.vill++;
+    if ((t.terrain === 'grass' || t.terrain === 'forest' || t.terrain === 'hill') && !t.hosp && !t.port
+        && (!t.city || t.city.capital)) { // la capitale dell'IA si sposta: la sua casella resta valida
+      const c = center(t);
+      p.spots.push(t); p.x += c.x; p.y += c.y;
+    }
+  }
+  for (const cc of Object.keys(info)) {
+    const p = info[cc];
+    if (!p.spots.length || !COUNTRY_NAMES[cc]) { delete info[cc]; continue; }
+    p.x /= p.spots.length; p.y /= p.spots.length; // baricentro, per trovare i vicini
+  }
+  paesiCache = { map, info };
+  return info;
+}
+function bonusPaese(cc) {
+  const p = paesiInfo()[cc];
+  return p ? PAESE_VILL_STELLE * Math.max(0, PAESE_VILL_BASE - p.vill) : 0;
+}
+function tagliaPaese(cc) {
+  const n = paesiInfo()[cc].caselle / (tileScale() * tileScale()); // in caselle della mappa piccola
+  return n >= 2000 ? 'immenso' : n >= 500 ? 'grande' : n >= 120 ? 'medio' : 'piccolo';
+}
+function paesiVicini(cc) {
+  const info = paesiInfo(), me = info[cc];
+  return Object.keys(info).filter(k => k !== cc)
+    .sort((a, b) => Math.hypot(info[a].x - me.x, info[a].y - me.y) - Math.hypot(info[b].x - me.x, info[b].y - me.y));
+}
+function componentePrincipale() {
+  if (!mainCache || mainCache.map !== map) mainCache = { map, set: largestComponent() };
+  return mainCache.set;
+}
+
+// la capitale dell'IA nel suo paese: sul continente se possibile, non addosso ai
+// villaggi, e lasciando al giocatore spazio per la sua capitale lontano dal nemico
+function spotCapitaleIA(aCc, pCc) {
+  const info = paesiInfo(), minD = Math.round(10 * tileScale());
+  const mie = info[pCc].spots.filter(paeseLibero);
+  let cand = info[aCc].spots.filter(t => paeseLibero(t) && (t.terrain === 'grass' || t.terrain === 'hill')
+    && neighbors(t).filter(n => passable(n)).length >= 3 && !neighbors(t).some(n => n.city));
+  if (!cand.length) cand = info[aCc].spots.filter(paeseLibero);
+  const main = componentePrincipale();
+  const sulContinente = cand.filter(t => main.has(key(t)));
+  if (sulContinente.length) cand = sulContinente;
+  const ok = t => mie.some(m => dist(m, t) >= minD);
+  for (let i = 0; i < 40 && cand.length; i++) {
+    const t = cand[Math.floor(Math.random() * cand.length)];
+    if (ok(t)) return t;
+  }
+  return cand.find(ok) || null;
+}
+
+// assegna i paesi ai due imperi e (ri)fonda la capitale dell'IA nel suo paese.
+// Si usa solo prima che il giocatore abbia fondato la capitale.
+function assegnaPaesi(pCc, aCc) {
+  const old = aCapital();
+  if (old) { old.city = null; if (old.unit && old.unit.owner === 'a') old.unit = null; }
+  const info = paesiInfo(), lista = Object.keys(info);
+  if (!info[pCc]) pCc = lista[Math.floor(Math.random() * lista.length)];
+  let ordine;
+  if (aCc && aCc !== pCc && info[aCc]) ordine = [aCc];
+  else {
+    const vicini = paesiVicini(pCc), primi = vicini.slice(0, PAESI_VICINI);
+    for (let i = primi.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [primi[i], primi[j]] = [primi[j], primi[i]]; }
+    ordine = primi.concat(vicini.slice(PAESI_VICINI));
+  }
+  let ac = null;
+  for (const cc of ordine) { ac = spotCapitaleIA(cc, pCc); if (ac) { aCc = cc; break; } }
+  if (!ac) { ac = randomCapitalSpot(); aCc = ac.country; } // non dovrebbe mai servire
+  ac.city = { owner: 'a', capital: true, pop: 1 };
+  ac.unit = mkUnit('warrior', 'a');
+  players.p.country = pCc; players.a.country = aCc;
+  players.p.stars = 7 + bonusPaese(pCc);
+  players.a.stars = 7 + bonusPaese(aCc);
+  placeSet = computePlaceSet();
+}
+function inPatria(t, owner) {
+  return !!(t.country && players[owner] && players[owner].country === t.country);
+}
+function msgPiazzamento() {
+  const p = players.p.country, a = players.a.country, b = bonusPaese(p);
+  msg(`🏛️ Giochi con ${bandiera(p)} ${nomePaese(p)}${b ? ` (+${b}⭐ di compenso: pochi villaggi)` : ''} contro ${bandiera(a)} ${nomePaese(a)}. FONDA LA TUA CAPITALE in patria: tocca una casella evidenziata. Per cambiare paese toccalo sulla mappa o usa 🌍.`);
+}
+
+// --- menu di scelta del paese ---
+function apriSceltaPaese() {
+  if (!placing) return;
+  const info = paesiInfo();
+  const lista = Object.keys(info).sort((a, b) => nomePaese(a).localeCompare(nomePaese(b), 'it'));
+  document.getElementById('paesiLista').innerHTML = lista.map(cc => {
+    const b = bonusPaese(cc), v = info[cc].vill;
+    return `<button class="paese-btn${cc === players.p.country ? ' sel' : ''}" onclick="scegliPaese('${cc}')">${bandiera(cc)} ${nomePaese(cc)}`
+      + `<small>${tagliaPaese(cc)} · ${v} ${v === 1 ? 'villaggio' : 'villaggi'}${b ? ` · +${b}⭐` : ''}</small></button>`;
+  }).join('');
+  const sel = document.getElementById('paeseNemico');
+  sel.innerHTML = '<option value="">🎲 Un paese vicino, a caso</option>'
+    + lista.filter(cc => cc !== players.p.country).map(cc => `<option value="${cc}">${bandiera(cc)} ${nomePaese(cc)}</option>`).join('');
+  sel.value = paeseNemicoScelto && paeseNemicoScelto !== players.p.country ? paeseNemicoScelto : '';
+  document.getElementById('paesiNemicoOra').textContent = `${bandiera(players.a.country)} ${nomePaese(players.a.country)}`;
+  document.getElementById('paesi').style.display = 'flex';
+}
+function chiudiSceltaPaese() {
+  document.getElementById('paesi').style.display = 'none';
+  if (placing && placeSet.length) scrollToTile(placeSet[Math.floor(Math.random() * placeSet.length)], false);
+}
+function cambiaPaese(cc) {
+  if (!placing || !paesiInfo()[cc]) return;
+  paeseScelto = cc;
+  if (paeseNemicoScelto === cc) paeseNemicoScelto = null;
+  assegnaPaesi(cc, paeseNemicoScelto);
+  msgPiazzamento(); ui(); render();
+}
+function scegliPaese(cc) { cambiaPaese(cc); apriSceltaPaese(); }
+function scegliNemico(cc) {
+  paeseNemicoScelto = cc || null;
+  if (placing) { assegnaPaesi(players.p.country, paeseNemicoScelto); msgPiazzamento(); ui(); render(); apriSceltaPaese(); }
 }
 
 // campo delle distanze dal mare (BFS multi-sorgente, aggira le montagne)
@@ -1875,7 +2052,7 @@ function defOf(t) {
   if (t.terrain === 'hill') def += 1; // dall'alto della collina
   if (t.terrain === 'mountain') def += 1; // chi tiene la vetta domina dall'alto
   if (t.terrain === 'river' || t.terrain === 'water') def -= 1; // sul ponte si è allo scoperto
-  if (t.city && t.city.owner === u.owner) def += 1;
+  if ((t.city && t.city.owner === u.owner) || inPatria(t, u.owner)) def += 1; // in città o in patria (non si sommano)
   if (t.hosp && t.hosp.owner === u.owner && t.hosp.level > 0) def += 1; // presidio dell'ospedale
   return Math.max(0, def);
 }
@@ -2324,12 +2501,13 @@ function serialize() {
       q: t.port ? { o: t.port.owner } : 0
     });
   }
-  return { v: 15, rows: ROWS, cols: COLS, turn, stars: { p: players.p.stars, a: players.a.stars }, tiles };
+  return { v: 16, rows: ROWS, cols: COLS, turn, stars: { p: players.p.stars, a: players.a.stars },
+           paesi: { p: players.p.country || null, a: players.a.country || null }, tiles };
 }
 
 function applySave(data) {
   const TERR = ['grass','forest','mountain','water','river','desert','hill'];
-  if (!data || ![6, 7, 8, 9, 10, 11, 12, 13, 14, 15].includes(data.v) || !Array.isArray(data.tiles) || !data.stars) return false;
+  if (!data || ![6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16].includes(data.v) || !Array.isArray(data.tiles) || !data.stars) return false;
   // se il salvataggio è di un'altra taglia di mappa, cambia taglia automaticamente;
   // i salvataggi PRE-estensione atlantica (v<12) hanno le vecchie dimensioni: si
   // caricano spostati di EXTC colonne e le nuove terre si ridisegnano da sole
@@ -2426,6 +2604,13 @@ function applySave(data) {
   turn = Math.max(1, data.turn | 0);
   players.p.stars = Math.max(0, data.stars.p | 0);
   players.a.stars = Math.max(0, data.stars.a | 0);
+  // i paesi (v16); nei salvataggi precedenti, quello in cui sorge ciascuna capitale
+  for (const o of ['p', 'a']) {
+    const cc = data.paesi && data.paesi[o];
+    const cap = o === 'p' ? pCapital() : aCapital();
+    players[o].country = (typeof cc === 'string' && COUNTRY_NAMES[cc]) ? cc : (cap && cap.country) || null;
+  }
+  document.getElementById('paesi').style.display = 'none';
   current = 'p'; gameOver = false; tutorial = false; tutStep = -1;
   placing = false; placeSet = [];
   congedo = false;
@@ -3331,7 +3516,8 @@ function onTileClick(t) {
   // fase di piazzamento della capitale
   if (placing) {
     if (placeSet.includes(t)) placePlayerCapital(t);
-    else msg('⚠️ Posizione non valida: scegli una casella evidenziata in verde chiaro.');
+    else if (t.country && t.country !== players.p.country && paesiInfo()[t.country]) cambiaPaese(t.country); // tocco su un altro paese: lo scegli
+    else msg('⚠️ Posizione non valida: scegli una casella evidenziata in verde chiaro, nel tuo paese.');
     return;
   }
   // clic su mossa evidenziata
@@ -3439,7 +3625,7 @@ function overlayVisible(id) {
   return el && el.style.display && el.style.display !== 'none';
 }
 function anyModalOpen() {
-  return overlayVisible('intro') || overlayVisible('rules') || overlayVisible('guide') || overlayVisible('overlay');
+  return overlayVisible('intro') || overlayVisible('rules') || overlayVisible('guide') || overlayVisible('overlay') || overlayVisible('paesi');
 }
 if (typeof document.addEventListener === 'function') {
   document.addEventListener('keydown', e => {
@@ -3449,6 +3635,7 @@ if (typeof document.addEventListener === 'function') {
       if (overlayVisible('rules')) { hideRules(); return; }
       if (overlayVisible('guide')) { document.getElementById('guide').style.display = 'none'; return; }
       if (overlayVisible('intro')) { closeIntro(); return; }
+      if (overlayVisible('paesi')) { chiudiSceltaPaese(); return; }
       deselect(); return;
     }
     if (k === 'r') { overlayVisible('rules') ? hideRules() : showRules(); return; }
@@ -3663,6 +3850,49 @@ function render() {
   const vis = tileRange(vx0, vy0, vx1, vy1, 2);
   const k = S / 42;
   ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  // territori: il paese di ciascun impero, velato e contornato nel suo colore
+  const terrP = players.p.country, terrA = players.a.country;
+  if (terrP || terrA) {
+    const lati = { p: [], a: [] }, dentro = { p: [], a: [] }; // segmenti x1,y1,x2,y2 e centri x,y
+    for (let r = vis.r0; r <= vis.r1; r++) for (let c = vis.c0; c <= vis.c1; c++) {
+      const t = map[r][c], cc = t.country;
+      if (!cc || (cc !== terrP && cc !== terrA)) continue;
+      const o = cc === terrP ? 'p' : 'a', path = lati[o];
+      const p = center(t);
+      dentro[o].push(p.x, p.y);
+      for (const n of neighbors(t)) {
+        if (n.country === cc) continue;
+        const q = center(n), ang = Math.atan2(q.y - p.y, q.x - p.x);
+        // il lato appena dentro il paese, cosi' non copre il tratteggio dei confini
+        const a1 = ang - Math.PI / 6, a2 = ang + Math.PI / 6, rr = S * 0.9;
+        path.push(p.x + rr * Math.cos(a1), p.y + rr * Math.sin(a1), p.x + rr * Math.cos(a2), p.y + rr * Math.sin(a2));
+      }
+    }
+    // il velo solo se le caselle sullo schermo non sono troppe (mappa gigante tutta in vista)
+    if (dentro.p.length + dentro.a.length < 60000) {
+      ctx.globalAlpha = 0.16;
+      for (const o of ['p', 'a']) {
+        const d = dentro[o];
+        if (!d.length) continue;
+        ctx.beginPath();
+        for (let i = 0; i < d.length; i += 2) for (let j = 0; j < 6; j++) {
+          const ang = Math.PI / 180 * (60 * j - 30), px = d[i] + S * Math.cos(ang), py = d[i+1] + S * Math.sin(ang);
+          j === 0 ? ctx.moveTo(px, py) : ctx.lineTo(px, py);
+        }
+        ctx.fillStyle = players[o].color; ctx.fill();
+      }
+    }
+    ctx.lineWidth = Math.max(4*k, 3 / scale); ctx.lineCap = 'round'; // almeno 3 pixel anche da lontano
+    ctx.globalAlpha = 0.9;
+    for (const o of ['p', 'a']) {
+      const s = lati[o];
+      if (!s.length) continue;
+      ctx.beginPath();
+      for (let i = 0; i < s.length; i += 4) { ctx.moveTo(s[i], s[i+1]); ctx.lineTo(s[i+2], s[i+3]); }
+      ctx.strokeStyle = players[o].color; ctx.stroke();
+    }
+    ctx.globalAlpha = 1; ctx.lineCap = 'butt';
+  }
   // evidenziazioni: solo sulle caselle interessate
   const paint = (arr, style) => { for (const t of arr) { const p = center(t); hexPathOn(ctx, p.x, p.y); ctx.fillStyle = style; ctx.fill(); } };
   if (placing) paint(placeSet, 'rgba(120,255,160,.28)');
@@ -3846,6 +4076,12 @@ function ui() {
   panel.innerHTML = '';
 
   if (current !== 'p') { panel.innerHTML = '<i>🔴 L\'Impero Cremisi sta muovendo…</i>'; return; }
+  const paesiTxt = players.p.country
+    ? `${bandiera(players.p.country)} <b>${nomePaese(players.p.country)}</b> contro ${bandiera(players.a.country)} ${nomePaese(players.a.country)}` : '';
+  if (placing) {
+    panel.innerHTML = `<span id="unitinfo">${paesiTxt}</span> <button class="btn" style="background:#3a5a8c" onclick="apriSceltaPaese()">🌍 Cambia paese</button>`;
+    return;
+  }
 
   if (selected && selected.unit) {
     const u = selected.unit, d = UNIT_TYPES[u.type];
@@ -3902,7 +4138,7 @@ function ui() {
       ? `<div id="unitinfo"><b>🏥 Ospedale liv. ${h.level}</b> · ❤️ ${h.hp}/${HOSP_HP * h.level} · cura <b>+${HOSP_HEAL * h.level}</b>/turno a chi vi sosta · un Medico può potenziarlo (max liv. 3)</div>`
       : `<div id="unitinfo"><b>🏥 Ospedale abbandonato</b> — manda un <b>Medico ⚕️</b> a rifondarlo (riparte da livello 1).</div>`;
   } else {
-    panel.innerHTML = `<span style="color:#8b98ab">Clicca un'unità per muoverla (verde=mossa, rosso=attacco, viola=unione) o una città libera per addestrare.</span>`;
+    panel.innerHTML = (paesiTxt ? `<span>${paesiTxt}</span> · ` : '') + `<span style="color:#8b98ab">Clicca un'unità per muoverla (verde=mossa, rosso=attacco, viola=unione) o una città libera per addestrare.</span>`;
   }
 }
 
