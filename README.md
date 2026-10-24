@@ -4,11 +4,14 @@ Gioco di strategia a turni su esagoni, in stile Polytopia: tu contro un'IA (l'"I
 
 ## Come giocare
 
-Apri `piccoli_imperi.html` nel browser con un doppio clic. Non serve installare nulla e funziona anche offline. Le partite si salvano e si caricano come file `.json` dai pulsanti 💾 Salva e 📂 Carica.
+Online: **https://ricbec15.github.io/piccoli-imperi/** (dal browser, anche da telefono).
+
+In locale: apri `piccoli_imperi.html` nel browser con un doppio clic. Non serve installare nulla e funziona anche offline. Le partite si salvano e si caricano come file `.json` dai pulsanti 💾 Salva e 📂 Carica.
 
 ## Contenuto
 
 - `piccoli_imperi.html`: il gioco completo (HTML, CSS e JavaScript in un unico file).
+- `index.html`: pagina d'ingresso per GitHub Pages, rimanda subito a `piccoli_imperi.html`.
 - `stub.js`, `shiptest.js`, `savetest.js`, `playtest.js`, `aitest.js`, `browser_check.js`, `mobile_check.js`: test automatici (`mobile_check.js` prova il gioco su un iPhone emulato con Playwright).
 - `build_russia.js`: script che ha estratto il confine della Russia dal dataset Natural Earth.
 - `ISTRUZIONI_MIGRAZIONE.md`: note di sviluppo, storia delle ultime versioni e istruzioni dettagliate.
