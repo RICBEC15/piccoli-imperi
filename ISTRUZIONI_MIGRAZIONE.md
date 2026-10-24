@@ -20,7 +20,7 @@ Il gioco vive interamente dentro `piccoli_imperi.html`: non ci sono database, se
 2. Allega `piccoli_imperi.html` (e, se vuoi continuare con i test automatici, anche `stub.js` e i file `*test*.js`).
 3. Spiega a Claude, in breve, cosa è già stato fatto e la regola più importante seguita finora:
 
-   > "Questo è un gioco di strategia a turni in stile Polytopia, con una mappa geografica reale e deterministica (seed fisso) che copre gran parte d'Europa, il Nord Africa e la Russia europea fino agli Urali. **Non rigenerare mai tutta la mappa da zero**: se serve una modifica, cambiala chirurgicamente e verifica che il resto della mappa resti identico prima/dopo."
+   > "Questo è un gioco di strategia a turni in stile Polytopia, con una mappa geografica reale e deterministica (seed fisso) che copre gran parte d'Europa, il Nord Africa e la Russia europea fino agli Urali. Dalla v57 i biomi vengono da OpenStreetMap e sono fissi per ogni grandezza (riga `const BIOMI` nel file, rigenerabile con `build_biomi.py`); verifica ogni modifica con `mappatest.js`."
 
 4. Da lì Claude può leggere direttamente il codice dentro `piccoli_imperi.html` (è tutto in un unico tag `<script>`) e continuare a modificarlo.
 
@@ -68,3 +68,22 @@ Il file di salvataggio è passato alla versione 15 (compatibile con i salvataggi
 - **Mappa gigante** ridotta da 5 a 3 volte la piccola (esagoni a un terzo, 750×632 caselle): il turno dell'IA lì è circa 3 volte più veloce. Le mappe piccola e media sono identiche casella per casella. I salvataggi fatti sulla vecchia mappa gigante non si possono più caricare.
 - Corrette le etichette delle dimensioni nel menu iniziale (erano rimaste quelle di una versione vecchia).
 - Nuovo test `aitest.js`: con il giocatore fermo l'IA deve continuare a crescere dopo il turno 50, minacciare o prendere la capitale entro il turno 150, e presidiare la propria capitale quando è minacciata. Nelle prove su 18 partite simulate l'IA ha preso la capitale in 16 entro il turno 150.
+
+## Cosa è cambiato nella v56
+
+- **Paesi e territori**: ogni impero gioca un paese reale e il suo territorio sono tutte le caselle di quel paese, contornate e velate sulla mappa nel suo colore.
+  - A inizio partita si apre il menu **🌍 Scegli il tuo paese** (lista con bandiera, grandezza e villaggi) e si può anche toccare un paese direttamente sulla mappa; il paese scelto resta per la partita successiva. Durante il piazzamento il pulsante 🌍 Cambia paese riapre il menu.
+  - Il nemico prende a caso uno dei 5 paesi più vicini al tuo, oppure quello che scegli nel menu. La sua capitale è in un punto casuale del suo paese (sul continente se possibile, sempre a distanza di sicurezza da almeno una casella del tuo paese).
+  - La tua capitale si fonda in patria (stesse regole di prima: niente montagne né deserto, lontano dal nemico).
+  - In patria le unità hanno +1 in difesa; in città il bonus è lo stesso e non si somma.
+  - Un paese con meno di 4 villaggi neutrali parte con 2 stelle in più per ogni villaggio mancante (Libia +8, Belgio +6, Italia e Francia nulla).
+  - Tutorial: giochi l'Italia contro un vicino di terra (Francia, Svizzera, Austria o Slovenia).
+- **Salvataggio v16**: aggiunge i paesi dei due imperi. I salvataggi precedenti si caricano ancora: il paese di ciascuno è quello dove sorge la sua capitale.
+- Nuovo test `paesitest.js`.
+
+## Cosa è cambiato nella v57 e nella v58
+
+- **v56 (mappa)**: corretto il confine della Russia in alto (un blocco di terra finta in Lapponia, Kola e Mar Bianco mancanti).
+- **v57**: una mappa fissa per ogni grandezza. I biomi vengono da OpenStreetMap e sono scritti nella riga `const BIOMI` (rigenerabile con `build_biomi.py` ed `export_tiles.js`); le vecchie regole del terreno scritte a mano sono state tolte. Nuovo test `mappatest.js`.
+- **Difficoltà dell'IA** (Facile, Normale, Difficile) da scegliere all'inizio e cambiabile in partita dal menu 🤖 IA; viene salvata nel file. Nuovo test `difficoltatest.js`.
+- **v58**: riunisce in una sola versione la mappa fissa, la scelta del paese e la difficoltà dell'IA. Salvataggio v16.

@@ -16,6 +16,7 @@ const path = require('path');
       if (typeof closeIntro === 'function') try { closeIntro(); } catch (e) {}
       const t0 = performance.now();
       setMapSize(taglia); newGame();
+      if (typeof chiudiSceltaPaese === 'function') chiudiSceltaPaese(); // il menu dei paesi coprirebbe la mappa
       if (placing && placeSet.length) placePlayerCapital(placeSet[0]);
       const tGen = performance.now() - t0;
       const w = document.getElementById('mapwrap');
