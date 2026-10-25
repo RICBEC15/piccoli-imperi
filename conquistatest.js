@@ -174,7 +174,9 @@ cambiaPaese('IT');
 tutorial = false;
 if (placing && placeSet.length) placePlayerCapital(placeSet[0]);
 {
-  const nemico = imperiIA()[0], ccN = players[nemico].country;
+  // il primo impero con spazio libero nel suo paese (i microstati di una casella non ne hanno)
+  const spazioLibero = o => map.flat().some(t => t.country === players[o].country && libera(t) && neighbors(t).some(libera));
+  const nemico = imperiIA().find(spazioLibero), ccN = players[nemico].country;
   const a = map.flat().find(t => t.country === ccN && libera(t) && neighbors(t).some(libera));
   const da = neighbors(a).find(libera);
   da.unit = mkUnit('warrior', 'p');

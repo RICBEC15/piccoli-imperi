@@ -1,6 +1,6 @@
 # Piccoli Imperi
 
-Gioco di strategia a turni su esagoni, in stile Polytopia, su una mappa geografica reale dell'Europa, dalle Canarie agli Urali. A inizio partita tocchi sulla mappa il paese da guidare: il suo territorio è la tua patria. **Ogni altro paese è un impero guidato dall'IA**, in guerra con tutti. Un impero cade quando perde la capitale; vinci quando sono caduti tutti. Nella schermata iniziale si può scegliere anche il duello: un solo nemico, l'"Impero Cremisi", in un paese vicino.
+Gioco di strategia a turni su esagoni, in stile Polytopia, su una mappa geografica reale dell'Europa, dall'Islanda e dalle Canarie agli Urali. A inizio partita tocchi sulla mappa il paese da guidare: il suo territorio è la tua patria. **Ogni altro paese è un impero guidato dall'IA**, in guerra con tutti. Un impero cade quando perde la capitale; vinci quando sono caduti tutti. Nella schermata iniziale si può scegliere anche il duello: un solo nemico, l'"Impero Cremisi", in un paese vicino.
 
 ## Come giocare
 
@@ -12,8 +12,9 @@ In locale: apri `piccoli_imperi.html` nel browser con un doppio clic. Non serve 
 
 - `piccoli_imperi.html`: il gioco completo (HTML, CSS e JavaScript in un unico file).
 - `index.html`: pagina d'ingresso per GitHub Pages, rimanda subito a `piccoli_imperi.html`.
-- `stub.js`, `shiptest.js`, `savetest.js`, `playtest.js`, `aitest.js`, `paesitest.js`, `imperitest.js`, `difficoltatest.js`, `mappatest.js`, `diplotest.js`, `conquistatest.js`, `capitalitest.js`, `browser_check.js`, `mobile_check.js`, `pantest.js`: test automatici (`mobile_check.js` prova il gioco su un iPhone emulato con Playwright, `pantest.js` lo spostamento nella mappa col mouse, le frecce e il dito, `conquista_check.js` la conquista delle caselle con tocchi veri, su computer e telefono, `citta_check.js` le città del paese già tue dopo la scelta).
+- `stub.js`, `shiptest.js`, `savetest.js`, `playtest.js`, `aitest.js`, `paesitest.js`, `imperitest.js`, `difficoltatest.js`, `mappatest.js`, `diplotest.js`, `conquistatest.js`, `capitalitest.js`, `paesinuovitest.js`, `microstatitest.js`, `browser_check.js`, `mobile_check.js`, `pantest.js`, `conquista_check.js`, `citta_check.js`: test automatici (`mobile_check.js` prova il gioco su un iPhone emulato con Playwright, `pantest.js` lo spostamento nella mappa col mouse, le frecce e il dito).
 - `build_russia.js`: script che ha estratto il confine della Russia dal dataset Natural Earth.
+- `build_paesi_nord.py`: estrae da Natural Earth i confini dei paesi aggiunti nella v65 (`POLY_NORD`, `SEMI_NORD`).
 - `build_biomi.py`, `export_tiles.js`: costruiscono i biomi fissi dai dati di OpenStreetMap.
 - `ISTRUZIONI_MIGRAZIONE.md`: note di sviluppo, storia delle ultime versioni e istruzioni dettagliate.
 
@@ -32,6 +33,8 @@ cat stub.js game.js mappatest.js > _run.js && node _run.js
 cat stub.js game.js diplotest.js > _run.js && node _run.js   # diplomazia: circa 15 secondi
 cat stub.js game.js conquistatest.js > _run.js && node _run.js   # conquista del territorio: circa 20 secondi
 cat stub.js game.js capitalitest.js > _run.js && node _run.js   # capitali reali: pochi secondi
+cat stub.js game.js paesinuovitest.js > _run.js && node _run.js   # i paesi della v65: circa 20 secondi
+cat stub.js game.js microstatitest.js > _run.js && node _run.js   # i microstati: circa 20 secondi
 ```
 
 ## La mappa
@@ -45,6 +48,14 @@ C'è **una sola mappa per ogni grandezza** (piccola, media, gigante), uguale a o
 Ogni modifica alla mappa va verificata con `mappatest.js`, che controlla anche che due partite abbiano la stessa mappa.
 
 ## Versione
+
+v65 (formato di salvataggio invariato, v17): **tutti i paesi d'Europa**. Ai 35 di prima si aggiungono Polonia, Cechia, Slovacchia, Danimarca, Svezia, Norvegia, Finlandia, Estonia, Lettonia, Lituania, Bielorussia, Islanda, Malta, Armenia, Azerbaigian, Kazakistan (la parte a ovest degli Urali, con capitale Aqtöbe: Astana è fuori mappa), San Marino e il Vaticano, più Kaliningrad e le isole artiche russe: 56 paesi, ognuno con il suo impero IA e la sua capitale vera.
+
+- La mappa si allarga a ovest fino all'Islanda e a nord fino a Capo Nord (piccola 273×220, media 549×440, gigante 824×660). Le terre di prima restano identiche casella per casella: i paesi nuovi si interrogano dopo tutti gli altri e i biomi OSM sono stati rifatti con gli stessi dati.
+- Laghi Vänern, Vättern, Peipus e Sevan; l'Øresund e il Grande Belt restano mare; fiumi Vistola e Daugava; villaggi fissi nelle città principali dei paesi nuovi.
+- I microstati (Monaco, San Marino, Vaticano, e Liechtenstein e Andorra dove il confine non basta) hanno sempre una casella libera per la capitale; il Vaticano sta accanto a Roma, non sopra.
+- I salvataggi delle versioni precedenti (fino alla v64) si caricano: la mappa vecchia entra spostata nella nuova e le terre dei paesi nuovi compaiono, senza imperi.
+- La mappa nasce più in fretta: ogni confine ha il suo rettangolo e il mare si scarta subito.
 
 v64 (formato di salvataggio invariato): **ogni paese comincia dalla sua vera capitale**: la Spagna a Madrid, la Francia a Parigi, l'Italia a Roma, la Russia a Mosca, e così per tutti i 35 paesi, sia il tuo sia quelli dell'IA (anche nel duello e nel tutorial).
 

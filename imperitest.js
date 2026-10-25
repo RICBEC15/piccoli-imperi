@@ -54,10 +54,16 @@ altra.city = null; soldato.unit = null;
 if (vicino.unit && vicino.unit.owner === 'p') vicino.unit = null; // il cavaliere della prova torna via
 
 // 3. la cronaca racconta le mosse vicino a te, non quelle lontane
-const ospite = imperiIA()[0];
+const ospite = imperiIA().includes('FR') ? 'FR' : imperiIA()[0]; // un vicino vero (dalla v65 ci sono anche i microstati)
 const qui = map.flat().find(t => paeseLibero(t) && passable(t) && t.terrain !== 'river' && dist(t, pCapital()) >= 2 && dist(t, pCapital()) <= 4);
 qui.unit = mkUnit('knight', ospite);
+// accanto un villaggio libero: il cavaliere ha di sicuro qualcosa da fare (con tutte le città
+// già assegnate non ci sono villaggi liberi verso cui marciare, e in tregua non attacca)
+const preda = neighbors(qui).find(n => passable(n) && !n.unit && !n.city && n.terrain !== 'river');
+preda.city = { owner: null, capital: false, pop: 1 };
 endTurn();
+for (const t of [qui, preda]) if (t.unit && t.unit.owner === ospite) t.unit = null;
+preda.city = null;
 assert(aiLog.some(s => s.startsWith(bandiera(ospite))), `la cronaca mostra la mossa di ${nomePaese(ospite)} vicino a te`);
 const lontani = new Set(imperiIA().filter(o => o !== ospite && cities(o).every(c => dist(c, pCapital()) > 40)));
 assert(!aiLog.some(s => [...lontani].some(o => s.startsWith(bandiera(o)))), 'e non quelle degli imperi lontani');

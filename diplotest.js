@@ -18,8 +18,8 @@ tutorial = false;
 if (placing && placeSet.length) placePlayerCapital(placeSet[0]);
 const cap = pCapital();
 assert(cap && imperiIA().length > 3, `partita con ${imperiIA().length} imperi IA`);
-// il vicino con la capitale più vicina alla tua
-const vicino = imperiIA().slice().sort((a, b) => dist(capitaleDi(a), cap) - dist(capitaleDi(b), cap))[0];
+// il vicino con la capitale più vicina alla tua (non un microstato di una casella: serve terra da toccare)
+const vicino = imperiIA().filter(o => paesiInfo()[o].caselle > 2).sort((a, b) => dist(capitaleDi(a), cap) - dist(capitaleDi(b), cap))[0];
 assert(imperiIA().every(o => relazione('p', o) === 'guerra'), 'all\'inizio sei in guerra con tutti');
 assert(diploAttiva(), 'con un impero per paese la diplomazia è attiva');
 

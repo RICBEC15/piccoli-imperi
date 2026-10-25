@@ -18,7 +18,7 @@ import sys, os, re, json, glob
 import numpy as np
 
 REL = "2026-10-21.0"
-LON0, LON1, LAT0, LAT1, RES = -18.0, 62.0, 26.0, 72.0, 0.01
+LON0, LON1, LAT0, LAT1, RES = -25.5, 62.0, 26.0, 72.0, 0.01  # da -25.5: l'Islanda
 W, H = round((LON1 - LON0) / RES), round((LAT1 - LAT0) / RES)
 CH = {  # canale -> coppie (subtype, class) di Overture/OSM
     'forest': {('forest', 'forest'), ('forest', 'wood')},
