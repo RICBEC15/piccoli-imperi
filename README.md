@@ -12,10 +12,11 @@ In locale: apri `piccoli_imperi.html` nel browser con un doppio clic. Non serve 
 
 - `piccoli_imperi.html`: il gioco completo (HTML, CSS e JavaScript in un unico file).
 - `index.html`: pagina d'ingresso per GitHub Pages, rimanda subito a `piccoli_imperi.html`.
-- `stub.js`, `shiptest.js`, `savetest.js`, `playtest.js`, `aitest.js`, `paesitest.js`, `imperitest.js`, `difficoltatest.js`, `mappatest.js`, `diplotest.js`, `conquistatest.js`, `capitalitest.js`, `paesinuovitest.js`, `microstatitest.js`, `browser_check.js`, `mobile_check.js`, `pantest.js`, `conquista_check.js`, `citta_check.js`: test automatici (`mobile_check.js` prova il gioco su un iPhone emulato con Playwright, `pantest.js` lo spostamento nella mappa col mouse, le frecce e il dito).
+- `stub.js`, `shiptest.js`, `savetest.js`, `playtest.js`, `aitest.js`, `paesitest.js`, `imperitest.js`, `difficoltatest.js`, `mappatest.js`, `diplotest.js`, `conquistatest.js`, `capitalitest.js`, `paesinuovitest.js`, `microstatitest.js`, `popolazionetest.js`, `browser_check.js`, `mobile_check.js`, `pantest.js`, `conquista_check.js`, `citta_check.js`: test automatici (`mobile_check.js` prova il gioco su un iPhone emulato con Playwright, `pantest.js` lo spostamento nella mappa col mouse, le frecce e il dito).
 - `build_russia.js`: script che ha estratto il confine della Russia dal dataset Natural Earth.
 - `build_paesi_nord.py`: estrae da Natural Earth i confini dei paesi aggiunti nella v65 (`POLY_NORD`, `SEMI_NORD`).
 - `build_biomi.py`, `export_tiles.js`: costruiscono i biomi fissi dai dati di OpenStreetMap.
+- `build_popolazione.js`: costruisce la lista delle città vere con i loro abitanti (Natural Earth).
 - `ISTRUZIONI_MIGRAZIONE.md`: note di sviluppo, storia delle ultime versioni e istruzioni dettagliate.
 
 ## Test
@@ -35,6 +36,7 @@ cat stub.js game.js conquistatest.js > _run.js && node _run.js   # conquista del
 cat stub.js game.js capitalitest.js > _run.js && node _run.js   # capitali reali: pochi secondi
 cat stub.js game.js paesinuovitest.js > _run.js && node _run.js   # i paesi della v65: circa 20 secondi
 cat stub.js game.js microstatitest.js > _run.js && node _run.js   # i microstati: circa 20 secondi
+cat stub.js game.js popolazionetest.js > _run.js && node _run.js   # abitanti veri delle città
 ```
 
 ## La mappa
@@ -45,9 +47,25 @@ C'è **una sola mappa per ogni grandezza** (piccola, media, gigante), uguale a o
 - Biomi (prato, bosco, collina, montagna, deserto di dune o di pietra, tundra): **OpenStreetMap**, precalcolati casella per casella e scritti nella riga `const BIOMI = ...` del gioco. Si leggono i poligoni di boschi, rocce, ghiacciai, sabbie, zone umide e brughiere, le quote delle cime e, per il Nord Africa, i campi coltivati. Dati © OpenStreetMap contributors (ODbL), letti tramite il tema `base` di Overture Maps.
 - Per rifare i biomi (per esempio dopo aver cambiato la forma della mappa) si usano `build_biomi.py` ed `export_tiles.js`: le istruzioni sono in testa a `build_biomi.py`. Non serve altro: fiumi, laghi, stretti e villaggi restano calcolati dal gioco in modo fisso.
 
+## Città e abitanti
+
+Ogni città ha i suoi **abitanti veri**: quelli dell'agglomerato urbano (campo `POP_MAX`) del dataset Natural Earth *populated places* 1:10m, di pubblico dominio (naturalearthdata.com). Roma ha 3.339.000 abitanti, Parigi 9.904.000, Milano 2.945.000. Le 1142 città che cadono sulle terre del gioco sono nella lista `CITTA_REALI` dentro `piccoli_imperi.html`, scritta da `build_popolazione.js` (istruzioni in testa al file).
+
+- Ogni città vera da un milione di abitanti in su ha il suo villaggio neutrale sulla mappa.
+- Ogni villaggio prende nome e abitanti della città vera più popolosa entro poco più di una casella (almeno 25 km); quelli lontani da città note hanno abitanti **stimati** (da 2.000 a 30.000, nel deserto da 500 a 8.000), fissi per casella.
+- La rendita cresce con gli abitanti, a scaglioni: sotto 5.000 abitanti 1⭐, da 5.000 2⭐, da 50.000 3⭐, da 200.000 4⭐, da 700.000 5⭐, da 2 milioni 6⭐, da 5 milioni 7⭐. La capitale rende 1⭐ in più (almeno 3⭐), e ogni livello di crescita portato dai cittadini aggiunge 1⭐.
+
 Ogni modifica alla mappa va verificata con `mappatest.js`, che controlla anche che due partite abbiano la stessa mappa.
 
 ## Versione
+
+v66 (formato di salvataggio v17, con nome e abitanti di ogni città; i vecchi salvataggi si caricano): **ogni città ha i suoi abitanti veri** e rende in base a quanti sono.
+
+- Abitanti dell'agglomerato urbano da Natural Earth, *populated places* 1:10m (pubblico dominio), nella lista `CITTA_REALI` generata da `build_popolazione.js`: Roma 3.339.000, Parigi 9.904.000, Milano 2.945.000... I villaggi lontani dalle città note hanno abitanti stimati.
+- Ogni città vera da un milione di abitanti in su ha il suo villaggio sulla mappa (ma mai sulla casella di un microstato).
+- Rendita a scaglioni: sotto 5.000 abitanti 1⭐, da 5.000 2⭐, da 50.000 3⭐, da 200.000 4⭐, da 700.000 5⭐, da 2 milioni 6⭐, da 5 milioni 7⭐; la capitale 1⭐ in più (e mai meno di 3⭐). Il vecchio distintivo azzurro della popolazione si chiama ora **crescita**.
+- Le capitali vere sorgono sul villaggio della loro città quando c'è (Roma, Madrid, Parigi...) e ne prendono nome e abitanti.
+- Toccando una città qualunque se ne vedono nome, abitanti e rendita; i nomi compaiono sotto le città ingrandendo la mappa.
 
 v65 (formato di salvataggio invariato, v17): **tutti i paesi d'Europa**. Ai 35 di prima si aggiungono Polonia, Cechia, Slovacchia, Danimarca, Svezia, Norvegia, Finlandia, Estonia, Lettonia, Lituania, Bielorussia, Islanda, Malta, Armenia, Azerbaigian, Kazakistan (la parte a ovest degli Urali, con capitale Aqtöbe: Astana è fuori mappa), San Marino e il Vaticano, più Kaliningrad e le isole artiche russe: 56 paesi, ognuno con il suo impero IA e la sua capitale vera.
 

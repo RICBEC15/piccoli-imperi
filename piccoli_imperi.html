@@ -259,7 +259,7 @@
       <p>Un piccolo gioco di strategia a turni ispirato a Civilization e Polytopia.
       Guidi l'<b style="color:#4da3ff">Impero Azzurro</b>: <b>tocca sulla mappa il paese</b> che vuoi guidare, fonda la capitale (tutte le città del tuo paese sono già tue), espanditi, conquista altre città
       e addestra un esercito. <b>Ogni altro paese è un impero guidato dall'IA</b>, in guerra con tutti: fai cadere le loro capitali prima che prendano la tua.</p>
-      <p style="font-size:12px;opacity:.75">Mappa reale, uguale a ogni partita: biomi © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener" style="color:#9cc9ff">OpenStreetMap contributors</a>.</p>
+      <p style="font-size:12px;opacity:.75">Mappa reale, uguale a ogni partita: biomi © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener" style="color:#9cc9ff">OpenStreetMap contributors</a>; abitanti delle città da <a href="https://www.naturalearthdata.com/" target="_blank" rel="noopener" style="color:#9cc9ff">Natural Earth</a>.</p>
       <h4>In breve</h4>
       <ul>
         <li>🏛️ Le tue <b>città</b> producono <b>stelle ⭐</b> a ogni turno: sono la tua moneta.</li>
@@ -327,7 +327,9 @@
       <small>Dati della mappa © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener" style="color:#9cc9ff">OpenStreetMap contributors</a> (ODbL), tramite Overture Maps.</small></p>
       <h4>🏛️ Città e stelle</h4>
       <ul>
-        <li>La <b>capitale</b> 🏛️ produce <b>3⭐</b> a turno, ogni altra <b>città</b> 🏘️ ne produce <b>2⭐</b>.</li>
+        <li>Ogni città ha i suoi <b>abitanti veri</b> 👥 (agglomerato urbano, dati Natural Earth: Roma 3.339.000, Parigi 9.904.000…) e rende <b>più stelle quanto più è popolosa</b>: sotto 5.000 abitanti <b>1⭐</b>, da 5.000 <b>2⭐</b>, da 50.000 <b>3⭐</b>, da 200.000 <b>4⭐</b>, da 700.000 <b>5⭐</b>, da 2 milioni <b>6⭐</b>, da 5 milioni <b>7⭐</b> a turno. La <b>capitale</b> 🏛️ rende <b>1⭐ in più</b> (e mai meno di 3⭐).</li>
+        <li>Ogni città reale da <b>un milione</b> di abitanti in su ha il suo villaggio sulla mappa; i villaggi lontani dalle città note hanno abitanti <b>stimati</b>. Tocca una città per vederne nome, abitanti e rendita; ingrandendo la mappa i nomi compaiono sotto le città.</li>
+        <li>La capitale si può fondare anche <b>su un villaggio neutrale</b> del tuo paese: ne prende nome e abitanti (es. Roma per l'Italia).</li>
         <li>I <b>villaggi neutrali</b> ⛺ (bordo beige) non appartengono a nessuno: muovi un'unità sopra per conquistarli.</li>
         <li>Clicca una tua città <b>senza unità sopra</b> per addestrare truppe: la nuova unità è pronta dal turno successivo.</li>
         <li>Difendere una propria città dà <b>+1 difesa</b>.</li>
@@ -353,9 +355,9 @@
       <p>Il <b>Costruttore</b> (4⭐, non combatte) costruisce i <b>ponti 🌉</b> (2⭐, casella arancione su un fiume adiacente) e i <b>porti ⚓</b> (3⭐, tasto <b>P</b>, sulla casella di terra dove si trova se confina con mare o fiume). Ogni porto rende <b>+1⭐ a turno</b>; non ha difese proprie e viene <b>conquistato</b> da qualsiasi unità nemica che ci sale sopra. I ponti, una volta costruiti, sono utilizzabili da entrambi gli imperi.</p>
       <h4>🚢 Navi</h4>
       <p>Da un <b>porto</b> (su mare o fiume) puoi comprare una <b>Nave</b> (20⭐, livello 1): naviga in mare e <b>lungo i fiumi</b> (movimento 3), <b>trasporta un gruppo di soldati</b> e non attacca. La capacità di stiva dipende dal <b>livello della nave</b> (da 3 soldati al livello 1 fino a 50 al livello 11): vicino a un tuo porto puoi <b>potenziarla</b> gratis (senza consumarne l'azione) pagando stelle crescenti, ma il mantenimento a turno sale con il livello. Imbarco: seleziona un'unità adiacente alla nave e clicca la nave (azzurra). Sbarco: seleziona la nave e clicca una costa gialla — l'unità arriva "spesa" ma conquista normalmente ciò su cui sbarca. Se la nave affonda, il carico è perduto.</p>
-      <h4>👨‍🌾 Cittadini, popolazione e Carovane 🐫</h4>
-      <p>Ogni città ha una <b>popolazione</b> (distintivo azzurro, da 1 a 5): ogni abitante oltre il primo vale <b>+1⭐ a turno</b>. Un <b>Cittadino</b> (3⭐, non combatte) che raggiunge una tua città <b>si insedia</b> (+1 popolazione); un villaggio neutrale lo colonizza (popolazione 2). Non può entrare nelle città nemiche.
-      Fino a <b>6 Cittadini</b> si uniscono in una <b>Carovana 🐫</b>; con 5 o più può <b>fondare un villaggio nuovo</b> (tasto <b>F</b>) su un prato libero ad almeno 2 caselle da altre strutture. Quando una città viene conquistata, <b>un abitante fugge</b> (popolazione −1).</p>
+      <h4>👨‍🌾 Cittadini, crescita e Carovane 🐫</h4>
+      <p>Oltre agli abitanti veri, ogni città ha una <b>crescita</b> (distintivo azzurro, da 1 a 5): ogni livello oltre il primo vale <b>+1⭐ a turno</b>. Un <b>Cittadino</b> (3⭐, non combatte) che raggiunge una tua città <b>si insedia</b> (+1 crescita); un villaggio neutrale lo colonizza (crescita 2). Non può entrare nelle città nemiche.
+      Fino a <b>6 Cittadini</b> si uniscono in una <b>Carovana 🐫</b>; con 5 o più può <b>fondare un villaggio nuovo</b> (tasto <b>F</b>) su un prato libero ad almeno 2 caselle da altre strutture. Un villaggio fondato da una carovana è nuovo: ha abitanti stimati. Quando una città viene conquistata, <b>la crescita cala di 1</b>.</p>
       <h4>⚕️ Medico e Ospedali 🏥</h4>
       <p>Il <b>Medico</b> (4⭐) non attacca mai, ma a fine turno cura di <b>+3 le unità amiche adiacenti</b>, anche se hanno agito.
       <b>Due Medici uniti</b> (caselle viola) fondano un <b>Ospedale fisso</b>; un terzo lo porta a livello 3. Le unità che <b>sostano sulla casella dell'ospedale</b> vengono curate di <b>+4 per livello</b> a turno.
@@ -666,6 +668,7 @@ function ensureTutorialVillage() {
       t.terrain = 'grass';
       terrainDirty = true;
       t.city = { owner:null, capital:false, pop:1 };
+      assegnaAbitanti();
       return;
     }
   }
@@ -803,6 +806,316 @@ const NUOVI_VILLAGGI = [[-9.05,38.75],[-8.62,41.15],[-7.93,37.02],[4.35,50.85],[
                         [27.56,53.9],[23.69,52.1],[30.98,52.44],[30.2,55.19],[-21.94,64.15],[-18.09,65.68],[14.51,35.9],[44.51,40.18],[49.87,40.41],[46.36,40.68],
                         // Aqtöbe, Atyrau, Oral, Aqtau, Kaliningrad
                         [57.21,50.28],[51.92,47.1],[51.37,51.23],[51.2,43.65],[20.51,54.71]];
+// ============ GLI ABITANTI REALI ============
+// Ogni città ha i suoi abitanti veri: quelli dell'agglomerato urbano (POP_MAX) di
+// Natural Earth, "populated places" 1:10m (pubblico dominio, naturalearthdata.com).
+// La lista e' ritagliata alle terre del gioco da build_popolazione.js:
+// [nome, lon, lat, abitanti], dalla piu' popolosa.
+// CITTA_REALI_INIZIO
+const CITTA_REALI = [
+  ["Il Cairo",31.248,30.052,11893000],["Mosca",37.614,55.754,10452000],["Istanbul",28.974,41.018,10061000],["Parigi",2.353,48.858,9904000],["Londra",-0.119,51.502,8567000],["Madrid",-3.685,40.402,5567000],
+  ["Barcellona",2.181,41.385,4920000],["San Pietroburgo",30.314,59.941,4553000],["Alessandria d'Egitto",29.948,31.202,4165000],["Ankara",32.862,39.929,3716000],["Berlino",13.4,52.524,3406000],["Algeri",3.049,36.765,3354000],
+  ["Roma",12.481,41.898,3339000],["Atene",23.731,37.985,3242000],["Casablanca",-7.618,33.602,3181000],["Milano",9.203,45.472,2945000],["Stoccarda",9.2,48.78,2944700],["Francoforte",8.675,50.1,2895000],
+  ["Lisbona",-9.147,38.725,2812000],["Katowice",19.02,50.26,2746000],["Kiev",30.515,50.435,2709000],["Giza",31.19,30.01,2681863],["Smirne",27.15,38.438,2587000],["Tunisi",10.18,36.803,2412500],
+  ["Vienna",16.365,48.202,2400000],["Mannheim",8.47,49.5,2362000],["Birmingham",-1.922,52.477,2285000],["Napoli",14.243,40.842,2250000],["Manchester",-2.249,53.475,2230000],["Tripoli",13.18,32.892,2189000],
+  ["Baku",49.86,40.397,2122300],["Bucarest",26.098,44.435,1942000],["Minsk",27.565,53.902,1805000],["Amburgo",9.998,53.552,1757000],["Bruxelles",4.331,50.835,1743000],["Essen",7.017,51.45,1742135],
+  ["Varsavia",21.005,52.231,1707000],["Rabat",-6.836,34.025,1705000],["Budapest",19.081,47.502,1679000],["Torino",7.668,45.072,1652000],["Leeds",-1.551,53.79,1529000],["Firenze",11.25,43.78,1500000],
+  ["Bursa",29.068,40.202,1492000],["Charkiv",36.248,50.002,1461000],["Lione",4.828,45.772,1423000],["L'Aia",4.27,52.08,1406000],["Marsiglia",5.373,43.292,1400000],["Porto",-8.622,41.152,1337000],
+  ["Ekaterinburg",60.598,56.852,1313000],["Adana",35.318,36.997,1293000],["Sheffield",-1.5,53.367,1292900],["Nižnij Novgorod",43.998,56.335,1278000],["Duisburg",6.75,51.43,1276757],["Monaco di Baviera",11.573,48.132,1275000],
+  ["Stoccolma",18.066,59.324,1264000],["Ginevra",6.14,46.21,1240000],["Düsseldorf",6.78,51.22,1220000],["Siviglia",-5.98,37.405,1212045],["Sofia",23.315,42.685,1185000],["Bengasi",20.065,32.119,1180000],
+  ["Praga",14.423,50.087,1162000],["Glasgow",-4.239,55.862,1160000],["Samara",50.149,53.197,1137000],["Helsinki",24.932,60.164,1115000],["Kazan’",49.124,55.752,1115000],["Zurigo",8.548,47.382,1108000],
+  ["Erevan",44.512,40.183,1102000],["Tbilisi",44.789,41.727,1100000],["Belgrado",20.466,44.821,1099000],["Copenaghen",12.562,55.681,1085000],["Dublino",-6.257,53.347,1059000],["Rostov sul Don",39.711,47.237,1052000],
+  ["Dnipro",34.998,48.482,1050000],["Gaziantep",37.383,37.077,1044000],["Lilla",3.078,50.652,1044000],["Amsterdam",4.915,52.352,1031000],["Ufa",56.038,54.792,1018000],["Rotterdam",4.478,51.922,1005000],
+  ["Colonia",6.948,50.932,1004000],["Fès",-5.002,34.057,1002000],["Perm'",56.248,58.002,997000],["Odessa",30.708,46.492,991000],["Donec'k",37.828,48.002,988000],["Volgograd",44.498,48.712,984000],
+  ["Salerno",14.77,40.68,954265],["Nizza",7.263,43.717,927000],["Anversa",4.413,51.222,920000],["Konya",32.473,37.877,919000],["Tirana",19.819,41.328,895350],["Tarso",34.88,36.92,894318],
+  ["Newcastle upon Tyne",-1.612,54.99,882000],["Bilbao",-2.93,43.25,875552],["Marrakech",-8.002,31.632,872000],["Palermo",13.348,38.127,863000],["Cardiff",-3.168,51.483,861400],["Tolosa",1.448,43.622,847000],
+  ["Voronež",39.187,51.665,844000],["Saratov",46.028,51.582,843000],["Oslo",10.748,59.919,835000],["Basilea",7.59,47.58,830000],["Salonicco",22.883,40.698,828000],["Braga",-8.421,41.555,826833],
+  ["Nottingham",-1.166,52.941,825600],["Agadir",-9.62,30.44,825467],["Liverpool",-2.962,53.405,811000],["Valencia",-0.402,39.487,808000],["Leopoli",24.03,49.835,803880],["Bordeaux",-0.597,44.852,803000],
+  ["Orano",-0.622,35.712,798000],["Zaporižžja",35.175,47.859,788000],["Adalia",30.698,36.892,783000],["Wuppertal",7.17,51.25,776525],["Saarbrücken",6.97,49.25,770001],["Trebisonda",39.72,40.98,764714],
+  ["Łódź",19.458,51.768,758000],["Cracovia",19.958,50.062,756000],["Tangeri",-5.806,35.776,750060],["Liegi",5.58,50.63,749110],["Riga",24.1,56.95,742572],["Danzica",18.64,54.36,740000],
+  ["Norimberga",11.08,49.45,737304],["Brema",8.8,53.08,724909],["Zagabria",16,45.8,722526],["Hannover",9.717,52.367,722490],["Togliatti",49.42,53.508,702879],["Meknes",-5.56,33.9,697628],
+  ["Sarajevo",18.383,43.85,696731],["Chișinău",28.858,47.005,688134],["Bonn",7.08,50.72,680543],["Catania",15.08,37.5,674542],["Bytom",18.91,50.35,662247],["Ismailia",32.26,30.59,656135],
+  ["Kryvyj Rih",33.345,47.928,652380],["Krasnodar",39,45.02,649851],["Saragozza",-0.89,41.65,649404],["Genova",8.93,44.41,647497],["Diyarbakır",40.23,37.92,644763],["Ul'janovsk",48.41,54.33,640680],
+  ["Utrecht",5.12,52.1,640000],["Breslavia",17.03,51.11,634893],["Iževsk",53.23,56.85,631038],["Poznań",16.9,52.406,623997],["Porto Said",32.29,31.26,623864],["Southend-on-Sea",0.72,51.55,618386],
+  ["Dresda",13.75,51.05,617515],["Wiesbaden",8.25,50.08,617126],["Mersina",34.62,36.8,616990],["Samsun",36.344,41.28,609339],["Jaroslavl'",39.87,57.62,606730],["Costantina",6.6,36.36,605179],
+  ["Mansura",31.38,31.05,600000],["Kayseri",35.49,38.735,592840],["Dortmund",7.45,51.53,588462],["Machačkala",47.5,42.98,554981],["Bristol",-2.583,51.45,553528],["Kenitra",-6.58,34.27,551786],
+  ["Orenburg",55.11,51.78,550204],["Malaga",-4.42,36.72,550058],["Lipsia",12.41,51.335,542529],["Vilnius",25.317,54.683,542366],["Göteborg",11.979,57.709,537797],["Rouen",1.08,49.43,532559],
+  ["Rjazan'",39.72,54.62,520173],["Lipeck",39.64,52.62,515655],["Eskişehir",30.53,39.795,514869],["Penza",45,53.18,512602],["Blida",2.83,36.42,511348],["Mykolaïv",31.984,46.968,510840],
+  ["Suez",32.55,30.005,508335],["Gliwice",18.67,50.33,507670],["Edimburgo",-3.219,55.948,504966],["Annaba",7.76,36.92,503524],["Brighton",-0.17,50.83,503008],["Astrachan'",48.055,46.349,502533],
+  ["Bradford",-1.754,53.792,501700],["Bari",16.873,41.114,500577],["Damanhur",30.47,31.05,500000],["Minya",30.75,28.09,500000],["Skopje",21.433,42,494087],["Tula",37.63,54.2,489486],
+  ["Beni Suef",31.09,29.08,489450],["Bologna",11.34,44.5,488172],["Mariupol'",37.556,47.096,481626],["Homel'",31,52.43,480951],["Ostrava",18.25,49.83,478963],["İzmit",29.931,40.776,466504],
+  ["Il Pireo",23.7,37.95,466065],["Pristina",21.166,42.667,465186],["Malatya",38.3,38.37,461574],["Naberežnye Čelny",52.392,55.732,461086],["Leicester",-1.133,52.63,457983],["Kirov",49.67,58.59,457437],
+  ["Sfax",10.72,34.75,453050],["Sunderland",-1.38,54.903,452934],["Luhans'k",39.334,48.57,452000],["Belfast",-5.928,54.594,450406],["Şanlıurfa",38.795,37.17,449549],["Chlef",1.32,36.17,449167],
+  ["Čeboksary",47.25,56.13,446781],["Gand",3.7,51.03,444336],["Portsmouth",-1.08,50.8,442252],["Strasburgo",7.75,48.58,439972],["Nantes",-1.59,47.21,438537],["Kaliningrad",20.497,54.7,434954],
+  ["Brjansk",34.43,53.26,427236],["Bournemouth",-1.9,50.73,426945],["Heidelberg",8.7,49.42,426590],["Bratislava",17.117,48.15,423737],["Ivanovo",41.01,57.01,420839],["Erzurum",41.29,39.92,420691],
+  ["Asyūṭ",31.18,27.19,420585],["Middlesbrough",-1.23,54.58,416042],["Magnitogorsk",58.98,53.423,413351],["Kursk",36.19,51.74,409431],["Oujda",-1.91,34.69,409391],["Metz",6.18,49.12,409186],
+  ["Stettino",14.53,53.42,407811],["Murcia",-1.13,37.98,406807],["Tanta",31,30.79,404901],["Tver'",35.89,56.86,400212],["Chmel'nyc'kyj",27.002,49.425,398346],["Eindhoven",5.5,51.43,398053],
+  ["Gorlovka",38.055,48.3,396885],["Tallinn",24.728,59.434,394024],["Stoke-on-Trent",-2.18,53,390801],["Grenoble",5.72,45.18,388574],["Granada",-3.585,37.165,388290],["Brno",16.61,49.2,388277],
+  ["Coventry",-1.503,52.401,388271],["Misurata",15.1,32.38,386120],["Béjaïa",5.07,36.76,384937],["Southampton",-1.4,50.9,384417],["Nižnij Tagil",59.975,57.92,381116],["Sebastopoli",33.524,44.604,379200],
+  ["Vigo",-8.73,42.22,378952],["Las Palmas de Gran Canaria",-15.43,28.1,378495],["Karlsruhe",8.4,49,377487],["Makiïvka",37.975,48.03,376610],["Kahramanmaraş",36.945,37.61,376045],["Palma di Maiorca",2.654,39.574,375773],
+  ["Kaunas",23.88,54.95,374643],["Denizli",29.08,37.77,372344],["Van",43.4,38.495,371713],["La Coruña",-8.42,43.33,370610],["Reading",-0.98,51.47,369804],["Mahilëŭ",30.325,53.899,369200],
+  ["La Valletta",14.515,35.9,368250],["Bydgoszcz",18.01,53.12,366452],["Vladikavkaz",44.67,43.05,364630],["Stavropol'",41.98,45.05,363064],["Lublino",22.573,51.25,360044],["Augusta",10.9,48.35,358989],
+  ["Sinferopoli",34.099,44.949,358108],["Tolone",5.919,43.134,357693],["San Sebastián",-1.98,43.32,357468],["Arcangelo",40.545,64.575,356051],["Safi",-9.24,32.32,353476],["Vinnycja",28.482,49.225,352115],
+  ["Haarlem",4.63,52.38,349957],["Linz",14.289,48.319,349161],["Verona",10.99,45.44,347459],["Charleroi",4.45,50.42,345367],["Belgorod",36.6,50.63,345289],["Vicebsk",30.185,55.189,342700],
+  ["Plovdiv",24.754,42.154,340494],["Kaluga",36.27,54.52,338978],["Gijón",-5.67,43.53,335972],["Orël",36.07,52.97,334552],["Bielefeld",8.53,52.03,331906],["Soči",39.73,43.59,327608],
+  ["Montpellier",3.87,43.61,327254],["Susa",10.625,35.83,327004],["Iași",27.575,47.168,325914],["Joškar-Ola",47.875,56.635,324406],["Volžskij",44.774,48.795,323293],["Valladolid",-4.75,41.65,322304],
+  ["Cordova",-4.77,37.88,321376],["Smolensk",32.047,54.783,320991],["Podol'sk",37.53,55.38,320635],["Cherson",32.601,46.633,320477],["Murmansk",33.1,68.97,319263],["Vladimir",40.41,56.13,318648],
+  ["Poltava",34.57,49.574,317847],["Hrodna",23.834,53.678,317365],["Fayyum",30.84,29.31,316772],["Cluj-Napoca",23.598,46.788,316748],["Alicante",-0.484,38.351,315863],["Timișoara",21.223,45.759,315053],
+  ["Lubiana",14.515,46.055,314807],["Pescara",14.219,42.455,314789],["Gdynia",18.53,54.52,314664],["Varna",27.895,43.216,312770],["Coblenza",7.6,50.35,312633],["Čerepovec",37.91,59.14,311850],
+  ["Galați",28.046,45.456,311156],["Brașov",25.607,45.648,311044],["Nal'čik",43.618,43.498,307866],["Černihiv",31.302,51.505,307684],["Ksar El Kebir",-5.91,35.02,306600],["Craiova",23.826,44.326,304142],
+  ["Costanza",28.61,44.203,303399],["Saransk",45.18,54.17,303394],["Gäncä",46.35,40.685,303268],["Chemnitz",12.92,50.83,302643],["Kingston upon Hull",-0.33,53.75,302296],["Batman",41.14,37.89,302074],
+  ["Tambov",41.43,52.73,301482],["Brėst",23.7,52.1,300715],["Damietta",31.82,31.42,299459],["Černivci",25.922,48.305,298251],["Alessandretta",36.17,36.58,297943],["Čerkasy",32.071,49.435,297568],
+  ["Vologda",39.92,59.21,294889],["Sumy",34.781,50.924,294456],["Swansea",-3.95,51.63,294339],["Białystok",23.182,53.132,291855],["Cagliari",9.104,39.222,291511],["Kassel",9.5,51.3,289924],
+  ["Adapazarı",30.4,40.767,286787],["Zagazig",31.517,30.583,285097],["Cadice",-6.286,36.525,283157],["Žytomyr",28.662,50.246,282192],["Batna",6.17,35.57,280798],["Rize",40.522,41.021,279450],
+  ["Sumqayıt",49.63,40.58,279159],["Taganrog",38.92,47.23,279056],["Kostroma",40.94,57.77,277656],["Berna",7.467,46.917,275329],["Sétif",5.4,36.18,274744],["Pamplona",-1.65,42.82,274545],
+  ["Blackpool",-3.05,53.83,272792],["Elâzığ",39.23,38.68,271492],["Venezia",12.335,45.439,270816],["Münster",7.62,51.97,270184],["Kiel",10.13,54.33,269427],["Malmö",13.023,55.599,269349],
+  ["Nancy",6.2,48.684,268976],["Sterlitamak",55.96,53.63,267231],["Losanna",6.65,46.53,265702],["Saint-Étienne",4.38,45.43,265684],["Petrozavodsk",34.361,61.781,265025],["Sivas",37.035,39.745,264022],
+  ["Tobruch",23.96,32.08,263527],["Graz",15.41,47.078,263234],["Aqtöbe",57.17,50.28,262457],["Balıkesir",27.89,39.65,261516],["Adapazarı",30.415,40.8,260109],["Tampere",23.75,61.5,259279],
+  ["Dzeržinsk",43.46,56.25,256537],["Rivne",26.253,50.617,255106],["Friburgo in Brisgovia",7.87,48,254889],["Messina",15.55,38.2,252026],["Caserta",14.337,41.06,250000],["Como",9.08,45.81,250000],
+  ["Lucerna",8.28,47.05,250000],["Niš",21.9,43.33,250000],["Kropyvnyc'kyj",32.26,48.504,249454],["Melun",2.667,48.533,249432],["Miskolc",20.78,48.1,247757],["Plymouth",-4.16,50.385,247297],
+  ["Orsk",58.627,51.21,246836],["Rzeszów",21.996,50.029,245686],["Ternopil'",25.582,49.536,244768],["Braunschweig",10.5,52.25,244715],["Magnesia",27.44,38.63,243971],["Le Havre",0.105,49.505,242124],
+  ["Novorossijsk",37.77,44.73,241856],["Ivano-Frankivs'k",24.709,48.935,241239],["Fürth",11,49.47,237844],["Aarhus",10.211,56.157,237551],["Košice",21.25,48.73,236563],["Tours",0.7,47.38,236096],
+  ["Luton",-0.42,51.88,235958],["Oviedo",-5.83,43.35,235651],["Lubecca",10.67,53.87,235390],["Nižnekamsk",51.82,55.64,234297],["Clermont-Ferrand",3.08,45.78,233050],["Kremenčuk",33.43,49.084,232742],
+  ["Ploiești",26.036,44.947,232542],["Debrecen",21.63,47.53,231286],["Osnabrück",8.05,52.28,231268],["Syktyvkar",50.82,61.66,230910],["Magdeburgo",11.62,52.13,229826],["Tlemcen",-1.32,34.89,229777],
+  ["Noginsk",38.48,55.87,229731],["Al-Rashidiyya",-4.45,31.94,228489],["Staryj Oskol",37.84,51.3,226977],["Groznyj",45.699,43.319,226100],["Kolpino",30.65,59.73,225801],["Novi Sad",19.85,45.25,225457],
+  ["Skikda",6.9,36.88,225181],["Vitoria",-2.67,42.85,224578],["Nicosia",33.367,35.167,224300],["Adıyaman",38.28,37.77,223744],["Banja Luka",17.18,44.78,221738],["Šachty",40.27,47.72,221312],
+  ["Babrujsk",29.193,53.127,220517],["Gabès",10.1,33.9,219517],["Velikij Novgorod",31.33,58.5,218717],["Potsdam",13.07,52.4,218095],["Mallawi",30.84,27.73,217365],["Orléans",1.9,47.9,217301],
+  ["Rybinsk",38.82,58.05,216724],["Groninga",6.58,53.22,216688],["Trieste",13.8,45.65,216035],["Kielce",20.66,50.89,215733],["Mulhouse",7.35,47.75,215454],["Spalato",16.47,43.52,214741],
+  ["Oradea",21.92,47.05,213830],["Luc'k",25.333,50.747,213661],["Bergen",5.325,60.391,213585],["Brăila",27.969,45.292,213569],["Kırıkkale",33.53,39.85,211138],["Oral",51.335,51.271,209788],
+  ["Rennes",-1.67,48.1,209375],["Santander",-3.8,43.38,208763],["Sidi Bel Abbes",-0.64,35.19,208604],["Salisburgo",13.04,47.81,206279],["Pisa",10.4,43.72,203336],["Erfurt",11.03,50.97,203254],
+  ["Rostock",12.15,54.07,203080],["Biskra",5.73,34.86,202103],["Taranto",17.23,40.508,202033],["Pskov",28.33,57.83,201990],["Homs",14.26,32.66,201943],["Cartagena",-0.98,37.6,201274],
+  ["Bergamo",9.67,45.7,200000],["Zawiya",12.72,32.76,200000],["Bacău",26.92,46.578,199668],["Taza",-4.02,34.22,199633],["Balakovo",47.8,52.03,199572],["Armavir",41.13,45,199548],
+  ["Rosetta",30.39,31.46,199509],["Bila Cerkva",30.131,49.774,199163],["Aydın",27.85,37.85,198857],["Reims",4.03,49.25,196565],["Engels",46.12,51.5,196011],["Burgas",27.475,42.515,195966],
+  ["Severodvinsk",39.83,64.57,194292],["Oxford",-1.248,51.752,192796],["Klaipėda",21.12,55.72,192307],["Zlatoust",59.65,55.175,191366],["Norwich",1.3,52.63,190756],["Caen",-0.35,49.184,190099],
+  ["Aberdeen",-2.105,57.145,189364],["Syzran'",48.48,53.17,189338],["Cork",-8.465,51.893,188907],["Angers",-0.53,47.48,188380],["Mostaganem",0.09,35.94,188354],["El Ayun",-13.2,27.15,188084],
+  ["Seghedino",20.15,46.25,187765],["Gibilterra",-5.346,36.128,187083],["Olsztyn",20.486,53.773,186670],["Pécs",18.22,46.08,186262],["Marbella",-4.883,36.517,186131],["Kütahya",29.93,39.42,185008],
+  ["Magonza",8.273,49.982,184997],["Ruse",25.973,43.854,184270],["Tiaret",1.32,35.38,184195],["Kramators'k",37.534,48.719,184105],["Kutaisi",42.73,42.25,183945],["Çorum",34.95,40.52,183418],
+  ["Mataró",2.45,41.54,183293],["Shibin El Kom",31.007,30.554,182900],["Atyrau",51.92,47.113,182753],["Castellón de la Plana",-0.05,39.97,180610],["El Jadida",-8.51,33.26,180470],["Reggio Calabria",15.641,38.115,180353],
+  ["Zuara",12.079,32.934,180310],["Almería",-2.43,36.83,179405],["Al-Arish",33.801,31.125,178651],["El Oued",6.86,33.37,177497],["Treviso",12.24,45.67,177309],["Nyíregyháza",21.719,47.965,176880],
+  ["Ouargla",5.34,31.97,176271],["Turku",22.255,60.454,175945],["Modena",10.92,44.65,175502],["Stavanger",5.68,58.97,173132],["Ulma",10,48.4,172955],["Isparta",30.53,37.77,172334],
+  ["Tébessa",8.12,35.41,171742],["Prizren",20.75,42.229,171464],["Kragujevac",20.92,44.02,171197],["Pitești",24.876,44.856,171021],["Fiume",14.45,45.33,170992],["Djelfa",3.25,34.68,170901],
+  ["Burgos",-3.68,42.35,170183],["Čačak",20.33,43.89,170000],["Digione",5.03,47.33,169946],["Nîmes",4.35,43.83,169547],["El Merj",20.83,32.5,169540],["Arad",21.32,46.17,169065],
+  ["Baranavičy",26.013,53.137,168772],["Würzburg",9.95,49.8,168561],["Berezniki",56.76,59.42,167748],["Volgodonsk",42.16,47.51,167731],["Miass",60.095,54.995,167500],["Oldenburg",8.22,53.13,167458],
+  ["Banha",31.183,30.467,167029],["Novočerkassk",40.08,47.42,166974],["Reykjavík",-21.937,64.143,166212],["Parma",10.32,44.81,166011],["Elbasan",20.084,41.122,165010],["Zenica",17.92,44.22,164423],
+  ["Ratisbona",12.12,49.02,164359],["Plzeň",13.36,49.74,164180],["Patrasso",21.73,38.23,163360],["Ingolstadt",11.45,48.77,163325],["Mostar",17.82,43.35,163067],["Lecce",18.15,40.36,162582],
+  ["Salamanca",-5.67,40.97,162353],["Settat",-7.62,33.01,161748],["Salavat",55.93,53.37,159893],["Zarzis",11.1,33.51,159161],["York",-1.072,53.951,158947],["Majkop",40.12,44.61,158451],
+  ["Odense",10.383,55.4,158222],["Albacete",-1.87,39,158094],["Melitopol'",35.377,46.838,158000],["Hurghada",33.83,27.23,157204],["Rustavi",45.05,41.57,157063],["Tiraspol",29.64,46.853,157000],
+  ["Afyonkarahisar",30.55,38.75,156992],["Zonguldak",31.78,41.43,156918],["Livorno",10.302,43.551,156274],["Scutari",19.519,42.068,155767],["Sibiu",24.137,45.797,155565],["Batumi",41.63,41.6,155542],
+  ["Barysaŭ",28.492,54.226,155389],["Innsbruck",11.41,47.28,155214],["Foggia",15.56,41.46,155203],["Ordu",37.87,41,155117],["Antiochia",36.117,36.233,154803],["Kovrov",41.33,56.36,154224],
+  ["Limassol",33.033,34.675,154000],["Uşak",29.42,38.68,152862],["Nusaybin",41.218,37.075,152668],["Novokujbyševsk",49.92,53.12,152334],["Limoges",1.25,45.83,152199],["Kerč",36.488,45.369,152195],
+  ["Samalut",30.71,28.3,152097],["Dundee",-3,56.47,151592],["Bălți",27.905,47.759,151355],["Užhorod",22.25,48.63,150832],["M'Sila",4.545,35.7,150000],["Târgu Mureș",24.558,46.558,149433],
+  ["Perugia",12.39,43.11,149125],["Gyumri",43.847,40.789,148381],["Jijel",5.766,36.822,148000],["Médéa",2.77,36.27,147707],["Kolomna",38.785,55.08,147690],["Aktau",51.142,43.69,147443],
+  ["Trondheim",10.417,63.417,147139],["Aix-en-Provence",5.45,43.52,146821],["Garian",13.02,32.17,146810],["Perpignano",2.9,42.7,146620],["Bruges",3.23,51.22,146469],["Podgorica",19.266,42.466,145850],
+  ["Biarritz",-1.562,43.473,145348],["Brest",-4.495,48.39,144899],["Qayrawan",10.1,35.68,144522],["Le Mans",0.203,48.004,144515],["Tuzla",18.68,44.55,144334],["Székesfehérvár",18.408,47.195,144319],
+  ["Huelva",-6.93,37.25,144174],["Tizi Ouzou",4.046,36.712,144000],["Kafr el-Sheikh",30.936,31.109,143970],["Agedabia",20.22,30.77,143833],["Ipswich",1.17,52.07,143767],["Logroño",-2.43,42.47,143698],
+  ["Stara Zagora",25.623,42.423,143431],["Béchar",-2.23,31.611,143382],["Amiens",2.3,49.9,143086],["Pjatigorsk",43.09,44.08,142865],["Arzamas",43.8,55.4,142597],["Durazzo",19.448,41.318,142432],
+  ["Saida",0.14,34.84,142213],["Arnhem",5.923,51.988,141674],["Melilla",-2.95,35.3,141308],["Al'met'evsk",52.32,54.9,140437],["Orechovo-Zuevo",38.98,55.82,140247],["Peterborough",-0.248,52.567,140141],
+  ["Badajoz",-6.97,38.88,140133],["Bordj Bou Arreridj",4.765,36.078,140000],["Biserta",9.855,37.29,139843],["Gottinga",9.92,51.52,139419],["Bremerhaven",8.58,53.55,137751],["Candia",25.13,35.325,137154],
+  ["Oulu",25.47,65,136752],["Baia Mare",23.579,47.659,136553],["León",-5.57,42.58,136227],["Győr",17.63,47.7,136081],["Serpuchov",37.43,54.93,135584],["Orša",30.422,54.515,135206],
+  ["Souk Ahras",7.95,36.29,134947],["Zakho",42.687,37.145,134863],["Ravenna",12.22,44.42,134631],["'s-Hertogenbosch",5.317,51.683,134520],["Nevinnomyssk",41.95,44.62,134380],["Touggourt",6.06,33.1,133954],
+  ["Pervoural'sk",59.955,56.91,133600],["Šiauliai",23.325,55.939,133528],["Uppsala",17.64,59.86,133117],["Kislovodsk",42.72,43.91,132771],["Dimitrovgrad",49.56,54.25,132226],["Opole",17.931,50.685,131412],
+  ["Murom",42.04,55.57,131287],["Ferrara",11.61,44.85,130992],["Novomoskovsk",38.289,54.011,130982],["Buzău",26.807,45.157,130954],["Pinsk",26.094,52.128,130777],["Nikopol'",34.406,47.567,130500],
+  ["Tokat",36.563,40.306,129702],["Erzincan",39.493,39.753,129407],["Larissa",22.42,39.63,128758],["Kamyšin",45.4,50.08,128626],["Karabük",32.6,41.2,128564],["Cambridge",0.117,52.2,128488],
+  ["Besançon",6.03,47.23,128426],["Sirte",16.59,31.21,128123],["Derna",22.639,32.765,127974],["Elbląg",19.403,54.154,127558],["Panevėžys",24.37,55.74,127405],["Neftekamsk",54.263,56.084,126805],
+  ["Gafsa",8.78,34.42,126803],["Edirne",26.57,41.67,126470],["Tarragona",1.25,41.12,126291],["Leeuwarden",5.783,53.25,125778],["Ghardaïa",3.67,32.49,125480],["Zlín",17.65,49.23,124610],
+  ["Lysyčans'k",38.427,48.92,124421],["Drohobyč",23.499,49.344,124269],["Siracusa",15.29,37.07,123657],["Guelma",7.428,36.466,123590],["Maastricht",5.677,50.853,122378],["Tekirdağ",27.51,40.991,122287],
+  ["Aalborg",9.917,57.034,122219],["Sassari",8.57,40.73,120729],["Karaman",33.215,37.182,120399],["Larache",-6.16,35.2,120082],["Tetovo",20.97,42.009,119132],["Udine",13.24,46.07,119009],
+  ["Pleven",24.613,43.424,118675],["Zielona Góra",15.5,51.95,118433],["Berdjans'k",36.787,46.757,118284],["Ourense",-7.87,42.33,118107],["Setúbal",-8.9,38.53,117974],["Vyborg",28.755,60.704,117201],
+  ["Jaén",-3.8,37.77,116400],["Nižyn",31.89,51.054,116288],["Čerkessk",42.06,44.29,116224],["Elec",38.5,52.58,115919],["Guelmim",-10.07,28.98,115267],["Nabeul",10.73,36.46,115149],
+  ["Botoșani",26.66,47.748,114783],["Kam'janec'-Podil's'kyj",26.581,48.684,114658],["Maribor",15.65,46.54,114228],["Siirt",41.933,37.944,114034],["Kecskemét",19.7,46.9,113895],["Laghouat",2.88,33.81,113872],
+  ["Bærum",11.347,59.913,113659],["Exeter",-3.53,50.7,113118],["Satu Mare",22.885,47.792,112490],["Mazyr",29.272,52.046,112137],["Zwolle",6.097,52.524,111805],["Daugavpils",26.51,55.88,111564],
+  ["Algeciras",-5.453,36.132,111027],["Volo",22.95,39.37,110632],["Bouira",3.9,36.38,110144],["Batajsk",39.745,47.137,109962],["Szombathely",16.629,47.225,109518],["Szolnok",20.179,47.186,109261],
+  ["Sergiev Posad",38.17,56.33,109252],["Kaposvár",17.8,46.367,108528],["Mascara",0.14,35.4,108230],["Oktjabr'skij",53.46,54.46,108200],["Barletta",16.27,41.32,107830],["Trento",11.12,46.08,107808],
+  ["Râmnicu Vâlcea",24.383,45.11,107558],["Koszalin",16.183,54.2,107450],["Obninsk",36.62,55.08,107392],["Lussemburgo",6.13,49.612,107260],["Västerås",16.558,59.609,107194],["Čapaevsk",49.724,52.974,107164],
+  ["Pardubice",15.76,50.04,107064],["Ėlista",44.209,46.329,106971],["Coimbra",-8.417,40.2,106582],["Drobeta-Turnu Severin",22.666,44.646,106578],["Namur",4.87,50.47,106284],["Novotroick",58.33,51.2,106186],
+  ["Derbent",48.277,42.058,105965],["Suceava",26.259,47.638,105796],["Annecy",6.117,45.9,105749],["Lugano",8.967,46,105388],["Eupatoria",33.363,45.197,105223],["Peć",20.311,42.66,105163],
+  ["Focșani",27.187,45.697,105112],["Cottbus",14.33,51.77,105067],["Prijedor",16.7,44.98,104858],["Jena",11.58,50.93,104712],["Gera",12.07,50.87,104659],["Brindisi",17.93,40.64,104437],
+  ["al-Qamishli",41.23,37.03,104107],["Konotop",33.209,51.242,103547],["Marsa Matruh",27.23,31.35,103470],["Velikie Luki",30.52,56.32,103149],["Piatra Neamț",26.383,46.94,102688],["Grudziądz",18.75,53.48,102443],
+  ["Uchta",53.69,63.56,102187],["Liberec",15.08,50.8,102175],["Sarapul",53.799,56.479,101344],["Maladzečna",26.865,54.319,101300],["Olomouc",17.257,49.587,101268],["Vanadzor",44.488,40.813,101098],
+  ["Tartu",26.71,58.384,101092],["Novara",8.62,45.45,100910],["Oum el-Bouaghi",7.15,35.85,100821],["Solikamsk",56.75,59.67,100812],["Glazov",52.629,58.123,100676],["Ancona",13.5,43.6,100507],
+  ["Sebha",14.433,27.033,100249],["Lida",25.285,53.888,100216],["Subotica",19.68,46.07,100000],["Zelenodol'sk",48.497,55.848,99600],["Novošachtinsk",39.92,47.77,99478],["Tuapse",39.064,44.115,99145],
+  ["Giresun",38.39,40.913,98864],["České Budějovice",14.46,48.98,98851],["Lahti",25.665,60.994,98826],["Votkinsk",53.99,57.03,98633],["Örebro",15.22,59.28,98573],["Serov",60.585,59.615,98438],
+  ["Jyväskylä",25.75,62.26,98136],["Balašov",43.163,51.554,98107],["Flensburgo",9.433,54.784,97930],["Železnogorsk",35.404,52.355,97900],["Slavonski Brod",18.016,45.16,97718],["Ariana",10.2,36.867,97687],
+  ["Bafra",35.907,41.568,97452],["Târgu Jiu",23.274,45.045,97179],["Šostka",33.48,51.873,96825],["Linköping",15.63,58.41,96732],["Schwerin",11.417,53.633,96641],["Bolu",31.606,40.736,96629],
+  ["Sliven",26.33,42.679,96368],["Bolzano",11.36,46.5,95895],["Kuzneck",46.6,53.12,95574],["Catanzaro",16.6,38.9,95251],["Hradec Králové",15.812,50.206,95195],["Osijek",18.68,45.55,95077],
+  ["Aqaba",35.078,29.527,95048],["Dobrič",27.84,43.585,94831],["Naxçıvan",45.412,39.209,94788],["Prešov",21.239,49,94718],["Kırşehir",34.171,39.142,94336],["Ústí nad Labem",14.081,50.663,94105],
+  ["Samandağ",35.933,36.117,93638],["Mičurinsk",40.5,52.9,93499],["Nazran'",44.783,43.233,93357],["Polatlı",32.147,39.584,93262],["Bath",-2.35,51.384,93238],["Kinešma",42.13,57.47,92983],
+  ["Rosenheim",12.133,47.85,92809],["Tulcea",28.797,45.199,92475],["Santiago di Compostela",-8.541,42.883,92430],["Calais",1.833,50.95,92201],["Ereğli",34.052,37.506,92117],["Bugul'ma",52.794,54.554,91900],
+  ["Kuopio",27.695,62.894,91900],["Arezzo",11.875,43.462,91589],["Helsingborg",12.723,56.041,91304],["Mons",3.939,50.446,91277],["Niğde",34.694,37.976,91039],["Lüleburgaz",27.355,41.407,90899],
+  ["Drammen",10.199,59.738,90722],["Klagenfurt am Wörthersee",14.31,46.62,90610],["Gatčina",30.133,59.571,90486],["Kirovo-Čepeck",50.044,58.554,90252],["Limerick",-8.623,52.665,90054],["Egor'evsk",39.029,55.385,89795],
+  ["Jönköping",14.165,57.771,89780],["Valona",19.498,40.477,89546],["Chester",-2.903,53.186,89531],["Norrköping",16.179,58.595,88639],["Brovary",30.781,50.494,88506],["Târgoviște",25.459,44.938,88435],
+  ["Yozgat",34.815,39.818,87881],["Ağrı",43.051,39.72,87854],["Ejsk",38.263,46.699,87814],["Buzuluk",52.262,52.782,87714],["Uman'",30.211,48.754,87658],["Žilina",18.749,49.22,87625],
+  ["Šumen",26.929,43.27,87283],["Bitola",21.34,41.039,86528],["Giannina",20.851,39.668,86304],["Lorca",-1.699,37.689,86119],["Ščëkino",37.514,54.014,86088],["Poitiers",0.333,46.583,85960],
+  ["Versailles",2.133,48.8,85416],["Liepāja",21.01,56.51,85132],["Lorient",-3.367,47.75,84952],["Londonderry/Derry",-7.333,55,83652],["Reșița",21.887,45.297,83324],["Izmaïl",28.837,45.35,83194],
+  ["Amasya",35.833,40.654,82896],["Wiener Neustadt",16.25,47.816,82762],["Muş",41.497,38.749,82536],["Pernik",23.023,42.61,82467],["Gießen",8.65,50.584,82358],["Banská Bystrica",19.15,48.733,82336],
+  ["Kilis",37.12,36.72,82301],["Fier",19.573,40.73,82297],["Polack",28.786,55.489,82258],["Kasserine",8.83,35.18,81987],["Kaspijsk",47.624,42.875,81752],["Sukhumi",41.02,43.02,81546],
+  ["Béziers",3.21,43.35,81438],["Bistrița",24.513,47.138,81318],["Klin",36.699,56.343,80778],["Bingöl",40.498,38.885,80568],["Haskovo",25.563,41.944,79699],["Kropotkin",40.582,45.447,79599],
+  ["Beni Mazar",30.81,28.49,79553],["Jalta",34.159,44.499,79509],["Inowrocław",18.25,52.78,79007],["Slatina",24.371,44.435,78988],["Kup\"jans'k",37.598,49.722,78870],["La Canea",24.016,35.512,78728],
+  ["Bienne",7.25,47.167,78708],["Ceuta",-5.307,35.889,78674],["Umeå",20.24,63.83,78197],["Marsala",12.439,37.805,77784],["Hakkâri",43.741,37.574,77699],["Kars",43.097,40.608,77486],
+  ["Söke",27.41,37.751,77341],["La Rochelle",-1.15,46.167,76997],["Pori",21.775,61.479,76772],["Kasserine",8.717,35.217,76243],["Kamensk-Šachtinskij",40.252,48.332,75814],["Bujnaksk",47.113,42.833,75800],
+  ["Galway",-9.049,53.272,75594],["Nevşehir",34.724,38.624,75527],["Agrinio",21.408,38.622,75233],["Greenock",-4.75,55.933,74635],["Toledo",-4.017,39.867,74632],["Karlstad",13.5,59.367,74141],
+  ["Sundsvall",17.317,62.4,73389],["Skien",9.6,59.2,73330],["Roanne",4.067,46.033,73315],["Călărași",27.326,44.206,73224],["Tatvan",42.282,38.507,73222],["Korosten'",28.65,50.95,72984],
+  ["Guadalajara",-3.167,40.634,72850],["Georgievsk",43.47,44.16,72649],["Carlisle",-2.93,54.88,72633],["Bourges",2.4,47.084,72340],["Esbjerg",8.45,55.467,72205],["Čusovoj",57.813,58.293,72113],
+  ["Calcide",23.612,38.464,71842],["Calamata",22.114,37.039,71823],["Vraca",23.563,43.21,71633],["Monastir",10.767,35.731,71546],["Çankırı",33.621,40.607,71379],["Mardin",40.743,37.312,71373],
+  ["Kovel'",24.717,51.217,71301],["Asti",8.21,44.93,71276],["Zara",15.262,44.12,71258],["Şirvan",48.92,39.932,70684],["San Gallo",9.362,47.423,70572],["Scarborough",-0.43,54.28,70571],
+  ["Tatabánya",18.433,47.55,70541],["Vol'sk",47.374,52.035,70500],["Kastamonu",33.783,41.389,70402],["Trnava",17.6,48.367,69785],["Ouazzane",-5.57,34.81,69658],["Vaslui",27.733,46.633,69225],
+  ["Hasselt",5.339,50.929,69222],["Giurgiu",25.966,43.902,69067],["Potenza",15.799,40.642,69060],["Ayr",-4.617,55.45,69042],["Ragusa",14.73,36.93,68956],["Tujmazy",53.694,54.605,68829],
+  ["Gävle",17.167,60.667,68635],["Borisoglebsk",42.089,51.369,68597],["L'Aquila",13.39,42.35,68503],["Deva",22.917,45.883,67802],["El Bayadh",1.01,33.69,67413],["Jelgava",23.713,56.653,67207],
+  ["Narva",28.16,59.378,66980],["Apatity",33.393,67.573,66907],["Aleksin",37.094,54.514,66885],["Nalut",10.97,31.88,66609],["Kungur",56.954,57.435,66389],["Klincy",32.245,52.765,66336],
+  ["Leninogorsk",52.449,54.599,66263],["Burdur",30.283,37.717,66158],["Alba Iulia",23.58,46.077,66085],["Polevskoj",60.188,56.443,65770],["Beni Ulid",13.99,31.77,65392],["Kumertau",55.784,52.775,65321],
+  ["Békéscsaba",21.101,46.672,65206],["Borås",12.939,57.718,65008],["Şəki",47.171,41.192,64968],["Krasnotur'insk",60.208,59.762,64878],["Tan-Tan",-11.1,28.43,64868],["Tichoreck",40.138,45.853,64387],
+  ["Arras",2.783,50.283,64165],["Zrenjanin",20.399,45.379,64053],["Kristiansand",7.975,58.146,63814],["Aïn Séfra",-0.58,32.76,63420],["Ržev",34.327,56.257,63414],["Cahul",28.194,45.908,63407],
+  ["Zalău",23.063,47.175,63232],["Balachna",43.594,56.494,63083],["Bitlis",42.123,38.394,62811],["Belebej",54.119,54.129,62582],["Tataouine",10.467,33,62577],["Assen",6.55,53,62237],
+  ["Čistopol'",50.641,55.365,62200],["Tichvin",33.514,59.645,62075],["Veszprém",17.911,47.091,62023],["Labinsk",40.744,44.635,61945],["Zalaegerszeg",16.84,46.844,61898],["Benevento",14.75,41.134,61791],
+  ["Medenina",10.417,33.4,61705],["Troyes",4.083,48.34,61703],["Vyksa",42.164,55.325,61664],["Pola",13.848,44.869,61599],["Sibaj",58.639,52.709,61590],["Stralsund",13.1,54.3,61368],
+  ["Civitavecchia",11.8,42.1,61316],["Portimão",-8.533,37.134,61226],["Coburgo",10.967,50.267,61054],["Sal'sk",41.542,46.478,61000],["Cherbourg-Octeville",-1.65,49.65,60991],["Šuja",41.364,56.854,60705],
+  ["Sfântu Gheorghe",25.793,45.868,60677],["Lənkəran",48.851,38.754,60180],["Crotone",17.123,39.083,60010],["Kotlas",46.663,61.263,59879],["Linares",-3.633,38.083,59761],["Växjö",14.817,56.884,59600],
+  ["Béja",9.19,36.73,59567],["Lappeenranta",28.183,61.067,59276],["Kavala",24.402,40.941,59240],["Michajlovka",43.217,50.068,58898],["Solnečnogorsk",36.981,56.181,58891],["Coriza",20.767,40.617,58259],
+  ["Agen",0.633,44.2,58223],["Kırklareli",27.226,41.743,58223],["Boroviči",33.897,58.398,57887],["Tiznit",-9.74,29.71,57705],["Step'anakert",46.752,39.816,57473],["Vaasa",21.6,63.1,57014],
+  ["Roslavl'",32.86,53.951,56971],["Rodi",28.223,36.441,56969],["Adrar",-0.29,27.87,56910],["Eger",20.383,47.895,56647],["Hof",11.917,50.317,56153],["Nižnjaja Tura",59.798,58.644,56084],
+  ["Serres",23.55,41.086,55886],["Ełk",22.35,53.834,55769],["Halmstad",12.856,56.672,55657],["Évora",-7.906,38.56,55620],["Gelendžik",38.064,44.575,55508],["Vjaz'ma",34.292,55.212,55500],
+  ["Brive-la-Gaillarde",1.533,45.15,55448],["Karlovac",15.548,45.487,55063],["Tarbes",0.083,43.233,54854],["Ajaccio",8.728,41.927,54364],["Aveiro",-8.651,40.641,54162],["Čornomors'k",30.667,46.3,54102],
+  ["Andorra la Vella",1.527,42.511,53998],["Jihlava",15.583,49.4,53921],["Severomorsk",33.423,69.073,53921],["Vyšnij Voločëk",34.563,57.583,53800],["Yevlax",47.15,40.617,53716],["Buguruslan",52.433,53.663,53511],
+  ["Joensuu",29.767,62.6,53388],["Katerini",22.502,40.272,53293],["Saint-Brieuc",-2.783,48.517,53223],["Veliko Tărnovo",25.656,43.086,53115],["Alessandropoli",25.874,40.849,52979],["Arrecife",-13.538,28.969,52944],
+  ["Livny",37.604,52.425,52915],["Slobozia",27.382,44.57,52693],["Krasnokamsk",55.744,58.075,52689],["Siena",11.35,43.317,52625],["Tromsø",18.992,69.635,52436],["Mérida",-6.338,38.912,52423],
+  ["Kimry",37.344,56.869,52070],["Emden",7.217,53.367,51526],["Jendouba",8.75,36.5,51408],["Vejle",9.535,55.709,51177],["Kjustendil",22.691,42.284,51067],["Kyštym",60.56,55.7,50911],
+  ["Campobasso",14.656,41.563,50762],["Xanthi",24.884,41.142,50570],["Passavia",13.441,48.575,50560],["Otradnyj",51.347,53.378,50127],["Kanaš",47.469,55.509,49886],["Mončegorsk",32.829,67.929,49868],
+  ["Moršansk",41.804,53.455,49350],["Alexandria",25.33,43.974,49346],["Ruzaevka",44.924,54.064,49311],["Waterford",-7.112,52.258,49275],["Timimoun",0.27,29.237,49237],["In Salah",2.467,27.217,49223],
+  ["Verchnjaja Salda",60.55,58.05,48992],["Slobodskoj",50.188,58.718,48962],["Larnaca",33.636,34.917,48947],["Luleå",22.158,65.597,48638],["Toržok",34.979,57.029,48546],["Muğla",28.364,37.216,48183],
+  ["Belaja Kalitva",40.786,48.187,48098],["Le Kef",8.715,36.183,47979],["Ålesund",6.263,62.46,47772],["Mcensk",36.547,53.265,47609],["Montana",23.237,43.414,47445],["Grjazi",39.934,52.495,47413],
+  ["Možga",52.184,56.455,47270],["Hämeenlinna",24.472,60.997,47261],["Lamia",22.434,38.899,47246],["Poti",41.672,42.156,47149],["Sandnes",5.69,58.845,46911],["Berat",19.972,40.71,46866],
+  ["Žítíqara",61.24,52.193,46740],["Kokkola",23.117,63.833,46714],["Safonovo",33.216,55.146,46637],["Mikkeli",27.285,61.69,46550],["Middelburg",3.61,51.502,46485],["Alatyr'",46.6,54.85,46427],
+  ["Östersund",14.65,63.183,46178],["Pečora",57.209,65.159,46113],["Kohtla-Järve",27.283,59.4,46060],["Mahdia",11.041,35.484,45977],["Nevers",3.167,46.984,45929],["Apšeronsk",39.729,44.469,45876],
+  ["Mozdok",44.654,43.754,45702],["Volchov",32.339,59.929,45673],["Komotini",25.417,41.133,45631],["Efremov",38.122,53.149,45497],["Brach",14.283,27.533,45421],["Olbia",9.515,40.914,45366],
+  ["Šebekino",36.894,50.414,45194],["Černjachovsk",21.811,54.632,45187],["Inverness",-4.233,57.467,45158],["Leiria",-8.805,39.739,45112],["Shahat",21.862,32.828,45000],["Usinsk",57.403,65.923,45000],
+  ["Achtubinsk",46.169,48.279,44551],["Trollhättan",12.3,58.267,44543],["Zvolen",19.133,48.584,44502],["Roskilde",12.083,55.65,44285],["Pärnu",24.514,58.375,44192],["Timašëvsk",38.944,45.625,44024],
+  ["Voznesens'k",31.333,47.55,43996],["Džankoj",34.4,45.717,43879],["Novozybkov",31.945,52.535,43534],["Sovetsk",21.882,55.072,43309],["Vichy",3.417,46.117,43158],["Krasnoufimsk",57.759,56.599,43121],
+  ["Ventspils",21.561,57.39,42884],["Famagosta",33.95,35.125,42526],["Dieppe",1.083,49.934,42461],["Kapan",46.415,39.202,42288],["Loveč",24.719,43.138,42211],["Sokol",40.114,59.465,42174],
+  ["Sidi Bouzid",9.5,35.017,42098],["Miercurea Ciuc",25.524,46.361,42029],["Emanželinsk",61.294,54.749,42023],["Urjupinsk",42.003,50.773,41644],["Gaj",58.454,51.475,41619],["Auxerre",3.567,47.8,41516],
+  ["Lushnjë",19.716,40.94,41469],["Faro",-7.933,37.017,41355],["Zelenokumsk",43.879,44.409,41306],["Birsk",55.544,55.424,41014],["Bastia",9.45,42.703,41001],["Frolovo",43.652,49.772,40882],
+  ["Haugesund",5.277,59.412,40321],["Bilecik",29.983,40.15,40285],["Luga",29.839,58.736,40114],["Pogradec",20.664,40.9,40000],["Alekseevka",38.693,50.653,39848],["Perth",-3.436,56.393,39654],
+  ["Salgótarján",19.826,48.105,39640],["Bogorodick",38.114,53.775,39553],["Tozeur",8.13,33.93,39504],["Borlänge",15.417,60.483,39422],["Kirov",34.305,54.085,39319],["Vičuga",41.929,57.219,39071],
+  ["Tønsberg",10.421,59.264,38914],["Dundalk",-6.396,54,38884],["Aša",57.273,54.998,38883],["Millerovo",40.397,48.938,38527],["Corfù",19.915,39.615,38517],["Tskhinvali",43.975,42.232,38502],
+  ["Rēzekne",27.317,56.5,38340],["Coira",9.5,46.85,38293],["Razgrad",26.536,43.534,38285],["Kandalakša",32.414,67.164,38126],["Uglič",38.33,57.524,37732],["Sebenico",15.906,43.727,37112],
+  ["Qulsary",54.017,46.983,37103],["Ragusa",18.091,42.661,36994],["Moss",10.669,59.437,36901],["Kasimov",41.393,54.943,36663],["Serdobsk",44.222,52.462,36652],["Drogheda",-6.35,53.709,36533],
+  ["Falun",15.647,60.613,36477],["Dover",1.3,51.134,36384],["Principato di Monaco",7.407,43.74,36371],["Vaduz",9.517,47.134,36281],["Slancy",28.075,59.112,36209],["Severoural'sk",59.962,60.157,36138],
+  ["Blagodarnyj",43.434,45.105,35995],["Pafo",32.422,34.756,35961],["Valujki",38.099,50.209,35887],["Beja",-7.863,38.014,35854],["Šar'ja",45.509,58.38,35532],["Göyçay",47.741,40.653,35348],
+  ["Vác",19.133,47.784,35293],["Šumerlja",46.424,55.485,35230],["Karlskrona",15.591,56.163,35212],["Kalmar",16.367,56.667,35024],["Sinope",35.153,42.023,34834],["Viborg",9.4,56.433,34831],
+  ["Aqsaj",53.035,51.171,34799],["Rovaniemi",25.716,66.5,34781],["Bežeck",36.69,57.765,34736],["Braganza",-6.755,41.808,34375],["Kondopoga",34.289,62.209,34360],["Staraja Russa",31.354,57.995,34303],
+  ["Szekszárd",18.713,46.344,34174],["Bodø",14.429,67.276,34073],["Aosta",7.315,45.737,34062],["Vibo Valentia",16.1,38.667,33957],["Verchnij Ufalej",60.231,56.066,33879],["Sciaffusa",8.633,47.706,33863],
+  ["Rostov Velikij",39.404,57.189,33803],["Djat'kovo",34.339,53.589,33527],["Castelo Branco",-7.488,39.811,33479],["Segeža",34.324,63.755,33354],["Velikij Ustjug",46.299,60.769,33237],["Kotovsk",41.504,52.595,33077],
+  ["Friburgo",7.15,46.8,32827],["Omutninsk",52.159,58.659,32800],["Beyneu",55.1,45.183,32452],["Kudymkar",54.633,59.016,32423],["Artvin",41.818,41.183,32272],["Gümüşhane",39.484,40.464,32250],
+  ["Kristianstad",14.133,56.034,32188],["Guarda",-7.262,40.541,32111],["Al-Mani'a",2.883,30.567,32049],["Balyqshy",51.867,47.067,31624],["Azaz",37.044,36.589,31534],["Gubacha",57.589,58.869,31424],
+  ["Sasovo",41.909,54.349,31325],["Skellefteå",20.95,64.772,31311],["Neuchâtel",6.923,46.999,31270],["Kouvola",26.709,60.876,31133],["Dumfries",-3.55,55.067,31044],["Arendal",8.766,58.465,30916],
+  ["Karpinsk",60.01,59.76,30807],["Mednogorsk",57.579,51.419,30676],["Svetogorsk",28.918,61.101,30115],["Kirovsk",33.669,67.609,29605],["Città di San Marino",12.442,43.936,29579],["comune di Hamar",11.069,60.82,29479],
+  ["Santarém",-8.682,39.231,29385],["Sosnogorsk",53.894,63.595,29343],["Mitilene",26.555,39.11,29328],["Svendborg",10.617,55.07,29180],["Tunceli",39.533,39.117,29062],["Tripoli",22.379,37.509,28970],
+  ["Kartaly",60.682,53.047,28503],["Kotel'nič",48.314,58.304,28431],["Hillerød",12.317,55.933,28313],["Alǧa",57.335,49.903,28267],["Qandyaǧaš",57.445,49.473,28196],["Nev'jansk",60.215,57.49,28170],
+  ["Sion",7.354,46.239,28045],["Örnsköldsvik",18.717,63.318,27749],["El-Tor",33.615,28.239,27628],["Nyköping",16.996,58.752,27582],["Atkarsk",44.996,51.876,27554],["Sol'-Ileck",55,51.16,27419],
+  ["Savonlinna",28.883,61.867,27353],["Shalqar",59.614,47.836,27256],["Siliana",9.383,36.083,26960],["Bregenz",9.767,47.517,26928],["Chio",26.136,38.368,26891],["Kyrenia",33.333,35.326,26701],
+  ["Pugačëv",48.794,52.015,26690],["Bakal",58.796,54.946,26559],["Buj",41.524,58.485,26486],["Tralee",-9.717,52.267,26384],["Viseu",-7.91,40.657,26364],["Vel'sk",42.097,61.067,26300],
+  ["Arlon",5.817,49.683,26179],["Mizda",12.983,31.434,26107],["Krasnoarmejsk",45.697,51.017,25841],["Nelidovo",32.773,56.224,25349],["Bologoe",34.052,57.872,25142],["Covilhã",-7.5,40.283,24828],
+  ["Frederikshavn",10.533,57.434,24103],["Khromtau",58.45,50.27,23715],["L'gov",35.274,51.695,23500],["Argirocastro",20.149,40.079,23437],["Zugo",8.487,47.179,23435],["Dubăsari",29.161,47.263,23254],
+  ["Siwa",25.517,29.2,23080],["Inta",60.167,66.037,22921],["Gjøvik",10.7,60.8,22719],["Onega",38.077,63.927,22693],["Kemi",24.582,65.733,22641],["Visby",18.3,57.634,22593],
+  ["Pyrgos",21.45,37.684,22399],["Kizel",57.634,59.064,22135],["Frauenfeld",8.905,47.553,21979],["Vänersborg",12.33,58.363,21835],["Gavar",45.127,40.359,21680],["Nar'jan-Mar",53.057,67.647,21658],
+  ["Kilkenny",-7.252,52.655,21589],["Croia",19.797,41.519,21286],["Omagh",-7.3,54.6,21056],["Penzance",-5.55,50.134,20812],["Krasnoural'sk",60.052,58.352,20571],["Artašat",44.551,39.954,20562],
+  ["Mo i Rana",14.167,66.317,20409],["Viljandi",25.59,58.364,20309],["Sligo",-8.483,54.267,20228],["Rayevskiy",54.927,54.067,20060],["Narvik",17.29,68.383,20000],["Kébili",8.971,33.69,19875],
+  ["Ben Gardane",11.22,33.14,19843],["Lillehammer",10.5,61.133,19542],["Harstad",16.516,68.788,19433],["Ivdel'",60.413,60.694,19379],["Coo",27.289,36.894,19244],["Poljarnyj",33.45,69.205,19200],
+  ["Hon",15.933,29.117,18878],["Ashtarak",44.359,40.302,18779],["Embi",58.144,48.827,18760],["Alessio",19.654,41.788,18695],["Molde",7.183,62.748,18594],["Tindouf",-8.148,27.674,18270],
+  ["Kiruna",20.217,67.85,18154],["Hassi Messaoud",6.054,31.702,18124],["Kirsanov",42.717,52.657,17975],["Sovetsk",48.958,57.578,17869],["Kukës",20.434,42.083,17832],["Pallasovka",46.877,50.048,17139],
+  ["Plast",60.809,54.369,17050],["Härnösand",17.934,62.634,17016],["Vila Real",-7.737,41.294,17001],["Zaghouan",10.147,36.4,16911],["Bellinzona",9.02,46.197,16572],["Akureyri",-18.1,65.667,16563],
+  ["Kamenka",44.044,53.195,16560],["Sparta",22.43,37.074,16187],["Nikolaevsk",45.426,50.016,16044],["Nikel'",30.219,69.413,15866],["Portalegre",-7.423,39.29,15581],["Viana do Castelo",-8.844,41.696,15555],
+  ["Aarau",8.034,47.39,15501],["Herisau",9.283,47.383,15438],["Burrel",20.016,41.626,15405],["Saranda",20,39.877,15147],["Mariestad",13.828,58.705,14891],["Soletta",7.537,47.212,14853],
+  ["Peshkopi",20.433,41.683,14848],["Ijevan",45.149,40.876,14737],["Tórshavn",-6.82,62.03,14398],["Abadla",-2.733,31.017,14364],["El Dabaa",28.433,31.034,14212],["Svitto",8.648,47.02,14177],
+  ["Maqat",53.327,47.648,14082],["Çorovodë",20.233,40.517,14046],["Kem'",34.568,64.954,13829],["Bollnäs",16.367,61.352,13398],["Eisenstadt",16.533,47.833,13165],["Lisburn",-6.048,54.51,12899],
+  ["Liestal",7.737,47.483,12832],["Librazhd",20.367,41.2,12691],["Tovuz",45.629,40.992,12626],["Ermoupoli",24.933,37.45,12260],["Porvoo",25.666,60.4,12242],["Belomorsk",34.766,64.525,12165],
+  ["Alta",23.242,69.967,12077],["Tepelenë",20.033,40.283,11955],["Killarney",-9.517,52.05,11902],["Qəbələ",47.846,40.981,11867],["Haapsalu",23.541,58.943,11805],["Gramsh",20.2,40.867,11556],
+  ["Kirs",52.245,59.314,11385],["Delémont",7.345,47.37,11315],["Steinkjer",11.5,64.017,11274],["Përmet",20.352,40.234,10686],["Rrëshen",19.817,41.783,10064],["Hammerfest",23.688,70.661,10000],
+  ["Fort William",-5.112,56.816,9652],["Dombarovskij rajon",59.54,50.755,9556],["Sarnen",8.243,46.899,9410],["Namsos",11.5,64.483,9035],["Sodankylä",26.6,67.417,8942],["Makhambet",51.58,47.671,8905],
+  ["Jañaözen",52.8,43.3,8895],["Kemijärvi",27.417,66.667,8883],["Sitia",26.099,35.2,8833],["Shannon Town",-8.864,52.704,8781],["Altdorf",8.638,46.879,8678],["Gədəbəy",45.816,40.566,8657],
+  ["Kirkwall",-2.95,58.967,8500],["Zhanibek",46.877,49.428,8212],["Yeghegnadzor",45.333,39.761,8200],["Bajram Curri",20.083,42.333,7967],["Keflavík",-22.567,64.017,7930],["Ersekë",20.683,40.333,7890],
+  ["Bajǧanin",55.874,48.692,7657],["Stans",8.383,46.95,7475],["El Alamein",28.95,30.817,7400],["Goranboy",46.79,40.61,7333],["Sollum",25.15,31.567,7330],["Sorø",11.567,55.433,7167],
+  ["Wick",-3.083,58.433,7147],["Oğuz",47.458,41.071,6876],["Ghadames",9.5,30.133,6623],["Augila",21.287,29.108,6610],["Pukë",19.883,42.033,6495],["Selfoss",-20.997,63.933,6275],
+  ["Diekirch",6.167,49.883,6242],["Umba",34.346,66.681,6128],["Chapaev",51.145,50.191,6000],["Monaghan",-6.967,54.25,5937],["Glarona",9.067,47.05,5681],["Appenzell",9.417,47.333,5649],
+  ["Beni Ounif",-1.251,32.049,5628],["Vossevangen",6.441,60.63,5571],["Qaminis",20.015,31.661,5348],["Polygyros",23.453,40.381,5258],["Fort Ševčenko",50.267,44.517,5213],["Vadsø",29.766,70.097,5139],
+  ["Farafra",27.967,27.067,5000],["Roscommon",-8.183,53.633,4860],["Klaksvík",-6.539,62.237,4664],["Aktau",51.236,43.623,4479],["Svolvær",14.567,68.233,4197],["Grevenmacher",6.426,49.68,3958],
+  ["Finnsnes",18.009,69.241,3907],["Mezen'",44.24,65.852,3672],["Dehiba",10.7,32.017,3525],["Kirkenes",30.052,69.725,3282],["Saranpaul'",60.97,64.25,2985],["Sauðárkrókur",-19.639,65.746,2682],
+  ["Rørvik",11.205,64.868,2615],["Ísafjörður",-23.15,66.083,2534],["Donegal Town",-8.117,54.65,2513],["Maradah",19.217,29.234,2500],["Egilsstaðir",-14.395,65.267,2265],["Leikanger",6.85,61.183,1965],
+  ["Beida",21.62,32.76,1794],["Borgarnes",-21.862,64.57,1783],["Giarabub",24.517,29.75,1744],["Höfn",-15.214,64.272,1695]
+];
+// CITTA_REALI_FINE
+const ABITANTI_GRANDI = 1000000; // ogni città da un milione in su ha sempre il suo villaggio
+// abitanti -> stelle a turno (a scaglioni, quasi logaritmici: Roma non vale 300 villaggi)
+const SCAGLIONI_ABITANTI = [[5000000, 7], [2000000, 6], [700000, 5], [200000, 4], [50000, 3], [5000, 2]];
+function renditaAbitanti(ab) {
+  for (const [soglia, stelle] of SCAGLIONI_ABITANTI) if (ab >= soglia) return stelle;
+  return 1;
+}
+// rendita di una città: abitanti (la capitale almeno 2) +1 se capitale, +1 per ogni livello di crescita
+function renditaCitta(c) {
+  const b = renditaAbitanti(c.ab == null ? 10000 : c.ab);
+  return (c.capital ? Math.max(2, b) + 1 : b) + ((c.pop || 1) - 1);
+}
+function fmtAbitanti(n) { return String(Math.round(n)).replace(/\B(?=(\d{3})+(?!\d))/g, '.'); }
+function escHtml(s) { return String(s).replace(/[&<>"']/g, ch => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' })[ch]); }
+function nomeCitta(c) { return c.n || (c.capital ? 'Capitale' : 'Villaggio'); }
+// i villaggi senza una città reale vicina: stima fissa per casella, da 2.000 a 30.000
+// abitanti (da 500 a 8.000 fra le sabbie del deserto)
+function stimaAbitanti(t) {
+  const h = (Math.imul(t.r + 1, 73856093) ^ Math.imul(t.c + 1, 19349663)) >>> 0;
+  const x = (h % 1000) / 1000;
+  const deserto = neighbors(t).filter(n => n.terrain === 'desert').length >= 3;
+  const [lo, hi] = deserto ? [500, 8000] : [2000, 30000];
+  return Math.round(lo * Math.pow(hi / lo, x) / 100) * 100;
+}
+// km fra due punti (stessa scala della mappa)
+function kmGeo(lon1, lat1, lon2, lat2) { return Math.hypot((lon1 - lon2) * GEO.kmLon, (lat1 - lat2) * GEO.kmLat); }
+// raggio entro cui un villaggio prende il nome di una città reale: poco piu' di una casella
+function raggioCittaKm(g) { return Math.max(25, 1.2 * S * SQ3 / g.sc); }
+// dà nome e abitanti alle città che non li hanno ancora: le città reali piu' popolose
+// scelgono per prime il villaggio piu' vicino entro il raggio; le altre restano stime
+function assegnaAbitanti() {
+  const g = geoSetup(), R = raggioCittaKm(g);
+  const usati = new Set(), attesa = [];
+  for (const row of map) for (const t of row) {
+    if (!t.city) continue;
+    if (t.city.ab == null) attesa.push(t);
+    else if (t.city.n) usati.add(t.city.n);
+  }
+  if (!attesa.length) return;
+  const pos = attesa.map(t => tileLonLat(t, g));
+  const libero = attesa.map(() => true);
+  for (const [n, lon, lat, ab] of CITTA_REALI) {
+    if (usati.has(n)) continue;
+    let best = -1, bd = R;
+    for (let i = 0; i < attesa.length; i++) {
+      if (!libero[i]) continue;
+      const d = kmGeo(lon, lat, pos[i].lon, pos[i].lat);
+      if (d <= bd) { bd = d; best = i; }
+    }
+    if (best < 0) continue;
+    libero[best] = false; usati.add(n);
+    attesa[best].city.n = n; attesa[best].city.ab = ab;
+  }
+  attesa.forEach((t, i) => { if (libero[i]) { t.city.n = null; t.city.ab = stimaAbitanti(t); } });
+}
+// un villaggio neutrale su ogni città reale da un milione in su che non ne ha già uno
+// accanto (deterministico: fa parte della mappa fissa)
+function villaggiGrandiCitta(g, vills, vieta) {
+  const W = OFFX * 2 + S * SQ3 * COLS, H = OFFY * 2 + S * 1.5 * ROWS;
+  for (const [n, lon, lat, ab] of CITTA_REALI) {
+    if (ab < ABITANTI_GRANDI) break;
+    const p = geoToPx(lon, lat, g);
+    if (p.x < 0 || p.y < 0 || p.x > W || p.y > H) continue;
+    const vt = tileAtGeo(lon, lat, g);
+    const vicine = [vt, ...neighbors(vt)];
+    if (vicine.some(x => x.city)) continue;
+    const spot = vicine.find(x => x.terrain !== 'water' && x.terrain !== 'river' && x.country && !(vieta && vieta.has(x)));
+    if (!spot) continue;
+    spot.terrain = 'grass'; delete spot.dvar;
+    spot.city = { owner: null, capital: false, pop: 1, n, ab };
+    vills.push(spot);
+  }
+}
 // ============ I BIOMI REALI (OpenStreetMap) ============
 // Una mappa fissa per ogni taglia: il bioma di ogni casella e' precalcolato da
 // build_biomi.py sulle coperture del suolo di OpenStreetMap (boschi, rocce,
@@ -1219,6 +1532,9 @@ function genMap() {
     if (spot) { spot.terrain = 'grass'; spot.city = { owner: null, capital: false, pop: 1 }; }
   }
   // le capitali degli imperi IA le fonda assegnaPaesi, ciascuna nel suo paese
+  // le grandi città reali, poi nomi e abitanti veri a tutti i villaggi
+  villaggiGrandiCitta(g, vills, micro); // non sulla casella di un microstato (il Vaticano accanto a Roma)
+  assegnaAbitanti();
 
   // i volti del deserto (dune, pietra, sale, tundra): solo aspetto
   assegnaDeserti(g);
@@ -1295,14 +1611,19 @@ function computePlaceSet() {
 function placePlayerCapital(t) {
   t.terrain = 'grass';
   terrainDirty = true;
-  t.city = { owner:'p', capital:true, pop:1 };
+  // su un villaggio neutrale la capitale ne prende nome e abitanti
+  const v = t.city;
+  t.city = v ? { owner:'p', capital:true, pop:1, n: v.n, ab: v.ab } : { owner:'p', capital:true, pop:1 };
   t.unit = mkUnit('warrior','p');
+  if (players.p.country) battezzaCapitale(t, players.p.country);
   placing = false; placeSet = [];
   document.getElementById('paesi').style.display = 'none';
-  const n = imperiIA().length, dove = nomeCapitale(players.p.country);
+  assegnaAbitanti();
+  const n = imperiIA().length, dove = t.city.n || nomeCapitale(players.p.country);
+  const quanti = `${fmtAbitanti(t.city.ab || 0)} abitanti, ${renditaCitta(t.city)}⭐ a turno`;
   msg(modoPartita === 'tutti'
-    ? `🏛️ Capitale fondata${dove ? ' a ' + dove : ''}! Contro di te ci sono ${n} imperi, uno per paese, in guerra fra loro e con te. Tocca a te.`
-    : `🏛️ Capitale fondata${dove ? ' a ' + dove : ''}! Espanditi e conquista. Tocca a te.`);
+    ? `🏛️ Capitale fondata${dove ? ' a ' + dove : ''} (${quanti})! Contro di te ci sono ${n} imperi, uno per paese, in guerra fra loro e con te. Tocca a te.`
+    : `🏛️ Capitale fondata${dove ? ' a ' + dove : ''} (${quanti})! Espanditi e conquista. Tocca a te.`);
   ui(); render();
   scrollToTile(t, false);
 }
@@ -1333,9 +1654,12 @@ function paesiInfo() {
   const info = {};
   for (const t of map.flat()) {
     if (!t.country || t.terrain === 'water' || t.terrain === 'river') continue;
-    const p = info[t.country] || (info[t.country] = { caselle: 0, vill: 0, spots: [], x: 0, y: 0 });
+    const p = info[t.country] || (info[t.country] = { caselle: 0, vill: 0, spots: [], ville: [], x: 0, y: 0 });
     p.caselle++;
-    if (t.city && !t.city.capital) p.vill++; // le città del paese, di chiunque siano (all'inizio sono del suo impero)
+    // le città del paese, di chiunque siano (all'inizio sono del suo impero), senza quella dove
+    // sorgerà la capitale vera (Roma, Parigi...)
+    if (t.city && !t.city.capital && !(t.city.n && t.city.n === nomeCittaCapitale(t.country))) p.vill++;
+    if (t.city) p.ville.push(t); // dove può sorgere la capitale vera, sul villaggio della sua città
     if ((t.terrain === 'grass' || t.terrain === 'forest' || t.terrain === 'hill') && !t.hosp && !t.port
         && (!t.city || t.city.capital)) { // le capitali si spostano: la loro casella resta valida
       const c = center(t);
@@ -1430,7 +1754,12 @@ function nuovoImpero(cc) {
 }
 function togliImpero(o) {
   const cap = capitaleDi(o);
-  if (cap) { cap.city = null; if (cap.unit && cap.unit.owner === o) cap.unit = null; }
+  if (cap) {
+    // una capitale sorta su un villaggio lo lascia al suo posto (Roma resta Roma)
+    const c = cap.city;
+    cap.city = c.exVillaggio ? { owner: null, capital: false, pop: 1, n: c.n, ab: c.ab } : null;
+    if (cap.unit && cap.unit.owner === o) cap.unit = null;
+  }
   delete players[o]; delete aiStato[o];
   ordineIA = ordineIA.filter(x => x !== o);
 }
@@ -1482,14 +1811,57 @@ function casellaCapitale(cc) {
     const p = center(t), d = (p.x - q.x) ** 2 + (p.y - q.y) ** 2;
     if (d < bd) { bd = d; best = t; }
   }
+  // se vicino al punto vero c'è già il villaggio della città (Roma, Madrid...), la capitale
+  // sorge lì e ne prende nome e abitanti (entro due caselle: Versailles non è Parigi)
+  const vera = cittaRealeCapitale(cc);
+  if (vera) {
+    const dueCaselle = (2.2 * S * SQ3) ** 2;
+    for (const t of info[cc].ville) {
+      if (!t.city || t.city.capital || t.city.n !== vera[0] || t.unit || t.hosp || t.port) continue;
+      const p = center(t);
+      if ((p.x - q.x) ** 2 + (p.y - q.y) ** 2 <= dueCaselle && neighbors(t).filter(n => passable(n)).length >= 3) return t;
+    }
+  }
   return best;
+}
+// la città vera della capitale nella lista degli abitanti: quella con lo stesso nome, o la più
+// vicina entro 20 km dal punto vero (Monaco è "Principato di Monaco" in Natural Earth)
+function cittaRealeCapitale(cc) {
+  const cap = CAPITALI_REALI[cc];
+  if (!cap) return null;
+  let best = null, bd = 20;
+  for (const x of CITTA_REALI) {
+    const d = kmGeo(x[1], x[2], cap[1], cap[2]);
+    if (x[0] === cap[0] && d <= 60) return x;
+    if (d <= bd && !nomiCapitali.has(x[0])) { bd = d; best = x; } // il Vaticano non si prende Roma
+  }
+  return best;
+}
+const nomiCapitali = new Set(Object.values(CAPITALI_REALI).map(c => c[0]));
+const cittaCapitaleCache = {};
+function nomeCittaCapitale(cc) {
+  if (!(cc in cittaCapitaleCache)) { const v = cittaRealeCapitale(cc); cittaCapitaleCache[cc] = v ? v[0] : null; }
+  return cittaCapitaleCache[cc];
+}
+// una capitale fondata su una casella libera prende comunque nome e abitanti della sua città;
+// se il nome l'aveva preso un villaggio lì accanto (La Valletta su Malta), quello diventa anonimo
+function battezzaCapitale(t, cc) {
+  if (!t.city || t.city.n) return;
+  const vera = cittaRealeCapitale(cc);
+  if (!vera) { t.city.ab = t.city.ab || stimaAbitanti(t); return; }
+  const altri = dallIndice(conCitta, x => x !== t && x.city.n === vera[0]);
+  if (altri.some(x => x.city.capital)) { t.city.ab = t.city.ab || stimaAbitanti(t); return; }
+  for (const x of altri) { x.city.n = null; x.city.ab = stimaAbitanti(x); }
+  t.city.n = vera[0]; t.city.ab = vera[3];
 }
 function fondaCapitaleIA(cc) {
   const t = casellaCapitale(cc);
   if (!t) return false;
   nuovoImpero(cc);
-  t.city = { owner: cc, capital: true, pop: 1 };
+  const v = t.city; // il villaggio della città vera, se la capitale sorge lì
+  t.city = v ? { owner: cc, capital: true, pop: 1, n: v.n, ab: v.ab, exVillaggio: true } : { owner: cc, capital: true, pop: 1 };
   t.unit = mkUnit('warrior', cc);
+  battezzaCapitale(t, cc);
   return true;
 }
 
@@ -1524,6 +1896,7 @@ function assegnaPaesi(pCc, aCc) {
     }
   }
   distribuisciCitta();
+  assegnaAbitanti();
   placeSet = computePlaceSet();
 }
 // a inizio partita ogni impero possiede tutte le città del suo paese (le tue comprese);
@@ -2235,7 +2608,7 @@ function settleIfCitizen(t) {
   if (!u || !UNIT_TYPES[u.type].settler) return;
   if (!t.city || t.city.owner !== u.owner) return;
   const space = MAX_POP - (t.city.pop || 1);
-  if (space <= 0) { msg('🏘️ La città è già a piena popolazione (5/5).'); return; }
+  if (space <= 0) { msg('🏘️ La città è già al massimo della crescita (5/5).'); return; }
   const absorbed = Math.min(space, u.count);
   t.city.pop = (t.city.pop || 1) + absorbed;
   if (absorbed >= u.count) t.unit = null;
@@ -2244,7 +2617,7 @@ function settleIfCitizen(t) {
     u.maxHp = UNIT_TYPES.citizen.hp * u.count;
     u.hp = Math.min(u.hp, u.maxHp);
   }
-  msg(`👨‍🌾 ${absorbed > 1 ? absorbed + ' cittadini si insediano' : 'Un cittadino si insedia'}: popolazione ${t.city.pop}/5, +${absorbed}⭐/turno`);
+  msg(`👨‍🌾 ${absorbed > 1 ? absorbed + ' cittadini si insediano' : 'Un cittadino si insedia'}: crescita ${t.city.pop}/5, +${absorbed}⭐/turno`);
 }
 
 // fondazione di un nuovo villaggio da parte di una Carovana
@@ -2268,10 +2641,11 @@ function foundVillage(t) {
   if (!canFound(t)) return false;
   const u = t.unit;
   const pop = Math.min(MAX_POP, 1 + Math.max(0, u.count - FOUND_MIN));
-  t.city = { owner: u.owner, capital: false, pop };
+  t.city = { owner: u.owner, capital: false, pop, n: null, ab: 0 };
+  t.city.ab = stimaAbitanti(t); // un villaggio nuovo: abitanti stimati, senza nome
   t.unit = null;
   terrainDirty = true;
-  msg(`🏗️ ${u.owner === 'p' ? 'Hai fondato un nuovo villaggio' : 'Il nemico ha fondato un nuovo villaggio'}! (popolazione ${pop}/5)`);
+  msg(`🏗️ ${u.owner === 'p' ? 'Hai fondato un nuovo villaggio' : 'Il nemico ha fondato un nuovo villaggio'}! (${fmtAbitanti(t.city.ab)} abitanti, crescita ${pop}/5)`);
   return true;
 }
 function playerFound() {
@@ -2289,7 +2663,8 @@ function captureIfCity(t, owner) {
     // la guerra fa fuggire parte degli abitanti
     if (was) t.city.pop = Math.max(1, (t.city.pop || 1) - 1);
     if (owner === 'p') {
-      msg(was === null ? '⛺ Villaggio conquistato! Ora produce stelle.' : '🔥 Città nemica conquistata! (parte della popolazione è fuggita)');
+      msg(was === null ? `⛺ ${t.city.n ? t.city.n + ' conquistata' : 'Villaggio conquistato'}! ${fmtAbitanti(t.city.ab || 0)} abitanti: +${renditaCitta(t.city)}⭐ a turno.`
+                     : `🔥 ${t.city.n || 'Città nemica'} conquistata! (la crescita cala di 1)`);
       if (was === null) tutEvent('capture');
     } else {
       if (was === null) aiLogAdd('⛺ Il nemico ha conquistato un villaggio neutrale');
@@ -2305,7 +2680,7 @@ function captureIfCity(t, owner) {
 function cities(owner) { return dallIndice(conCitta, t => t.city.owner === owner); }
 function unitsOf(owner) { return dallIndice(conUnita, t => t.unit.owner === owner); }
 function income(owner) {
-  return cities(owner).reduce((s, t) => s + (t.city.capital ? 3 : 2) + ((t.city.pop || 1) - 1), 0)
+  return cities(owner).reduce((s, t) => s + renditaCitta(t.city), 0)
        + ports(owner).length * PORT_INCOME
        + alleatiDi(owner).length * ALLEANZA_RENDITA; // il commercio con gli alleati
 }
@@ -2449,7 +2824,7 @@ function snapshot() {
     stelle: Object.fromEntries(Object.keys(players).map(o => [o, players[o].stars])), vivi: imperiIA(), turn,
     tiles: map.flat().map(t => ({
       g: t.terrain, b: t.bridge ? 1 : 0,
-      y: t.city ? { o: t.city.owner, k: t.city.capital, p: t.city.pop || 1 } : 0,
+      y: t.city ? { o: t.city.owner, k: t.city.capital, p: t.city.pop || 1, n: t.city.n, a: t.city.ab } : 0,
       u: t.unit ? { t: t.unit.type, o: t.unit.owner, n: t.unit.count, h: t.unit.hp,
                     m: t.unit.maxHp, mv: t.unit.moved, ak: t.unit.attacked, cl: t.unit.climb || 0,
                     lv: UNIT_TYPES[t.unit.type].ship ? (t.unit.lvl || 1) : 0,
@@ -2470,7 +2845,7 @@ function restoreSnapshot(s) {
     const t = map[r][c], x = d.tiles[i++];
     t.terrain = x.g;
     t.bridge = !!x.b;
-    t.city = x.y ? { owner: x.y.o, capital: x.y.k, pop: x.y.p || 1 } : null;
+    t.city = x.y ? { owner: x.y.o, capital: x.y.k, pop: x.y.p || 1, n: x.y.n, ab: x.y.a } : null;
     t.unit = x.u ? { type: x.u.t, owner: x.u.o, count: x.u.n, hp: x.u.h,
                      maxHp: x.u.m, moved: x.u.mv, attacked: x.u.ak, climb: x.u.cl || 0 } : null;
     if (t.unit && UNIT_TYPES[t.unit.type].ship) {
@@ -2512,7 +2887,7 @@ function serialize() {
     const t = map[r][c];
     tiles.push({
       r, c, g: t.terrain, b: t.bridge ? 1 : 0,
-      y: t.city ? { o: t.city.owner, k: !!t.city.capital, p: t.city.pop || 1 } : 0,
+      y: t.city ? { o: t.city.owner, k: !!t.city.capital, p: t.city.pop || 1, n: t.city.n || null, a: t.city.ab } : 0,
       u: t.unit ? { t: t.unit.type, o: t.unit.owner, n: t.unit.count, h: t.unit.hp, m: t.unit.maxHp, cl: t.unit.climb || 0,
                     lv: UNIT_TYPES[t.unit.type].ship ? (t.unit.lvl || 1) : 0,
                     k: t.unit.cargo ? { t: t.unit.cargo.type, o: t.unit.cargo.owner, n: t.unit.cargo.count,
@@ -2577,6 +2952,9 @@ function applySave(data) {
     if (s.y) {
       if (s.y.o !== null && !proprietario(s.y.o)) return false;
       t.city = { owner: s.y.o, capital: !!s.y.k, pop: Math.min(MAX_POP, Math.max(1, (s.y.p | 0) || 1)) };
+      // nome e abitanti reali (dalla v66); i salvataggi precedenti li ricalcolano dopo
+      if (typeof s.y.n === 'string' && s.y.n.length <= 80) t.city.n = s.y.n;
+      if (Number.isFinite(s.y.a) && s.y.a >= 0) t.city.ab = Math.min(50000000, Math.round(s.y.a));
     }
     if (s.u) {
       if (!(s.u.t in UNIT_TYPES) || !proprietario(s.u.o)) return false;
@@ -2650,6 +3028,7 @@ function applySave(data) {
   }
   assignCountries();
   assegnaDeserti(); // riconosce erg/reg/chott sul deserto salvato (solo aspetto)
+  assegnaAbitanti(); // salvataggi senza abitanti: li ricava dalla posizione
   terrainDirty = true;
   turn = Math.max(1, data.turn | 0);
   // gli imperi: il paese di ciascuno (v16+), o quello in cui sorge la sua capitale
@@ -2849,9 +3228,9 @@ const GUIDE_SLIDES = [
   { title: '👨‍🌾 Il Cittadino e la Carovana', html: () =>
     unitCard('citizen', 'Il motore della crescita: non combatte, costruisce l\'impero.',
       `Il Cittadino <b>non attacca mai</b> e ha difesa zero: chiunque può ucciderlo in un colpo. Ma è l'unico che fa <b>crescere</b> le città invece di conquistarle.
-      <b>Insediamento:</b> portalo in una <b>tua città</b> e vi si insedia: la <b>popolazione</b> sale di 1 (distintivo azzurro, max ${MAX_POP}) e la rendita aumenta di <b>+1⭐/turno</b> per abitante. Una città a piena popolazione rende 6⭐, la capitale 7⭐. Entrando in un <b>villaggio neutrale ⛺</b> lo colonizza pacificamente (diventa tuo con popolazione 2). Non può entrare nelle città nemiche: è un civile.
+      <b>Insediamento:</b> portalo in una <b>tua città</b> e vi si insedia: la <b>crescita</b> sale di 1 (distintivo azzurro, max ${MAX_POP}) e la rendita aumenta di <b>+1⭐/turno</b> per livello, oltre a quella data dagli abitanti veri. Entrando in un <b>villaggio neutrale ⛺</b> lo colonizza pacificamente (diventa tuo con crescita 2). Non può entrare nelle città nemiche: è un civile.
       <b>🐫 Carovana:</b> i Cittadini si uniscono fino a <b>6</b> (caselle viola). Con <b>${FOUND_MIN} o più</b>, su un prato libero lontano almeno 2 caselle da altre strutture, può <b>🏗️ fondare un villaggio nuovo</b> (pulsante nel pannello o tasto <b>F</b>): nasce una tua città vera e propria.
-      <b>Attenzione:</b> quando il nemico conquista una città, <b>un abitante fugge</b> (popolazione −1): la crescita va difesa. E le carovane nemiche sono prede: l'Impero Cremisi colonizza anche lui!`) },
+      <b>Attenzione:</b> quando il nemico conquista una città, <b>la crescita cala di 1</b>: va difesa. E le carovane nemiche sono prede: l'Impero Cremisi colonizza anche lui!`) },
 
   { title: '👷 Il Costruttore', html: () =>
     unitCard('builder', 'L\'ingegnere dell\'impero: apre le strade che non esistono.',
@@ -3899,6 +4278,11 @@ function onTileClick(t) {
     tutEvent('selectCity');
     ui(); render(); return;
   }
+  // villaggio neutrale o città nemica: se ne vedono nome, abitanti e rendita
+  if (t.city && !t.unit) {
+    selected = t; moveSet = []; attackSet = []; mergeSet = []; bridgeSet = []; embarkSet = []; disembarkSet = [];
+    ui(); render(); return;
+  }
   // selezione porto proprio (per comprare navi)
   if (t.port && t.port.owner === 'p' && !t.unit) {
     selected = t; moveSet = []; attackSet = []; mergeSet = []; bridgeSet = []; embarkSet = []; disembarkSet = [];
@@ -4291,6 +4675,7 @@ function render() {
     ctx.setLineDash([6*k, 4*k]); ctx.stroke(); ctx.setLineDash([]);
   }
   // strutture e unità (caselle sparse), solo quelle sullo schermo
+  const etichette = [];
   for (let r = vis.r0; r <= vis.r1; r++) for (let c = vis.c0; c <= vis.c1; c++) {
     const t = map[r][c];
     if (!t.city && !t.hosp && !t.port && !t.unit) continue;
@@ -4317,6 +4702,9 @@ function render() {
         ctx.font = 'bold ' + Math.round(11*k) + 'px sans-serif'; ctx.fillStyle = '#04203d';
         ctx.fillText(String(t.city.pop), bx, by + 0.5*k);
       }
+      // il nome della città reale (le grandi città anche da lontano), sopra le unità
+      const hexPx = S * zoom; // misura della casella in pixel CSS
+      if (t.city.n && (hexPx >= 20 || (t.city.ab >= ABITANTI_GRANDI && hexPx >= 7))) etichette.push(t);
     }
     // porto
     if (t.port) {
@@ -4403,6 +4791,16 @@ function render() {
           ctx.lineWidth = 1.5*k; ctx.strokeStyle = '#0e3c1d'; ctx.stroke();
         }
       }
+    }
+  }
+  // i nomi delle città, sotto la casella: per ultimi, cosi' nessuna unità li copre
+  if (etichette.length) {
+    ctx.font = `bold ${11 / zoom}px sans-serif`; // 11 pixel CSS a ogni zoom e densita' di schermo
+    ctx.lineWidth = 3 / zoom; ctx.strokeStyle = 'rgba(10,16,28,.85)'; ctx.fillStyle = '#fff';
+    for (const t of etichette) {
+      const p = center(t), ly = p.y + Math.max(S * 0.78, 8 / zoom);
+      ctx.strokeText(t.city.n, p.x, ly);
+      ctx.fillText(t.city.n, p.x, ly);
     }
   }
 }
@@ -4493,9 +4891,8 @@ function ui() {
       &nbsp; ❤️ ${u.hp}/${u.maxHp} · ⚔️ ${atkTxt} · 🛡️ ${d.def} · 👣 ${d.move} · 🎯 ${d.range}
       &nbsp; ${u.moved ? '✔️ mosso' : '🟢 può muovere'} · ${u.attacked ? '✔️ attaccato' : '🟢 può attaccare'}${u.count > 1 ? ` · <span style="color:#9fd8ff">${n} in forze</span>` : ''}${u.climb > 0 ? ' · <span style="color:#ffb35c">⛰️ in scalata (ferma)</span>' : ''}${extra}</div>`;
   } else if (selected && selected.city && selected.city.owner === 'p') {
-    const cp = selected.city.pop || 1;
-    const rend = (selected.city.capital ? 3 : 2) + cp - 1;
-    let html = `<span id="unitinfo"><b>${selected.city.capital ? '🏛️ Capitale' : '🏘️ Città'}</b> · 👨‍🌾 ${cp}/${MAX_POP} · rendita ${rend}⭐ — addestra:</span>`;
+    const sc = selected.city, cp = sc.pop || 1;
+    let html = `<span id="unitinfo"><b>${sc.capital ? '🏛️' : '🏘️'} ${escHtml(nomeCitta(sc))}</b> · 👥 ${fmtAbitanti(sc.ab || 0)} abitanti${sc.n ? '' : ' (stima)'} · crescita ${cp}/${MAX_POP} · rendita ${renditaCitta(sc)}⭐ — addestra:</span>`;
     for (const [k, d] of Object.entries(UNIT_TYPES)) {
       if (!d.trainable) continue;
       const dis = players.p.stars < d.cost ? 'disabled' : '';
@@ -4508,6 +4905,10 @@ function ui() {
       }
     }
     panel.innerHTML = html;
+  } else if (selected && selected.city && !selected.unit) {
+    const sc = selected.city;
+    const chi = sc.owner === null ? '⛺ neutrale: portaci un\'unità per conquistarla' : `${bandiera(sc.owner)} di ${escHtml(nomeImpero(sc.owner))}`;
+    panel.innerHTML = `<div id="unitinfo"><b>${sc.owner === null ? '⛺' : sc.capital ? '🏛️' : '🏘️'} ${escHtml(nomeCitta(sc))}</b> · 👥 ${fmtAbitanti(sc.ab || 0)} abitanti${sc.n ? '' : ' (stima)'} · rendita ${renditaCitta(sc)}⭐/turno · ${chi}</div>`;
   } else if (selected && selected.port && !selected.unit && !selected.city && !selected.hosp) {
     let html = `<span id="unitinfo"><b>⚓ Porto</b> · +${PORT_INCOME}⭐/turno</span>`;
     if (canBuyShip(selected, 'p')) html += ` <button class="btn" style="background:#1f6f8c" onclick="playerBuyShip()">🚢 Compra nave ${SHIP_COST}⭐ (liv.1, capacità ${NAVE_CAPACITA[0]})</button>`;

@@ -103,6 +103,10 @@ function schieraIA() {
 }
 assert(schieraIA() > 0, 'l\'esercito alleato è schierato attorno alla tua capitale');
 const cittaPrima = cities('p').length;
+// un presidio robusto nella capitale dell'alleato: con l'esercito qui, i suoi vicini (più ricchi
+// dalla v66, con gli abitanti veri) non devono farlo cadere prima della prova del tradimento
+{ const capV = capitaleDi(vicino), n = 20;
+  capV.unit = Object.assign(mkUnit('warrior', vicino), { count: n, hp: n * UNIT_TYPES.warrior.hp, maxHp: n * UNIT_TYPES.warrior.hp }); }
 for (let i = 0; i < 6 && !gameOver; i++) { players.p.stars = 200; endTurn(); }
 assert(contaAttacchi.suDiTe === 0, 'in 6 turni l\'alleato non ti ha mai attaccato');
 assert(pCapital() && cities('p').every(t => t.city.owner === 'p') && !gameOver, 'e non ti ha preso nessuna città');
