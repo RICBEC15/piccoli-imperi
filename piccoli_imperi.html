@@ -306,7 +306,8 @@
       Nella schermata iniziale puoi scegliere anche il <b>duello</b>: un solo nemico, l'Impero Cremisi, in un paese vicino al tuo.</p>
       <h4>🏳️ Territori</h4>
       <p>Il <b>territorio</b> di ogni impero è il suo paese, contornato sulla mappa nel suo colore (azzurro il tuo; ogni impero IA ha il suo).
-      In patria le unità hanno <b>+1 🛡️ in difesa</b> (in città il bonus è lo stesso, non si somma).
+      <b>In guerra il territorio si conquista</b>: un'unità di qualunque tipo che entra in una casella del territorio di un impero con cui sei in guerra la prende, e la casella passa al colore del suo nuovo impero (velo più deciso). Vale anche per l'IA: le sue truppe ti tolgono le caselle dove passano, e tu le riprendi ripassandoci. Con chi è in pace o alleato non si conquista niente.
+      In patria (il tuo territorio, caselle conquistate comprese) le unità hanno <b>+1 🛡️ in difesa</b> (in città il bonus è lo stesso, non si somma).
       Un paese con meno di 4 villaggi neutrali parte con <b>2⭐ in più per ogni villaggio mancante</b>.</p>
       <h4>🤝 Diplomazia: guerra, pace e alleanza</h4>
       <p>All'inizio sei in guerra con tutti. <b>Tocca il territorio di un altro impero</b> (con niente di selezionato) e si apre la sua scheda: lì puoi <b>proporre la pace</b>, <b>proporre un'alleanza</b> o <b>dichiarare guerra</b>.
@@ -522,6 +523,7 @@ function svuotaIndici() { conUnita.clear(); conCitta.clear(); conPorto.clear(); 
 class Casella {
   constructor(r, c) {
     this.r = r; this.c = c; this.terrain = 'water'; this.country = null;
+    this.terra = null; // l'impero che ha conquistato la casella in guerra (null = del suo paese)
     this._u = null; this._y = null; this._q = null; this._h = null;
   }
   get hosp() { return this._h; }
@@ -1396,8 +1398,34 @@ function assegnaPaesi(pCc, aCc) {
   placeSet = computePlaceSet();
 }
 function inPatria(t, owner) {
-  return !!(t.country && players[owner] && players[owner].country === t.country);
+  return !!(owner && players[owner] && padroneTerra(t) === owner);
 }
+
+// ============ LA CONQUISTA DEL TERRITORIO ============
+// In guerra, un'unità di qualunque tipo che entra in una casella del territorio nemico
+// la conquista: la casella passa al suo impero (t.terra) e sulla mappa prende il suo colore.
+// Il padrone di partenza di una casella è l'impero del suo paese; chi la riprende la riporta indietro.
+function padroneNaturale(t) {
+  const cc = t.country;
+  if (!cc) return null;
+  if (players.p && players.p.country === cc) return 'p'; // il tuo vince, se un vecchio salvataggio li sovrappone
+  return players[cc] && players[cc].vivo ? cc : null;
+}
+function padroneTerra(t) {
+  const o = t.terra;
+  if (o && players[o] && players[o].vivo !== false) return o;
+  return padroneNaturale(t);
+}
+function terraConquistabile(t) { return !!t.country && t.terrain !== 'water' && t.terrain !== 'river'; }
+// restituisce l'impero a cui è stata tolta la casella (o null se non cambia niente)
+function conquistaTerra(t, owner) {
+  if (!owner || !players[owner] || !terraConquistabile(t)) return null;
+  const da = padroneTerra(t);
+  if (!da || da === owner || !ostile(owner, da)) return null;
+  t.terra = owner === padroneNaturale(t) ? null : owner;
+  return da;
+}
+function caselleConquistate(owner) { return map.flat().filter(t => t.terra === owner && padroneTerra(t) === owner).length; }
 function msgPiazzamento() {
   const p = players.p.country;
   if (!p) {
@@ -1593,7 +1621,8 @@ function aiDiplomazia() {
 function imperoDiCasella(t) {
   const vivo = o => o && o !== 'p' && players[o] && players[o].vivo;
   for (const o of [t.city && t.city.owner, t.unit && t.unit.owner, t.port && t.port.owner]) if (vivo(o)) return o;
-  return vivo(t.country) ? t.country : null;
+  const o = padroneTerra(t);
+  return vivo(o) ? o : null;
 }
 function apriDiplomazia(o, esito = '') {
   if (!players[o] || !players[o].vivo) return;
@@ -1959,6 +1988,12 @@ function doMove(from, to) {
 function arrivalEffects(to) {
   const u = to.unit;
   if (!u) return;
+  // in guerra la casella del territorio nemico diventa tua (i messaggi di porti e città vengono dopo)
+  const tolta = conquistaTerra(to, u.owner);
+  if (tolta) {
+    if (u.owner === 'p') { if (to.terrain !== 'mountain') msg(`🚩 Casella conquistata a ${bandiera(tolta)} ${nomeImpero(tolta)}: ora è territorio tuo.`); }
+    else if (tolta === 'p') aiLogAdd('🚩 Il nemico ti ha preso una casella di territorio');
+  }
   // solo un Medico può rifondare un ospedale abbandonato (riparte da livello 1)
   if (to.hosp && to.hosp.level === 0 && UNIT_TYPES[u.type].medic) {
     to.hosp = { owner: u.owner, level: 1, hp: Math.min(HOSP_HP, u.hp) };
@@ -2287,7 +2322,8 @@ function snapshot() {
                                         h: t.unit.cargo.hp, m: t.unit.cargo.maxHp,
                                         mv: t.unit.cargo.moved, ak: t.unit.cargo.attacked } : 0 } : 0,
       s: t.hosp ? { o: t.hosp.owner, l: t.hosp.level, p: t.hosp.hp } : 0,
-      q: t.port ? { o: t.port.owner } : 0
+      q: t.port ? { o: t.port.owner } : 0,
+      w: t.terra || 0
     }))
   });
 }
@@ -2309,6 +2345,7 @@ function restoreSnapshot(s) {
     }
     t.hosp = x.s ? { owner: x.s.o, level: x.s.l, hp: x.s.p } : null;
     t.port = x.q ? { owner: x.q.o } : null;
+    t.terra = x.w || null;
   }
   for (const o of Object.keys(players)) {
     if (o in d.stelle) players[o].stars = d.stelle[o];
@@ -2354,7 +2391,9 @@ function serialize() {
   return { v: 17, rows: ROWS, cols: COLS, turn, modo: modoPartita, imperi, caduti,
            stars: Object.fromEntries(['p', ...imperi].map(o => [o, players[o].stars])),
            paesi: Object.fromEntries(['p', ...imperi].map(o => [o, players[o].country || null])),
-           ia: aiLivello, diplomazia: diplo, tiles };
+           ia: aiLivello, diplomazia: diplo, tiles,
+           // v62 (campo facoltativo): le caselle conquistate in guerra, [riga, colonna, impero]
+           conquiste: map.flat().filter(t => t.terra && players[t.terra]).map(t => [t.r, t.c, t.terra]) };
 }
 
 function applySave(data) {
@@ -2485,6 +2524,13 @@ function applySave(data) {
     players[o].stars = Math.max(0, data.stars[o0] | 0);
     // un impero senza capitale nel file è già caduto
     if (!capitaleDi(o)) { players[o].vivo = false; if (!caduti.includes(o)) caduti.push(o); }
+  }
+  // le caselle conquistate in guerra (campo facoltativo, dalla v62)
+  if (Array.isArray(data.conquiste)) for (const x of data.conquiste) {
+    if (!Array.isArray(x)) continue;
+    const t = map[x[0]] && map[x[0]][x[1]], o = x[2];
+    if (t && typeof o === 'string' && Object.prototype.hasOwnProperty.call(players, o) && terraConquistabile(t)
+        && padroneNaturale(t) !== o) t.terra = o;
   }
   // la diplomazia (campo facoltativo): senza, tutti in guerra con tutti
   nuovaDiplomazia();
@@ -3976,20 +4022,24 @@ function render() {
   const terr = {}; // paese -> impero che lo guida (il tuo vince, se un vecchio salvataggio li sovrappone)
   for (const o of imperiIA()) if (players[o].country) terr[players[o].country] = o;
   if (players.p.country) terr[players.p.country] = 'p';
-  const imperiTerr = [...new Set(Object.values(terr))];
+  // le caselle conquistate in guerra passano al colore di chi le ha prese
+  const vivi = new Set(['p', ...imperiIA()]);
+  const padrone = t => (t.terra && vivi.has(t.terra) ? t.terra : t.country ? terr[t.country] : undefined);
+  const imperiTerr = [...vivi];
   if (imperiTerr.length) {
-    const lati = {}, dentro = {}; // segmenti x1,y1,x2,y2 e centri x,y
-    for (const o of imperiTerr) { lati[o] = []; dentro[o] = []; }
+    const lati = {}, dentro = {}, presi = {}; // segmenti x1,y1,x2,y2 e centri x,y (presi: conquistate)
+    for (const o of imperiTerr) { lati[o] = []; dentro[o] = []; presi[o] = []; }
     let nDentro = 0;
     for (let r = vis.r0; r <= vis.r1; r++) for (let c = vis.c0; c <= vis.c1; c++) {
-      const t = map[r][c], cc = t.country;
-      const o = cc && terr[cc];
+      const t = map[r][c];
+      const o = padrone(t);
       if (!o) continue;
       const path = lati[o];
       const p = center(t);
       dentro[o].push(p.x, p.y); nDentro += 2;
+      if (t.terra === o) presi[o].push(p.x, p.y);
       for (const n of neighbors(t)) {
-        if (n.country === cc) continue;
+        if (padrone(n) === o) continue;
         const q = center(n), ang = Math.atan2(q.y - p.y, q.x - p.x);
         // il lato appena dentro il paese, cosi' non copre il tratteggio dei confini
         const a1 = ang - Math.PI / 6, a2 = ang + Math.PI / 6, rr = S * 0.9;
@@ -4009,6 +4059,18 @@ function render() {
         }
         ctx.fillStyle = players[o].color; ctx.fill();
       }
+    }
+    // le caselle conquistate hanno un velo piu' deciso: si vede subito che hanno cambiato colore
+    ctx.globalAlpha = 0.3;
+    for (const o of imperiTerr) {
+      const d = presi[o];
+      if (!d.length) continue;
+      ctx.beginPath();
+      for (let i = 0; i < d.length; i += 2) for (let j = 0; j < 6; j++) {
+        const ang = Math.PI / 180 * (60 * j - 30), px = d[i] + S * Math.cos(ang), py = d[i+1] + S * Math.sin(ang);
+        j === 0 ? ctx.moveTo(px, py) : ctx.lineTo(px, py);
+      }
+      ctx.fillStyle = players[o].color; ctx.fill();
     }
     ctx.lineWidth = Math.max(4*k, 3 / scale); ctx.lineCap = 'round'; // almeno 3 pixel anche da lontano
     ctx.globalAlpha = 0.9;

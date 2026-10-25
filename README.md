@@ -12,7 +12,7 @@ In locale: apri `piccoli_imperi.html` nel browser con un doppio clic. Non serve 
 
 - `piccoli_imperi.html`: il gioco completo (HTML, CSS e JavaScript in un unico file).
 - `index.html`: pagina d'ingresso per GitHub Pages, rimanda subito a `piccoli_imperi.html`.
-- `stub.js`, `shiptest.js`, `savetest.js`, `playtest.js`, `aitest.js`, `paesitest.js`, `imperitest.js`, `difficoltatest.js`, `mappatest.js`, `diplotest.js`, `browser_check.js`, `mobile_check.js`, `pantest.js`: test automatici (`mobile_check.js` prova il gioco su un iPhone emulato con Playwright, `pantest.js` lo spostamento nella mappa col mouse, le frecce e il dito).
+- `stub.js`, `shiptest.js`, `savetest.js`, `playtest.js`, `aitest.js`, `paesitest.js`, `imperitest.js`, `difficoltatest.js`, `mappatest.js`, `diplotest.js`, `conquistatest.js`, `browser_check.js`, `mobile_check.js`, `pantest.js`: test automatici (`mobile_check.js` prova il gioco su un iPhone emulato con Playwright, `pantest.js` lo spostamento nella mappa col mouse, le frecce e il dito, `conquista_check.js` la conquista delle caselle con tocchi veri, su computer e telefono).
 - `build_russia.js`: script che ha estratto il confine della Russia dal dataset Natural Earth.
 - `build_biomi.py`, `export_tiles.js`: costruiscono i biomi fissi dai dati di OpenStreetMap.
 - `ISTRUZIONI_MIGRAZIONE.md`: note di sviluppo, storia delle ultime versioni e istruzioni dettagliate.
@@ -30,6 +30,7 @@ cat stub.js game.js aitest.js > _run.js && node _run.js   # IA: 150 turni, circa
 cat stub.js game.js difficoltatest.js > _run.js && node _run.js   # difficoltà IA: circa 40 secondi
 cat stub.js game.js mappatest.js > _run.js && node _run.js
 cat stub.js game.js diplotest.js > _run.js && node _run.js   # diplomazia: circa 15 secondi
+cat stub.js game.js conquistatest.js > _run.js && node _run.js   # conquista del territorio: circa 20 secondi
 ```
 
 ## La mappa
@@ -43,6 +44,13 @@ C'è **una sola mappa per ogni grandezza** (piccola, media, gigante), uguale a o
 Ogni modifica alla mappa va verificata con `mappatest.js`, che controlla anche che due partite abbiano la stessa mappa.
 
 ## Versione
+
+v62 (formato di salvataggio v17 con il campo facoltativo `conquiste`): **in guerra il territorio si conquista**. Un'unità di qualunque tipo che entra in una casella del territorio di un impero con cui il suo impero è in guerra la conquista: la casella passa al colore del nuovo padrone (contorno e un velo più deciso delle altre caselle).
+
+- Vale per tutti: per te, per l'IA che entra nel tuo territorio e fra imperi IA (sempre in guerra fra loro). Chi riprende una casella persa la riporta al suo paese. In pace o in alleanza non si conquista niente.
+- Le caselle conquistate contano come territorio del nuovo padrone: lì le sue unità hanno il +1 🛡️ in patria, e toccandole si apre la diplomazia con chi le tiene.
+- Se un impero cade, le caselle che aveva conquistato tornano al loro paese; quelle che gli hai preso restano tue.
+- Il salvataggio (e l'Annulla) tiene le caselle conquistate; un salvataggio che non le ha riparte con i confini dei paesi.
 
 v61 (formato di salvataggio v17 con il campo facoltativo `diplomazia`): la **diplomazia**. Toccando il territorio di un altro impero (con niente di selezionato) si apre la sua scheda: puoi proporgli la pace o un'alleanza, o dichiarargli guerra. All'inizio sei in guerra con tutti.
 
