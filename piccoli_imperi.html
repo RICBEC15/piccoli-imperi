@@ -139,6 +139,11 @@
   }
   .ov-tut { background:#a8632a; } .ov-tut:hover { background:#c47a38; }
   #paesi { z-index:50; } /* sopra i pulsanti dello zoom */
+  #diplo { z-index:50; }
+  .diplo-stato { font-size:17px; }
+  .diplo-azioni { flex-wrap:wrap; gap:8px; }
+  .diplo-azioni button small { font-size:11px; opacity:.85; }
+  .diplo-azioni button:disabled { opacity:.45; cursor:default; }
   .paesi-grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(140px, 1fr)); gap:6px; margin-top:12px; }
   .paese-btn { background:#2f3e57; color:#fff; border:2px solid transparent; border-radius:8px; padding:7px 8px;
     font-size:14px; text-align:left; cursor:pointer; }
@@ -244,6 +249,9 @@
     </div>
   </div>
 
+  <!-- Diplomazia: si apre toccando il territorio di un altro impero -->
+  <div class="bigov" id="diplo"><div class="ovbox" id="diploBox"></div></div>
+
   <!-- Schermata di benvenuto -->
   <div class="bigov" id="intro" style="display:flex">
     <div class="ovbox">
@@ -258,6 +266,7 @@
         <li>⚔️ Con le stelle <b>addestri unità</b> cliccando su una tua città libera.</li>
         <li>⛺ Porta un'unità su un <b>villaggio neutrale</b> per conquistarlo e aumentare le entrate.</li>
         <li>🏆 Vinci conquistando la <b>capitale nemica</b>.</li>
+        <li>🤝 Tocca il territorio di un altro impero per <b>dichiarargli guerra</b> o proporgli <b>pace</b> o <b>alleanza</b>.</li>
       </ul>
       <h4>Difficoltà dell'IA
         <select id="iaSelIntro" onchange="setDifficolta(this.value)">
@@ -299,6 +308,12 @@
       <p>Il <b>territorio</b> di ogni impero è il suo paese, contornato sulla mappa nel suo colore (azzurro il tuo; ogni impero IA ha il suo).
       In patria le unità hanno <b>+1 🛡️ in difesa</b> (in città il bonus è lo stesso, non si somma).
       Un paese con meno di 4 villaggi neutrali parte con <b>2⭐ in più per ogni villaggio mancante</b>.</p>
+      <h4>🤝 Diplomazia: guerra, pace e alleanza</h4>
+      <p>All'inizio sei in guerra con tutti. <b>Tocca il territorio di un altro impero</b> (con niente di selezionato) e si apre la sua scheda: lì puoi <b>proporre la pace</b>, <b>proporre un'alleanza</b> o <b>dichiarare guerra</b>.
+      Con chi è in pace o alleato non vi attaccate e non entrate nelle città e nei porti dell'altro; l'alleanza dà anche <b>+1⭐ a turno</b> di commercio a testa.
+      L'IA decide da sola: accetta più volentieri se sei forte rispetto a lei, se le tue truppe sono vicine alle sue città e se hai sempre rispettato i patti. Se rifiuta, puoi riprovare dopo 3 turni.
+      Chi <b>rompe un patto</b> perde la fiducia dell'impero tradito e un po' anche quella di tutti gli altri. Un impero in pace con te, se diventa molto più forte, prima o poi può tornare in guerra; le alleanze le rompi solo tu.
+      Se tutti gli imperi rimasti sono tuoi alleati vinci con la <b>vittoria diplomatica</b>. Nel duello e nel tutorial la diplomazia non c'è.</p>
       <h4>🗺️ La mappa</h4>
       <ul>
         <li><b>Prato</b> (verde chiaro): terreno normale.</li>
@@ -535,6 +550,7 @@ function newGame(tut = false) {
   undoStack = [];
   players = { p: { stars: 7, color:'#4da3ff', dark:'#1f5fa8', name:'Tu', country: null, vivo: true } };
   ordineIA = []; aiStato = {}; caduti = []; conquistatoreP = null; aiMe = null;
+  nuovaDiplomazia(); chiudiDiplomazia();
   modoPartita = tut ? 'duello' : modoAvversari; // il tutorial è sempre un duello
   genMap();
   if (tutorial) {
@@ -1453,6 +1469,7 @@ function cadeImpero(o, chi, t) {
   if (o === 'p') { conquistatoreP = chi; return; } // la partita finisce: il resto non serve
   players[o].vivo = false;
   caduti.push(o);
+  for (const k of Object.keys(diplo.rel)) if (k.split('|').includes(o)) delete diplo.rel[k]; // i suoi patti finiscono con lui
   for (const x of cities(o)) x.city.owner = null;
   for (const x of unitsOf(o)) x.unit = null;
   for (const x of ports(o)) x.port.owner = null;
@@ -1464,6 +1481,153 @@ function cadeImpero(o, chi, t) {
       : `👑 Hai preso la capitale nemica!`);
   } else aiLogAdd(`🏳️ ${bandiera(o)} ${nomePaese(o)} è caduto: ${bandiera(chi)} ${nomeImpero(chi)} ne ha preso la capitale. Restano ${resto} imperi.`, true);
 }
+
+// ============ LA DIPLOMAZIA ============
+// Fra due imperi c'è guerra, pace o alleanza. All'inizio tutti sono in guerra con tutti;
+// toccando il territorio di un altro impero si apre la finestra della diplomazia, dove
+// si dichiara guerra o si propone la pace o un'alleanza. Con chi è in pace o alleato non
+// ci si attacca e non si entra nelle sue città e nei suoi porti; un'alleanza porta anche
+// +1⭐ a turno di commercio a entrambi. L'IA accetta o rifiuta secondo la forza dei due
+// imperi, la minaccia che sente e la fiducia che ha in te (chi rompe i patti la perde).
+const DIPLO_RIFIUTO_TURNI = 3; // dopo un rifiuto si riprova fra qualche turno
+const ALLEANZA_RENDITA = 1;    // ⭐ a turno per ogni alleato
+const DIPLO_SOGLIA = 55;       // il punteggio (più il caso, fino a +20) che serve perché l'IA accetti
+let diplo = { rel: {}, fiducia: {}, rifiuto: {} };
+let diploCon = null;           // l'impero nella finestra aperta
+function nuovaDiplomazia() { diplo = { rel: {}, fiducia: {}, rifiuto: {} }; diploCon = null; }
+function chiaveRel(a, b) { return a < b ? a + '|' + b : b + '|' + a; }
+function relazione(a, b) {
+  if (!a || !b || a === b) return 'sé';
+  const r = diplo.rel[chiaveRel(a, b)];
+  return r ? r.stato : 'guerra';
+}
+function setRelazione(a, b, stato) {
+  const k = chiaveRel(a, b);
+  if (stato === 'guerra') delete diplo.rel[k];
+  else diplo.rel[k] = { stato, dal: turn };
+}
+// due imperi possono combattersi (le città e i porti senza padrone sono di tutti)
+function ostile(a, b) { return !!a && !!b && a !== b && relazione(a, b) === 'guerra'; }
+// una casella di un impero con cui si è in pace o alleati: non ci si entra
+function terraAmica(n, owner) {
+  const o = (n.city && n.city.owner) || (n.port && n.port.owner) || null;
+  return !!o && o !== owner && !ostile(owner, o);
+}
+function alleatiDi(o) { return imperiIA().concat('p').filter(x => x !== o && relazione(o, x) === 'alleanza'); }
+function nomeRel(s) { return s === 'alleanza' ? '🤝 Alleanza' : s === 'pace' ? '🕊️ Pace' : '⚔️ Guerra'; }
+function forzaImpero(o) { return aiSoldati(o) + 2 * cities(o).length; }
+function fiduciaDi(o) { return diplo.fiducia[o] || 0; }
+function cambiaFiducia(o, d) { diplo.fiducia[o] = Math.max(-100, Math.min(100, fiduciaDi(o) + d)); }
+// quanto l'impero o si sente minacciato da te: le tue truppe vicino alle sue città
+function minacciaSu(o) {
+  const mie = cities(o), R = aiR(5);
+  let n = 0;
+  for (const t of unitsOf('p')) if (UNIT_TYPES[t.unit.type].atk > 0 && mie.some(c => dist(c, t) <= R)) n += aliveCount(t.unit);
+  return n;
+}
+// il punteggio con cui l'IA valuta una proposta (senza il caso): più è alto, più accetta
+function valutaProposta(o, tipo) {
+  const rapporto = Math.min(2.5, forzaImpero('p') / Math.max(1, forzaImpero(o)));
+  let s = 40 * rapporto + fiduciaDi(o) / 2;
+  if (minacciaSu(o) >= 3) s += 15;                                // le tue truppe sono alle porte
+  s += aiLivello === 'facile' ? 10 : aiLivello === 'difficile' ? -10 : 0;
+  if (tipo === 'alleanza') {
+    s -= 20;                                                      // un'alleanza vale più della pace
+    if (relazione('p', o) === 'pace') s += Math.min(15, turn - diplo.rel[chiaveRel('p', o)].dal); // la pace lunga crea fiducia
+  }
+  return s;
+}
+function diploAttesa(o) {
+  const r = diplo.rifiuto[o];
+  return r !== undefined && turn - r < DIPLO_RIFIUTO_TURNI ? DIPLO_RIFIUTO_TURNI - (turn - r) : 0;
+}
+// la diplomazia c'è quando ogni paese è un impero (non nel duello né nel tutorial)
+function diploAttiva() { return modoPartita === 'tutti' && !tutorial; }
+
+// le azioni del giocatore
+function proponi(o, tipo) {
+  if (!diploAttiva() || current !== 'p' || gameOver || placing || !players[o] || !players[o].vivo) return false;
+  const ora = relazione('p', o);
+  if (ora === tipo || (tipo === 'pace' && ora === 'alleanza')) return false;
+  if (diploAttesa(o)) { msg(`⏳ ${bandiera(o)} ${nomePaese(o)} ha appena rifiutato: riprova fra ${diploAttesa(o)} turni.`); return false; }
+  const ok = valutaProposta(o, tipo) + Math.random() * 20 >= DIPLO_SOGLIA;
+  if (ok) {
+    setRelazione('p', o, tipo);
+    msg(tipo === 'alleanza'
+      ? `🤝 ${bandiera(o)} ${nomePaese(o)} accetta l'alleanza! Niente più attacchi fra voi e +${ALLEANZA_RENDITA}⭐ a turno di commercio a testa.`
+      : `🕊️ ${bandiera(o)} ${nomePaese(o)} accetta la pace. Non vi attaccherete più, finché uno dei due non dichiara guerra.`);
+    checkEnd(); // alleato con tutti quelli rimasti: vittoria diplomatica
+  } else {
+    diplo.rifiuto[o] = turn;
+    msg(`✋ ${bandiera(o)} ${nomePaese(o)} rifiuta ${tipo === 'alleanza' ? "l'alleanza" : 'la pace'}. Si sente ${forzaImpero(o) > forzaImpero('p') ? 'più forte di te' : 'al sicuro'}: riprova fra ${DIPLO_RIFIUTO_TURNI} turni.`);
+  }
+  refreshSets(); ui(); render();
+  return ok;
+}
+function dichiaraGuerra(o) {
+  if (!diploAttiva() || current !== 'p' || gameOver || placing || !players[o] || !players[o].vivo) return false;
+  const ora = relazione('p', o);
+  if (ora === 'guerra') return false;
+  setRelazione('p', o, 'guerra');
+  // rompere un patto costa la fiducia di chi lo subisce e, un po', di tutti gli altri
+  const tradito = ora === 'alleanza';
+  cambiaFiducia(o, tradito ? -60 : -40);
+  for (const x of imperiIA()) if (x !== o) cambiaFiducia(x, tradito ? -15 : -10);
+  msg(`⚔️ Hai dichiarato guerra a ${bandiera(o)} ${nomePaese(o)}${tradito ? " rompendo l'alleanza" : ''}. Gli altri imperi si fideranno meno di te.`);
+  refreshSets(); ui(); render();
+  return true;
+}
+// l'IA in pace con te può tornare in guerra, se è molto più forte e la pace dura da tempo
+// (le alleanze invece le rompi solo tu)
+function aiDiplomazia() {
+  if (!diploAttiva() || relazione(aiMe, 'p') !== 'pace') return;
+  const r = diplo.rel[chiaveRel(aiMe, 'p')];
+  if (turn - r.dal < 15 || forzaImpero(aiMe) < 2 * forzaImpero('p') + 4 || fiduciaDi(aiMe) > 20) return;
+  if (Math.random() > 0.1) return;
+  setRelazione(aiMe, 'p', 'guerra');
+  aiLogAdd(`⚔️ ${bandiera(aiMe)} ${nomePaese(aiMe)} rompe la pace e ti dichiara guerra!`, true);
+}
+
+// la finestra della diplomazia: si apre toccando il territorio (o una città, un'unità)
+// di un altro impero, quando non hai niente di selezionato
+function imperoDiCasella(t) {
+  const vivo = o => o && o !== 'p' && players[o] && players[o].vivo;
+  for (const o of [t.city && t.city.owner, t.unit && t.unit.owner, t.port && t.port.owner]) if (vivo(o)) return o;
+  return vivo(t.country) ? t.country : null;
+}
+function apriDiplomazia(o, esito = '') {
+  if (!players[o] || !players[o].vivo) return;
+  diploCon = o;
+  const ora = relazione('p', o), attesa = diploAttesa(o);
+  const fp = forzaImpero('p'), fo = forzaImpero(o), fid = fiduciaDi(o);
+  const prob = tipo => { const v = valutaProposta(o, tipo); return v >= DIPLO_SOGLIA ? 'alta' : v + 20 >= DIPLO_SOGLIA ? 'media' : 'nessuna'; };
+  const bott = (txt, fn, colore, dis) => `<button class="ov-play" style="background:${colore}"${dis ? ' disabled' : ''} onclick="${fn}">${txt}</button>`;
+  let azioni = '';
+  if (ora === 'guerra') azioni += bott(`🕊️ Proponi la pace <small>(probabilità ${prob('pace')})</small>`, `diploAzione('${o}','pace')`, '#2e7d4f', attesa);
+  if (ora !== 'alleanza') azioni += bott(`🤝 Proponi un'alleanza <small>(probabilità ${prob('alleanza')})</small>`, `diploAzione('${o}','alleanza')`, '#1f6f8c', attesa);
+  if (ora !== 'guerra') azioni += bott(ora === 'alleanza' ? "⚔️ Rompi l'alleanza: guerra!" : '⚔️ Dichiara guerra', `diploAzione('${o}','guerra')`, '#a83a2f');
+  const patti = imperiIA().filter(x => relazione('p', x) !== 'guerra');
+  document.getElementById('diploBox').innerHTML = `
+    <h2>${bandiera(o)} ${nomePaese(o)}</h2>
+    <p class="diplo-stato">Con te: <b>${nomeRel(ora)}</b>${ora !== 'guerra' ? ` dal turno ${diplo.rel[chiaveRel('p', o)].dal}` : ''}</p>
+    <p>🏘️ ${cities(o).length} città · 💪 forza ${fo} (la tua: ${fp}) · ${fid >= 20 ? '😊 si fida di te' : fid <= -20 ? '😠 non si fida di te' : '😐 ti guarda con sospetto'}</p>
+    <p style="font-size:13px;opacity:.85">In pace o alleati non vi attaccate e non entrate nelle città e nei porti dell'altro.
+    L'alleanza dà +${ALLEANZA_RENDITA}⭐ a turno a testa. Chi rompe un patto perde la fiducia degli altri imperi.
+    L'IA accetta più volentieri se sei forte, se le tue truppe sono vicine alle sue città e se ti sei sempre comportato bene.</p>
+    ${attesa ? `<p style="color:#ffb35c">⏳ Ha rifiutato da poco: puoi riprovare fra ${attesa} ${attesa === 1 ? 'turno' : 'turni'}.</p>` : ''}
+    ${esito ? `<p id="diploEsito" style="color:#ffd76e">${esito}</p>` : ''}
+    <div class="ovrow diplo-azioni">${azioni}${bott('Chiudi', 'chiudiDiplomazia()', '#3a4d6b')}</div>
+    ${patti.length ? `<p style="font-size:12px;opacity:.8">I tuoi patti: ${patti.map(x => `${bandiera(x)} ${nomePaese(x)} ${relazione('p', x) === 'alleanza' ? '🤝' : '🕊️'}`).join(' · ')}</p>` : ''}`;
+  document.getElementById('diplo').style.display = 'flex';
+}
+// un bottone della finestra: l'esito resta scritto nella finestra (e nella barra dei messaggi)
+function diploAzione(o, tipo) {
+  if (tipo === 'guerra') dichiaraGuerra(o); else proponi(o, tipo);
+  const m = document.getElementById('msg');
+  if (gameOver) { chiudiDiplomazia(); return; }
+  if (players[o] && players[o].vivo) apriDiplomazia(o, m ? m.textContent : '');
+}
+function chiudiDiplomazia() { diploCon = null; document.getElementById('diplo').style.display = 'none'; }
 
 // campo delle distanze dal mare (BFS multi-sorgente, aggira le montagne)
 function seaDistanceField() {
@@ -1616,6 +1780,8 @@ function movesFor(t) {
         if (!passable(n)) continue;
         // un ospedale nemico attivo blocca il passaggio: va prima ridotto al silenzio
         if (n.hosp && n.hosp.level > 0 && n.hosp.owner !== u.owner) continue;
+        // nelle città e nei porti di chi è in pace o alleato non si entra
+        if (terraAmica(n, u.owner)) continue;
         // i civili non entrano nelle città nemiche
         if (d.civil && n.city && n.city.owner && n.city.owner !== u.owner) continue;
         seen.add(key(n));
@@ -1656,6 +1822,7 @@ function mergesFor(t) {
         }
         if (!passable(n) || n.unit) continue;
         if (n.hosp && n.hosp.level > 0 && n.hosp.owner !== u.owner) continue;
+        if (terraAmica(n, u.owner)) continue;
         if (d.civil && n.city && n.city.owner && n.city.owner !== u.owner) continue;
         seen.add(key(n));
         if (n.terrain !== 'forest') next.push(n);
@@ -1704,8 +1871,10 @@ function attacksFor(t) {
     for (let c = Math.max(0, t.c - range - 1); c <= Math.min(COLS - 1, t.c + range + 1); c++) {
       const n = map[r][c];
       if (n === t || dist(t, n) > range) continue;
-      if (n.unit && n.unit.owner !== u.owner) out.push(n);
-      else if (!n.unit && n.hosp && n.hosp.level > 0 && n.hosp.owner !== u.owner) out.push(n); // ospedale scoperto
+      // si colpisce solo chi è in guerra con noi (non chi è in pace o alleato)
+      if (n.unit && ostile(u.owner, n.unit.owner)) out.push(n);
+      else if (!n.unit && n.hosp && n.hosp.level > 0 && n.hosp.owner !== u.owner
+               && (!n.hosp.owner || ostile(u.owner, n.hosp.owner))) out.push(n); // ospedale scoperto
     }
   }
   return out;
@@ -1875,6 +2044,7 @@ function disembarksFor(t) {
   return neighbors(t).filter(n => {
     if (!passable(n) || n.unit) return false;
     if (n.hosp && n.hosp.level > 0 && n.hosp.owner !== c.owner) return false;
+    if (terraAmica(n, c.owner)) return false;
     if (cd.civil && n.city && n.city.owner && n.city.owner !== c.owner) return false;
     return true;
   });
@@ -1966,7 +2136,8 @@ function cities(owner) { return dallIndice(conCitta, t => t.city.owner === owner
 function unitsOf(owner) { return dallIndice(conUnita, t => t.unit.owner === owner); }
 function income(owner) {
   return cities(owner).reduce((s, t) => s + (t.city.capital ? 3 : 2) + ((t.city.pop || 1) - 1), 0)
-       + ports(owner).length * PORT_INCOME;
+       + ports(owner).length * PORT_INCOME
+       + alleatiDi(owner).length * ALLEANZA_RENDITA; // il commercio con gli alleati
 }
 
 // il mantenimento dell'esercito: 1⭐ ogni 2 soldati (guerrieri, arcieri, cavalieri,
@@ -2018,6 +2189,8 @@ function checkEnd() {
   if (gameOver || placing) return;
   if (!pCapital()) endGame(false);
   else if (!imperiIA().length) endGame(true);
+  // vittoria diplomatica: tutti gli imperi rimasti sono tuoi alleati
+  else if (modoPartita === 'tutti' && imperiIA().every(o => relazione('p', o) === 'alleanza')) endGame(true);
 }
 
 function endGame(win) {
@@ -2026,7 +2199,9 @@ function endGame(win) {
   const chi = conquistatoreP && players[conquistatoreP];
   document.getElementById('ovTitle').textContent = win ? '🏆 VITTORIA!' : '💀 SCONFITTA';
   document.getElementById('ovText').textContent = win
-    ? (modoPartita === 'tutti'
+    ? (modoPartita === 'tutti' && imperiIA().length
+      ? `Vittoria diplomatica: tutti gli imperi rimasti (${imperiIA().length}) sono tuoi alleati, al turno ${turn}. L'Europa è in pace sotto la tua guida!`
+      : modoPartita === 'tutti'
       ? `Hai fatto cadere tutti gli imperi in ${turn} turni. L'Europa è tua!`
       : `Hai conquistato la capitale dell'Impero Cremisi in ${turn} turni. Il continente è tuo!`)
     : (modoPartita === 'tutti' && chi
@@ -2179,7 +2354,7 @@ function serialize() {
   return { v: 17, rows: ROWS, cols: COLS, turn, modo: modoPartita, imperi, caduti,
            stars: Object.fromEntries(['p', ...imperi].map(o => [o, players[o].stars])),
            paesi: Object.fromEntries(['p', ...imperi].map(o => [o, players[o].country || null])),
-           ia: aiLivello, tiles };
+           ia: aiLivello, diplomazia: diplo, tiles };
 }
 
 function applySave(data) {
@@ -2311,9 +2486,25 @@ function applySave(data) {
     // un impero senza capitale nel file è già caduto
     if (!capitaleDi(o)) { players[o].vivo = false; if (!caduti.includes(o)) caduti.push(o); }
   }
+  // la diplomazia (campo facoltativo): senza, tutti in guerra con tutti
+  nuovaDiplomazia();
+  const dp = data.diplomazia; // c'è solo dalla v61: gli id sono già i codici dei paesi
+  if (dp && typeof dp === 'object') {
+    const ok = o => Object.prototype.hasOwnProperty.call(players, o);
+    for (const [k, r] of Object.entries(dp.rel || {})) {
+      const [a, b] = k.split('|');
+      if (ok(a) && ok(b) && a !== b && r && (r.stato === 'pace' || r.stato === 'alleanza'))
+        diplo.rel[chiaveRel(a, b)] = { stato: r.stato, dal: Math.max(1, Math.min(turn, r.dal | 0)) };
+    }
+    for (const campo of ['fiducia', 'rifiuto'])
+      for (const [o, v] of Object.entries(dp[campo] || {})) {
+        if (ok(o) && o !== 'p' && Number.isFinite(v)) diplo[campo][o] = campo === 'fiducia' ? Math.max(-100, Math.min(100, v)) : v | 0;
+      }
+  }
   // la difficoltà dell'IA (campo facoltativo): i salvataggi che non ce l'hanno giocano a Normale
   setDifficolta(AI_LIVELLI[data.ia] ? data.ia : 'normale');
   document.getElementById('paesi').style.display = 'none';
+  chiudiDiplomazia();
   current = 'p'; gameOver = false; tutorial = false; tutStep = -1;
   placing = false; placeSet = [];
   congedo = false;
@@ -2638,6 +2829,7 @@ function aiTurn(i) {
     congedati++;
   }
   me.stars = Math.max(0, me.stars - upkeep(aiMe));
+  aiDiplomazia();
   aiPreparaTurno();
   if (modoPartita !== 'tutti') {
     aiLog = [];
@@ -2907,23 +3099,23 @@ function aiSoldati(owner) {
   }
   return s;
 }
-// le unità di altri imperi entro R esagoni da t (scansione locale, come attacksFor;
+// le unità degli imperi in guerra con owner entro R esagoni da t (scansione locale, come attacksFor;
 // se le unità in campo sono poche si guardano direttamente quelle)
 function nemiciVicino(t, R, owner = aiMe) {
   const out = [];
   if (conUnita.size < (2 * R + 1) * (2 * R + 3)) {
-    for (const n of conUnita) if (n.unit.owner !== owner && dist(t, n) <= R && map[n.r][n.c] === n) out.push(n);
+    for (const n of conUnita) if (ostile(owner, n.unit.owner) && dist(t, n) <= R && map[n.r][n.c] === n) out.push(n);
     return out;
   }
   for (let r = Math.max(0, t.r - R); r <= Math.min(ROWS - 1, t.r + R); r++)
     for (let c = Math.max(0, t.c - R - 1); c <= Math.min(COLS - 1, t.c + R + 1); c++) {
       const n = map[r][c];
-      if (n.unit && n.unit.owner !== owner && dist(t, n) <= R) out.push(n);
+      if (n.unit && ostile(owner, n.unit.owner) && dist(t, n) <= R) out.push(n);
     }
   return out;
 }
-// le città di tutti gli altri imperi: gli obiettivi dell'offensiva (guerra contro tutti)
-function cittaNemiche() { return dallIndice(conCitta, t => t.city.owner && t.city.owner !== aiMe); }
+// le città degli imperi in guerra con chi muove: gli obiettivi dell'offensiva
+function cittaNemiche() { return dallIndice(conCitta, t => t.city.owner && ostile(aiMe, t.city.owner)); }
 // l'impero nemico più vicino: la sua forza decide quando passare all'offensiva
 function aiRivale() {
   const casa = capitaleDi(aiMe) || cities(aiMe)[0];
@@ -2941,6 +3133,9 @@ function aiPreparaTurno() {
   if (!aiCostiBase || aiCostiBase.length !== ROWS * COLS) aiPreparaGiro();
   aiCosti = aiCostiBase.slice();
   for (const t of dallIndice(conOsp, x => x.hosp.level > 0 && x.hosp.owner !== aiMe)) aiCosti[aiIdx(t)] = 18;
+  // le città e i porti di chi è in pace o alleato non si attraversano: si aggirano
+  for (const t of dallIndice(conCitta, x => terraAmica(x, aiMe))) aiCosti[aiIdx(t)] = 18;
+  for (const t of dallIndice(conPorto, x => terraAmica(x, aiMe))) aiCosti[aiIdx(t)] = 18;
   // la stessa mappa ma "via terra": il mare costa carissimo, per chi ha aspettato troppo una nave
   // calcolate solo quando servono davvero
   const pigro = f => { let v = null; return () => v || (v = f()); };
@@ -3501,6 +3696,9 @@ function onTileClick(t) {
     selected = t; moveSet = []; attackSet = []; mergeSet = []; bridgeSet = []; embarkSet = []; disembarkSet = [];
     ui(); render(); return;
   }
+  // tocco sul territorio di un altro impero (senza niente di selezionato): la diplomazia
+  const altro = !selected && imperoDiCasella(t);
+  if (altro && diploAttiva()) { deselect(); apriDiplomazia(altro); return; }
   deselect();
 }
 
@@ -3539,7 +3737,7 @@ function overlayVisible(id) {
   return el && el.style.display && el.style.display !== 'none';
 }
 function anyModalOpen() {
-  return overlayVisible('intro') || overlayVisible('rules') || overlayVisible('guide') || overlayVisible('overlay') || overlayVisible('paesi');
+  return overlayVisible('intro') || overlayVisible('rules') || overlayVisible('guide') || overlayVisible('overlay') || overlayVisible('paesi') || overlayVisible('diplo');
 }
 if (typeof document.addEventListener === 'function') {
   document.addEventListener('keydown', e => {
@@ -3559,6 +3757,7 @@ if (typeof document.addEventListener === 'function') {
       if (overlayVisible('guide')) { document.getElementById('guide').style.display = 'none'; return; }
       if (overlayVisible('intro')) { closeIntro(); return; }
       if (overlayVisible('paesi')) { chiudiSceltaPaese(); return; }
+      if (overlayVisible('diplo')) { chiudiDiplomazia(); return; }
       deselect(); return;
     }
     if (k === 'r') { overlayVisible('rules') ? hideRules() : showRules(); return; }
