@@ -40,7 +40,7 @@ check(roma && placeSet.length === 1 && placeSet[0] === roma, 'la casella della c
 placePlayerCapital(roma);
 check(roma.city.owner === 'p' && roma.city.capital && roma.city.n === 'Roma' && roma.city.ab === 3339000, 'la capitale si chiama Roma e ha i suoi abitanti');
 check(renditaCitta(roma.city) === 7, `Roma capitale rende ${renditaCitta(roma.city)}⭐ (6 + 1)`);
-const atteso = cities('p').reduce((s, t) => s + renditaCitta(t.city), 0) + ports('p').length * PORT_INCOME + alleatiDi('p').length * ALLEANZA_RENDITA;
+const atteso = cities('p').reduce((s, t) => s + renditaCitta(t.city) + (terraFertile(t) ? 1 : 0), 0) + ports('p').length * PORT_INCOME + alleatiDi('p').length * ALLEANZA_RENDITA;
 check(income('p') === atteso, `rendita del giocatore: somma delle sue città = ${income('p')}⭐`);
 const parigi = capitaleDi('FR');
 check(parigi && parigi.city.n === 'Parigi' && parigi.city.ab === 9904000, 'la Francia IA ha la capitale sul villaggio di Parigi');

@@ -51,13 +51,14 @@ if (urb && pra) {
 }
 
 // una citta' fra i campi rende +1 stella
-const campo = map.flat().find(t => t.city && t.city.owner === null && terraFertile(t));
-check(!!campo, 'c\'e\' un villaggio fra i campi');
+// (dalla v63 le città sono già degli imperi: se ne prende una qualunque, non capitale)
+const campo = map.flat().find(t => t.city && !t.city.capital && t.city.owner !== 'p' && terraFertile(t));
+check(!!campo, 'c\'e\' una citta\' fra i campi');
 if (campo) {
-  const e0 = income('p');
+  const e0 = income('p'), prima = campo.city.owner;
   campo.city.owner = 'p';
-  check(income('p') === e0 + 2 + (campo.city.pop - 1) + 1, 'un villaggio fra i campi conquistato rende 2+1 stelle');
-  campo.city.owner = null;
+  check(income('p') === e0 + renditaCitta(campo.city) + 1, `una citta' fra i campi rende ${renditaCitta(campo.city)}+1 stelle`);
+  campo.city.owner = prima;
   // senza campi attorno (tutto prato) lo stesso villaggio rende solo 2 stelle
   const sotto = [campo, ...neighbors(campo)].filter(x => x.terrain === 'grass' && ['c', 'v'].includes(bioma(x)));
   sotto.forEach(x => { x.terrain = 'hill'; });
