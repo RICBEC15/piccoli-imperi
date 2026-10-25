@@ -88,4 +88,16 @@ Il file di salvataggio è passato alla versione 15 (compatibile con i salvataggi
 - **Difficoltà dell'IA** (Facile, Normale, Difficile) da scegliere all'inizio e cambiabile in partita dal menu 🤖 IA; viene salvata nel file. Nuovo test `difficoltatest.js`.
 - **v58**: riunisce in una sola versione la mappa fissa, la scelta del paese e la difficoltà dell'IA. Salvataggio v16.
 - **v59**: ci si sposta nella mappa a qualunque zoom (trascinamento col mouse, frecce, dito). `#mapsizer` ha un bordo di mezzo schermo per lato (`PADX`/`PADY`): per passare da scroll a coordinate della mappa usare sempre `viewX(wrap)`/`viewY(wrap)`, mai `scrollLeft`/`scrollTop` direttamente. Test `pantest.js` (Playwright).
-- **v60**: tutti i biomi OSM. Nuovi simboli in `BIOMI`: p palude, c campi, v vigneti e frutteti, u città, k macchia, b brughiera, a prateria (terreno base `grass`), z ghiacciaio (base `mountain`). Il terreno salvato resta quello base; il bioma si legge con `bioma(t)`, che lo restituisce solo se torna col terreno salvato. Regole: `fermaMovimento` (palude), `defOf` (città +1), `terraFertile` in `income` (+1⭐). `build_biomi.py` legge anche il tema `land_use` (canali agri, campi, vigne, urbano, sale); soglie in `PRATO`. Test `biomitest.js`.
+
+## Cosa è cambiato nella v60
+
+- **Ogni paese è un impero IA** (modalità `tutti`, la predefinita; `duello` è quella di prima, sempre usata dal tutorial e dai vecchi salvataggi). L'id di un impero IA è il codice del suo paese (`players.FR`, `cities('FR')`); il giocatore resta `'p'`. `imperiIA()` dà gli imperi in piedi in ordine di turno, `capitaleDi(o)` la capitale, `aiMe` l'impero che sta muovendo. Lo stato di ogni IA (ponti, navi, offensiva) è in `aiStato`.
+- **Scelta del paese** toccandolo sulla mappa: `newGame` parte senza paese (`players.p.country = null`), il tocco chiama `cambiaPaese`, il menu 🌍 resta come aiuto.
+- **Caduta degli imperi** in `cadeImpero`: vince chi resta l'ultimo.
+- **Prestazioni**: le caselle sono oggetti `Casella` con setter per `unit`, `city`, `port` e `hosp`, che tengono aggiornati gli indici `conUnita`, `conCitta`, `conPorto` e `conOsp`. `cities`, `unitsOf` e `ports` leggono gli indici. `aiCampo` lavora in una finestra attorno alle unità e si ferma poco dopo l'ultima. Le mosse lontane dal giocatore (`aiZona`) si fanno senza pausa.
+- **Salvataggio v17** (`imperi`, `modo`, `caduti`, stelle per impero). Fino alla v16 il nemico si chiamava `'a'`: al caricamento prende il codice del suo paese.
+- `stub.js` esegue i `setTimeout` in coda (a trampolino): con tanti imperi le chiamate una dentro l'altra esaurivano la pila. Nuovo test `imperitest.js`.
+
+## Cosa è cambiato nella v66
+
+- **Tutti i biomi OSM.** Nuovi simboli in `BIOMI`: p palude, c campi, v vigneti e frutteti, u città, k macchia, b brughiera, a prateria (terreno base `grass`), z ghiacciaio (base `mountain`). Il terreno salvato resta quello base; il bioma si legge con `bioma(t)`, che lo restituisce solo se torna col terreno salvato. Regole: `fermaMovimento` (palude), `defOf` (città +1), `terraFertile` in `income` (+1⭐). `build_biomi.py` legge anche il tema `land_use` (canali agri, campi, vigne, urbano, sale); soglie in `PRATO`. Test `biomitest.js`.

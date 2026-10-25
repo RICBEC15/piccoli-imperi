@@ -2,6 +2,7 @@ function assert(cond, msg) { if (!cond) { console.error('ASSERT FAIL:', msg); pr
 
 setMapSize('piccola');
 newGame();
+cambiaPaese('IT');
 if (placing && placeSet.length) placePlayerCapital(placeSet[0]);
 players.p.stars = 1000;
 
@@ -55,7 +56,7 @@ assert(landNear.unit === null && shipTileRef.unit.cargo && shipTileRef.unit.carg
 assert(canUpgradeShip(shipTileRef, 'p') === true, 'upgrade permesso: nave adiacente a un porto proprio');
 // test negativo: porto altrui non abilita il potenziamento
 const savedPortOwner = portTile.port.owner;
-portTile.port.owner = 'a';
+portTile.port.owner = imperiIA()[0];
 assert(canUpgradeShip(shipTileRef, 'p') === false, 'upgrade rifiutato se il porto adiacente e nemico');
 portTile.port.owner = savedPortOwner;
 

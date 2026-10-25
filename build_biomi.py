@@ -28,7 +28,7 @@ CH = {  # canale -> coppie (subtype, class) di Overture/OSM (tema base/land)
     'sand': {('sand', 'sand'), ('sand', 'dune'), ('desert', 'desert'), ('sand', 'desert')},
     'wetland': {('wetland', 'wetland'), ('wetland', 'bog'), ('wetland', 'marsh'), ('wetland', 'swamp')},
     'shrub': {('shrub', 'heath'), ('shrub', 'scrub'), ('grass', 'fell'), ('shrub', 'tundra'), ('grass', 'tundra')},
-    # i canali seguenti distinguono i biomi del prato (v60)
+    # i canali seguenti distinguono i biomi del prato (v66)
     'scrub': {('shrub', 'scrub'), ('shrub', 'shrub'), ('shrub', 'shrubbery')},
     'heath': {('shrub', 'heath')},
     'grassland': {('grass', 'grassland'), ('grass', 'meadow'), ('grass', 'grass')},
@@ -183,7 +183,7 @@ def frazioni(S, lon, lat, half_lon, half_lat):
 
 AFRICA = {'MA', 'DZ', 'TN', 'LY', 'EG'}
 
-# i biomi del prato (v60): soglia di copertura di ciascuno; vince quello che la supera di piu'
+# i biomi del prato (v66): soglia di copertura di ciascuno; vince quello che la supera di piu'
 PRATO = [('a', 'grassland', 0.12), ('b', 'heath', 0.08), ('k', 'scrub', 0.12), ('c', 'campi', 0.3),
          ('v', 'vigne', 0.08), ('p', 'wetland', 0.15), ('u', 'urbano', 0.15)]
 

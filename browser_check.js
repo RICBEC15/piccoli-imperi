@@ -21,6 +21,7 @@ const path = require('path');
 
   // fonda la capitale se in fase di piazzamento
   await page.evaluate(() => {
+    if (typeof placing !== 'undefined' && placing && !players.p.country) cambiaPaese('IT');
     if (typeof placing !== 'undefined' && placing && placeSet.length) placePlayerCapital(placeSet[0]);
   });
   await page.waitForTimeout(300);

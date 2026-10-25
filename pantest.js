@@ -12,6 +12,7 @@ async function prepara(page) {
     try { closeIntro(); } catch (e) {}
     setMapSize('piccola'); newGame();
     try { chiudiSceltaPaese(); } catch (e) {}
+    if (placing && !players.p.country) cambiaPaese('IT'); // il paese si sceglie toccandolo sulla mappa
     if (placing && placeSet.length) placePlayerCapital(placeSet[0]);
     deselect();
     const r = document.getElementById('mapwrap').getBoundingClientRect();

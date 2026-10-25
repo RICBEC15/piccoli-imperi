@@ -1,6 +1,7 @@
 function assert(cond, msg) { if (!cond) { console.error('ASSERT FAIL:', msg); process.exit(1); } else console.log('OK:', msg); }
 setMapSize('piccola');
 newGame();
+cambiaPaese('IT');
 tutorial = false; // salta il tutorial per il test
 if (placing && placeSet.length) placePlayerCapital(placeSet[0]);
 try {

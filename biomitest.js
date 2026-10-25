@@ -1,4 +1,4 @@
-// Test dei biomi OpenStreetMap del prato (v60): ci sono sulla mappa e hanno le loro regole.
+// Test dei biomi OpenStreetMap del prato (v66): ci sono sulla mappa e hanno le loro regole.
 // uso: cat stub.js game.js biomitest.js > _run.js && node _run.js
 let fail = 0;
 function check(ok, txt) { console.log((ok ? 'OK: ' : 'ERRORE: ') + txt); if (!ok) fail++; }
@@ -34,7 +34,10 @@ if (pal) {
   check(senza.length > mosse.length && mosse.every(m => senza.includes(m)), `dalla palude non si prosegue nello stesso turno (${mosse.length} mosse contro ${senza.length})`);
   da.unit = null;
   check(!canFoundTile(pal), 'in palude non si fonda un villaggio');
-  check(!computePlaceSet().includes(pal), 'in palude non si mette la capitale');
+  const cc0 = players.p.country; players.p.country = pal.country;
+  const ps = computePlaceSet();
+  check(ps.length > 0 && !ps.includes(pal), `in palude non si mette la capitale (${ps.length} caselle buone in ${pal.country})`);
+  players.p.country = cc0;
 }
 
 // la citta' (zone costruite) da' +1 difesa
