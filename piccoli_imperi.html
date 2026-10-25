@@ -145,8 +145,8 @@
   .paese-btn:hover { background:#3a4d6b; }
   .paese-btn.sel { border-color:#ffd76e; background:#3a5a8c; }
   .paese-btn small { display:block; font-size:11px; color:#aeb9cb; margin-top:2px; }
-  #iaSel, #iaSelIntro { padding:3px 6px; font-size:12px; border-radius:6px; background:#1c2738; color:#fff; border:1px solid #3a4a63; }
-  #iaSelIntro { font-size:14px; padding:6px; max-width:100%; }
+  #iaSel, #iaSelIntro, #avvSelIntro { padding:3px 6px; font-size:12px; border-radius:6px; background:#1c2738; color:#fff; border:1px solid #3a4a63; }
+  #iaSelIntro, #avvSelIntro { font-size:14px; padding:6px; max-width:100%; }
   #paeseNemico { width:100%; padding:8px; font-size:14px; border-radius:8px; background:#1c2738; color:#fff; border:1px solid #3a4a63; }
   .ov-play { background:#3a5a8c; } .ov-play:hover { background:#4a6fa8; }
   .ov-rules { background:#2c3a52; } .ov-rules:hover { background:#3a4a66; }
@@ -182,6 +182,7 @@
       <span class="stat">⭐ <b id="stars">7</b></span>
       <span class="stat">📈 <b id="income">+3</b></span>
       <span class="stat">🏛️ <b id="cityCount">1</b></span>
+      <span class="stat" title="Imperi IA ancora in piedi">🏳️ <b id="imperi">0</b></span>
       <button class="btn small" onclick="showRules()" title="Tasto R">📖 Regole <kbd>R</kbd></button>
       <button class="btn small" onclick="showGuide('free')" title="Tasto E">📚 Enciclopedia <kbd>E</kbd></button>
       <button class="btn small" onclick="startTutorial()" title="Tasto T">🎓 Tutorial <kbd>T</kbd></button>
@@ -210,7 +211,7 @@
     </div>
     <div id="tutbar"><button class="skip" onclick="endTutorial()">Salta ✕</button><span id="tuttext"></span></div>
     <div id="ailogbox" style="display:none">
-      <div class="ailogtitle">🗞️ Mosse del nemico</div>
+      <div class="ailogtitle">🗞️ Mosse dei nemici</div>
       <div id="ailog"></div>
     </div>
   </div>
@@ -231,11 +232,14 @@
   <div class="bigov" id="paesi">
     <div class="ovbox">
       <h2>🌍 Scegli il tuo paese</h2>
-      <p>Il tuo territorio è il paese che scegli: lì fondi la capitale e lì le tue unità si difendono meglio (+1 🛡️ in patria).
-      I paesi con pochi villaggi partono con qualche stella in più. Puoi anche toccare un paese direttamente sulla mappa.</p>
+      <p>Il paese si sceglie <b>toccandolo sulla mappa</b>; questo elenco è un aiuto per trovarlo.
+      Il tuo territorio è il paese che scegli: lì fondi la capitale e lì le tue unità si difendono meglio (+1 🛡️ in patria).
+      I paesi con pochi villaggi partono con qualche stella in più.</p>
       <div class="paesi-grid" id="paesiLista"></div>
-      <h4>Il nemico: <span id="paesiNemicoOra"></span></h4>
-      <select id="paeseNemico" onchange="scegliNemico(this.value)"></select>
+      <div id="paesiNemicoBox">
+        <h4>Il nemico: <span id="paesiNemicoOra"></span></h4>
+        <select id="paeseNemico" onchange="scegliNemico(this.value)"></select>
+      </div>
       <div class="ovrow"><button class="ov-play" onclick="chiudiSceltaPaese()">🏛️ Avanti: fonda la capitale</button></div>
     </div>
   </div>
@@ -245,9 +249,8 @@
     <div class="ovbox">
       <h2>⚔️ Piccoli Imperi</h2>
       <p>Un piccolo gioco di strategia a turni ispirato a Civilization e Polytopia.
-      Guidi l'<b style="color:#4da3ff">Impero Azzurro</b>: scegli dove fondare la capitale, espanditi, conquista i villaggi,
-      addestra un esercito e trova e prendi la capitale dell'<b style="color:#ff6b5e">Impero Cremisi</b> — nascosta da qualche parte nel suo paese — prima che lui prenda la tua.
-      All'inizio scegli il <b>paese</b> da guidare: il suo territorio è la tua patria.</p>
+      Guidi l'<b style="color:#4da3ff">Impero Azzurro</b>: <b>tocca sulla mappa il paese</b> che vuoi guidare, fonda la capitale, espanditi, conquista i villaggi
+      e addestra un esercito. <b>Ogni altro paese è un impero guidato dall'IA</b>, in guerra con tutti: fai cadere le loro capitali prima che prendano la tua.</p>
       <p style="font-size:12px;opacity:.75">Mappa reale, uguale a ogni partita: biomi © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener" style="color:#9cc9ff">OpenStreetMap contributors</a>.</p>
       <h4>In breve</h4>
       <ul>
@@ -263,6 +266,12 @@
           <option value="difficile">Difficile — attacca appena è forte, a piena economia</option>
         </select></h4>
       <p style="margin:4px 0 0"><small>La puoi cambiare anche durante la partita, dal menu 🤖 IA in alto.</small></p>
+      <h4>Avversari
+        <select id="avvSelIntro" onchange="setAvversari(this.value)">
+          <option value="tutti" selected>🌍 Ogni paese è un impero IA (tutti contro tutti)</option>
+          <option value="duello">⚔️ Duello: un solo paese vicino, come prima</option>
+        </select></h4>
+      <p style="margin:4px 0 0"><small>Con tutti i paesi vedi muovere solo i nemici vicino a te: gli altri muovono di colpo. Sulla mappa gigante il turno degli imperi dura qualche secondo.</small></p>
       <h4>Scegli la grandezza della mappa</h4>
       <div class="ovrow">
         <button class="ov-play" onclick="startGame('piccola')">▶️ Mappa piccola<br><small>esagoni grandi · 249×210</small></button>
@@ -282,10 +291,12 @@
     <div class="ovbox">
       <h2>📖 Come si gioca</h2>
       <h4>🎯 Obiettivo</h4>
-      <p>Conquistare la capitale nemica 🏛️ (bordo rosso). Se il nemico conquista la tua, hai perso.
-      <b>A inizio partita scegli il tuo paese</b> (dalla lista o toccandolo sulla mappa) e poi <b>dove fondare la capitale</b>: ovunque nel tuo paese — isole comprese — tranne che su <b>montagne e deserto</b>, e a distanza di sicurezza dal nemico (caselle evidenziate). Il nemico gioca un altro paese, di solito vicino al tuo (puoi anche sceglierlo tu): la sua capitale è in un <b>punto casuale</b> del suo paese, esplora per scoprirla!</p>
+      <p><b>Ogni paese della mappa è un impero</b>: il tuo e, uno per ciascun altro paese, gli imperi guidati dall'IA, ognuno con la sua capitale 🏛️ (bordo del suo colore), le sue truppe e la sua economia. Sono <b>tutti in guerra con tutti</b>: si espandono, si combattono fra loro e prima o poi vengono a cercare te.
+      Quando un impero perde la capitale <b>cade</b>: chi l'ha presa la tiene, le sue altre città tornano villaggi liberi e il suo esercito si scioglie. <b>Vinci quando sono caduti tutti</b>; se cade la tua capitale, hai perso.
+      <b>A inizio partita tocca sulla mappa il paese che vuoi guidare</b> (il menu 🌍 Elenco dei paesi aiuta a trovarlo) e poi <b>dove fondare la capitale</b>: ovunque nel tuo paese — isole comprese — tranne che su <b>montagne e deserto</b>, e il più lontano possibile dalle capitali vicine (caselle evidenziate).
+      Nella schermata iniziale puoi scegliere anche il <b>duello</b>: un solo nemico, l'Impero Cremisi, in un paese vicino al tuo.</p>
       <h4>🏳️ Territori</h4>
-      <p>Il <b>territorio</b> di ogni impero è il suo paese, contornato sulla mappa nel suo colore (azzurro il tuo, rosso il nemico).
+      <p>Il <b>territorio</b> di ogni impero è il suo paese, contornato sulla mappa nel suo colore (azzurro il tuo; ogni impero IA ha il suo).
       In patria le unità hanno <b>+1 🛡️ in difesa</b> (in città il bonus è lo stesso, non si somma).
       Un paese con meno di 4 villaggi neutrali parte con <b>2⭐ in più per ogni villaggio mancante</b>.</p>
       <h4>🗺️ La mappa</h4>
@@ -338,11 +349,11 @@
       <ul>
         <li>Ogni unità può <b>muovere e attaccare una volta</b> per turno: il <b>pallino verde 🟢</b> indica chi può ancora agire, le unità scurite hanno finito.</li>
         <li>Clicca un'unità: caselle <b style="color:#7fdb8f">verdi</b> = movimento, <b style="color:#ff8f8f">rosse</b> = attacco, <b style="color:#c99df0">viola</b> = unione con un'unità uguale (fino a 50!).</li>
-        <li>Durante il turno nemico, l'IA muove <b>un pezzo alla volta</b> (bordo arancione, la vista la segue) e ogni mossa è descritta nella cronaca <b>🗞️ Mosse del nemico</b>, in trasparenza in basso a sinistra sulla mappa.</li>
+        <li>Durante il turno nemico, l'IA muove <b>un pezzo alla volta</b> vicino a te (bordo arancione, la vista la segue; lontano da te gli imperi muovono di colpo) e ogni mossa è descritta nella cronaca <b>🗞️ Mosse del nemico</b>, in trasparenza in basso a sinistra sulla mappa.</li>
         <li>Il danno dipende da attacco, vita rimasta e difesa del bersaglio; chi sopravvive a un attacco ravvicinato risponde.</li>
         <li>Se un'unità da mischia elimina il bersaglio adiacente, ne occupa la casella.</li>
         <li>Le unità che <b>non fanno nulla</b> recuperano 2 ❤️ a fine turno.</li>
-        <li>Premi <b>✅ Fine turno</b> quando hai finito: poi muove l'Impero Cremisi.</li>
+        <li>Premi <b>✅ Fine turno</b> quando hai finito: poi muovono gli imperi IA, uno dopo l'altro (in alto vedi chi sta muovendo e, con 🏳️, quanti ne restano).</li>
         <li><b>↩️ Annulla</b> (tasto <b>U</b> o <b>Z</b>) torna indietro di un'azione — mossa, attacco, unione o addestramento — per correggere un errore, fino a 10 volte nel turno. La possibilità di annullare finisce col turno.</li>
         <li><b>💰 Mantenimento:</b> ogni turno l'esercito va pagato — <b>1⭐ ogni 2 soldati</b> (guerrieri, arcieri e cavalieri, anche imbarcati) e il mantenimento di ogni <b>nave</b> (cresce con il suo livello). Medici, cittadini e costruttori non costano nulla. Il pagamento è <b>automatico</b> a inizio turno; se le stelle non bastano, <b>scegli tu</b> quali truppe congedare (clicca le armate evidenziate in rosso: si riducono di un soldato alla volta, le navi si congedano intere) finché non puoi pagare quelle rimaste — solo allora il turno riprende.</li>
         <li><b>🎖️ Grandi armate:</b> nelle città puoi arruolare le truppe <b>già in gruppo</b> (×2, ×3, ×4, ×5) pagando il costo moltiplicato, e con le unioni sul campo un'armata può crescere <b>fino a 50 unità</b>: il danno cresce col numero dei vivi.</li>
@@ -487,6 +498,34 @@ let tutorial = false, tutStep = -1;
 let aiLog = [], aiActive = null;
 let undoStack = [];
 
+// Una casella della mappa. Unità, città e porti passano da un "setter" che tiene
+// aggiornati gli indici delle caselle occupate: con un impero per paese l'IA chiede
+// di continuo "dove sono le mie città, le mie unità?" e scorrere tutta la mappa
+// (fino a 474.000 caselle sulla gigante) a ogni domanda rallentava troppo i turni.
+const conUnita = new Set(), conCitta = new Set(), conPorto = new Set(), conOsp = new Set();
+function svuotaIndici() { conUnita.clear(); conCitta.clear(); conPorto.clear(); conOsp.clear(); }
+class Casella {
+  constructor(r, c) {
+    this.r = r; this.c = c; this.terrain = 'water'; this.country = null;
+    this._u = null; this._y = null; this._q = null; this._h = null;
+  }
+  get hosp() { return this._h; }
+  set hosp(v) { this._h = v || null; if (v) conOsp.add(this); else conOsp.delete(this); }
+  get unit() { return this._u; }
+  set unit(v) { this._u = v || null; if (v) conUnita.add(this); else conUnita.delete(this); }
+  get city() { return this._y; }
+  set city(v) { this._y = v || null; if (v) conCitta.add(this); else conCitta.delete(this); }
+  get port() { return this._q; }
+  set port(v) { this._q = v || null; if (v) conPorto.add(this); else conPorto.delete(this); }
+}
+// le caselle di un indice che soddisfano f, nell'ordine della mappa (riga per riga),
+// come quando si scorreva tutta la mappa: l'ordine decide chi muove prima
+function dallIndice(ind, f) {
+  const out = [];
+  for (const t of ind) if (map[t.r] && map[t.r][t.c] === t && f(t)) out.push(t);
+  return out.sort((a, b) => a.r - b.r || a.c - b.c);
+}
+
 function newGame(tut = false) {
   document.getElementById('overlay').style.display = 'none';
   tutorial = tut;
@@ -494,10 +533,9 @@ function newGame(tut = false) {
   congedo = false;
   aiLog = []; aiActive = null; updateAiLog();
   undoStack = [];
-  players = {
-    p: { stars: 7, color:'#4da3ff', dark:'#1f5fa8', name:'Tu', country: null },
-    a: { stars: 7, color:'#ff6b5e', dark:'#a83a2f', name:'Impero Cremisi', country: null }
-  };
+  players = { p: { stars: 7, color:'#4da3ff', dark:'#1f5fa8', name:'Tu', country: null, vivo: true } };
+  ordineIA = []; aiStato = {}; caduti = []; conquistatoreP = null; aiMe = null;
+  modoPartita = tut ? 'duello' : modoAvversari; // il tutorial è sempre un duello
   genMap();
   if (tutorial) {
     // nel tutorial giochi l'Italia contro un vicino di terra; la capitale viene piazzata
@@ -505,7 +543,8 @@ function newGame(tut = false) {
     const vicini = PAESI_TUTORIAL.filter(cc => paesiInfo()[cc]);
     assegnaPaesi('IT', vicini[Math.floor(Math.random() * vicini.length)]);
     placing = false;
-    const flood = aCapital() ? floodFrom(aCapital()) : new Set();
+    const ac = capitaleDi(imperiIA()[0]);
+    const flood = ac ? floodFrom(ac) : new Set();
     const spots = computePlaceSet().filter(t =>
       t.terrain === 'grass' && flood.has(key(t))
       && neighbors(t).filter(n => passable(n)).length >= 3);
@@ -520,15 +559,13 @@ function newGame(tut = false) {
     tutStep = -1;
     document.getElementById('tutbar').style.display = 'none';
     document.getElementById('endBtn').classList.remove('pulse');
-    // fase di piazzamento: si sceglie il paese (all'inizio l'ultimo scelto, o uno a caso),
-    // l'IA fonda la capitale nel suo, il giocatore sceglie dove fondare la propria in patria
+    // fase di piazzamento: tutta la mappa in vista, ogni paese con il suo impero IA;
+    // il giocatore tocca il paese che vuole guidare, poi la casella dove fondare la capitale
     placing = true;
-    const lista = Object.keys(paesiInfo());
-    assegnaPaesi(paesiInfo()[paeseScelto] ? paeseScelto : lista[Math.floor(Math.random() * lista.length)], paeseNemicoScelto);
+    assegnaPaesi(null);
     msgPiazzamento();
+    zoomFit();
     render(); ui();
-    scrollToTile(placeSet.length ? placeSet[Math.floor(Math.random() * placeSet.length)] : map[Math.floor(ROWS/2)][Math.floor(COLS/2)], false);
-    if (!overlayVisible('intro')) apriSceltaPaese(); // sotto la schermata di benvenuto si aspetta il "gioca"
   }
 }
 
@@ -961,10 +998,11 @@ function genMap() {
   const g = geoSetup();
   const rng = mulberry32(MAP_SEED); // deterministico: stessa Italia ogni partita
   map = [];
+  svuotaIndici();
   for (let r = 0; r < ROWS; r++) {
     map[r] = [];
     for (let c = 0; c < COLS; c++) {
-      map[r][c] = { terrain: 'water', city: null, unit: null, hosp: null, port: null, country: null, r, c };
+      map[r][c] = new Casella(r, c);
     }
   }
   for (const tile of map.flat()) {
@@ -1068,15 +1106,7 @@ function genMap() {
     const spot = [vt, ...neighbors(vt)].find(x => x.terrain !== 'water' && x.terrain !== 'river' && !x.city);
     if (spot) { spot.terrain = 'grass'; spot.city = { owner: null, capital: false, pop: 1 }; }
   }
-  // capitale IA: punto CASUALE (vero) sul continente principale, non addosso ai villaggi
-  const main = largestComponent();
-  const cand = map.flat().filter(t =>
-    (t.terrain === 'grass' || t.terrain === 'hill') && !t.city && !t.hosp && main.has(key(t))
-    && neighbors(t).filter(n => passable(n)).length >= 3
-    && vills.every(v => dist(t, v) >= vSpace));
-  const ac = cand[Math.floor(Math.random() * cand.length)] || randomCapitalSpot();
-  ac.city = { owner: 'a', capital: true, pop: 1 };
-  ac.unit = mkUnit('warrior', 'a');
+  // le capitali degli imperi IA le fonda assegnaPaesi, ciascuna nel suo paese
 
   // i volti del deserto (dune, pietra, sale, tundra): solo aspetto
   assegnaDeserti(g);
@@ -1143,16 +1173,19 @@ function floodFrom(t) {
 
 // --- fase di piazzamento della capitale del giocatore ---
 // La capitale si fonda in PATRIA, nel paese scelto (isole comprese!),
-// tranne che su montagne e deserto — e mai troppo vicino al nemico.
+// tranne che su montagne e deserto — e il più lontano possibile dalle capitali nemiche.
 function computePlaceSet() {
-  const ac = aCapital();
-  const minD = Math.round(10 * tileScale());
-  const cc = players.p.country;
-  return map.flat().filter(t =>
-    (t.terrain === 'grass' || t.terrain === 'forest' || t.terrain === 'hill')
-    && !t.city && !t.hosp && !t.port && !t.unit
-    && (!cc || t.country === cc)
-    && ac && dist(t, ac) >= minD);
+  const cc = players.p.country, info = paesiInfo();
+  if (!cc || !info[cc]) return [];
+  const caps = imperiIA().map(capitaleDi).filter(Boolean);
+  const base = info[cc].spots.filter(t => !t.city && !t.hosp && !t.port && !t.unit);
+  // 10 caselle dalle capitali nemiche; nei paesi piccoli stretti fra i vicini si cede un po'
+  for (const f of [1, 0.5, 0]) {
+    const minD = Math.round(10 * tileScale() * f);
+    const s = base.filter(t => caps.every(c => dist(t, c) >= minD));
+    if (s.length) return s;
+  }
+  return base;
 }
 function placePlayerCapital(t) {
   t.terrain = 'grass';
@@ -1160,7 +1193,11 @@ function placePlayerCapital(t) {
   t.city = { owner:'p', capital:true, pop:1 };
   t.unit = mkUnit('warrior','p');
   placing = false; placeSet = [];
-  msg('🏛️ Capitale fondata! Espanditi e conquista. Tocca a te.');
+  document.getElementById('paesi').style.display = 'none';
+  const n = imperiIA().length;
+  msg(modoPartita === 'tutti'
+    ? `🏛️ Capitale fondata! Contro di te ci sono ${n} imperi, uno per paese, in guerra fra loro e con te. Tocca a te.`
+    : '🏛️ Capitale fondata! Espanditi e conquista. Tocca a te.');
   ui(); render();
   scrollToTile(t, false);
 }
@@ -1170,13 +1207,14 @@ function placePlayerCapital(t) {
 // paese. La capitale si fonda in patria, e in patria le unità si difendono meglio.
 const PAESE_VILL_BASE = 4;   // sotto questo numero di villaggi neutrali il paese riceve stelle di compenso
 const PAESE_VILL_STELLE = 2; // stelle in piu' per ogni villaggio mancante
-const PAESI_VICINI = 5;      // l'IA "a caso" pesca fra i paesi piu' vicini al tuo
+const PAESI_VICINI = 5;      // nel duello l'IA "a caso" pesca fra i paesi piu' vicini al tuo
 const PAESI_TUTORIAL = ['FR', 'CH', 'AT', 'SI']; // nel tutorial giochi l'Italia contro un vicino di terra
 let paeseScelto = null;       // il paese del giocatore, ricordato fra una partita e l'altra
-let paeseNemicoScelto = null; // null = l'IA prende un paese vicino, a caso
-let paesiCache = null, mainCache = null;
+let paeseNemicoScelto = null; // duello: null = l'IA prende un paese vicino, a caso
+let paesiCache = null, mainCache = null, profCache = null;
 
 function bandiera(cc) {
+  if (!cc || !/^[A-Z]{2}$/.test(cc)) return '🏳️';
   const c = cc === 'UK' ? 'GB' : cc;
   return String.fromCodePoint(...[...c].map(ch => 0x1F1E6 + ch.charCodeAt(0) - 65));
 }
@@ -1193,7 +1231,7 @@ function paesiInfo() {
     p.caselle++;
     if (t.city && !t.city.capital && t.city.owner === null) p.vill++;
     if ((t.terrain === 'grass' || t.terrain === 'forest' || t.terrain === 'hill') && !t.hosp && !t.port
-        && (!t.city || t.city.capital)) { // la capitale dell'IA si sposta: la sua casella resta valida
+        && (!t.city || t.city.capital)) { // le capitali si spostano: la loro casella resta valida
       const c = center(t);
       p.spots.push(t); p.x += c.x; p.y += c.y;
     }
@@ -1223,59 +1261,141 @@ function componentePrincipale() {
   if (!mainCache || mainCache.map !== map) mainCache = { map, set: largestComponent() };
   return mainCache.set;
 }
+// per ogni casella, quante caselle la separano dal confine (o dalla costa) del suo paese
+function profonditaPaesi() {
+  if (profCache && profCache.map === map) return profCache.d;
+  const d = new Int16Array(ROWS * COLS).fill(-1), q = [];
+  for (const t of map.flat()) {
+    if (!t.country || t.terrain === 'water') continue;
+    if (neighbors(t).length < 6 || neighbors(t).some(n => n.country !== t.country)) { d[aiIdx(t)] = 0; q.push(t); }
+  }
+  for (let h = 0; h < q.length; h++) {
+    const t = q[h], v = d[aiIdx(t)] + 1;
+    for (const n of neighbors(t)) if (d[aiIdx(n)] < 0 && n.country === t.country) { d[aiIdx(n)] = v; q.push(n); }
+  }
+  profCache = { map, d };
+  return d;
+}
 
-// la capitale dell'IA nel suo paese: sul continente se possibile, non addosso ai
-// villaggi, e lasciando al giocatore spazio per la sua capitale lontano dal nemico
-function spotCapitaleIA(aCc, pCc) {
+// ============ GLI IMPERI ============
+// 'tutti': ogni paese della mappa è un impero guidato dall'IA, in guerra con tutti;
+// 'duello': come fino alla v59, un solo impero nemico in un paese vicino.
+let modoAvversari = 'tutti'; // la scelta del menu iniziale, ricordata fra una partita e l'altra
+try { const v = localStorage.getItem('piccoliImperi.avversari'); if (v === 'tutti' || v === 'duello') modoAvversari = v; } catch (e) {}
+let modoPartita = 'tutti';   // la modalità della partita in corso (un salvataggio vecchio è un duello)
+let ordineIA = [];           // gli imperi IA in ordine di turno (l'id è il codice del paese)
+let aiStato = {};            // per ogni impero IA: ponti e navi che aspetta, offensiva
+let caduti = [];             // gli imperi già caduti, per la cronaca
+function setAvversari(v) {
+  if (v !== 'tutti' && v !== 'duello') return;
+  modoAvversari = v;
+  try { localStorage.setItem('piccoliImperi.avversari', v); } catch (e) {}
+}
+function imperiIA() { return ordineIA.filter(o => players[o] && players[o].vivo); }
+function nomeImpero(o) { return o === 'p' ? 'Tu' : players[o] ? players[o].name : '—'; }
+function capitaleDi(o) { return cities(o).find(t => t.city.capital); }
+function pCapital() { return capitaleDi('p'); }
+// un colore per paese, sempre lo stesso; l'azzurro resta il tuo
+function coloreImpero(cc) {
+  if (modoPartita === 'duello') return { color: '#ff6b5e', dark: '#a83a2f' };
+  const i = Object.keys(COUNTRY_NAMES).sort().indexOf(cc);
+  let h = Math.round((i * 137.508 + 8) % 360);
+  if (h > 185 && h < 245) h = (h + 75) % 360;
+  return { color: `hsl(${h},78%,60%)`, dark: `hsl(${h},60%,28%)` };
+}
+function nuovoStatoIA() {
+  return { bisogni: { ponti: new Map(), imbarchi: new Map() }, fronte: new Map(), senzaPorto: [], offensiva: false };
+}
+function nuovoImpero(cc) {
+  const col = coloreImpero(cc);
+  players[cc] = { stars: 7 + bonusPaese(cc), color: col.color, dark: col.dark,
+                  name: modoPartita === 'duello' ? 'Impero Cremisi' : nomePaese(cc), country: cc, vivo: true };
+  aiStato[cc] = nuovoStatoIA();
+  if (!ordineIA.includes(cc)) ordineIA.push(cc);
+}
+function togliImpero(o) {
+  const cap = capitaleDi(o);
+  if (cap) { cap.city = null; if (cap.unit && cap.unit.owner === o) cap.unit = null; }
+  delete players[o]; delete aiStato[o];
+  ordineIA = ordineIA.filter(x => x !== o);
+}
+
+// la capitale di un impero IA nel suo paese: sul continente se possibile, verso l'interno
+// (non addosso ai vicini), non attaccata ai villaggi e lontana dalle altre capitali
+function spotCapitaleIA(cc) {
   const info = paesiInfo(), minD = Math.round(10 * tileScale());
-  const mie = info[pCc].spots.filter(paeseLibero);
-  let cand = info[aCc].spots.filter(t => paeseLibero(t) && (t.terrain === 'grass' || t.terrain === 'hill')
+  if (!info[cc]) return null;
+  let cand = info[cc].spots.filter(t => paeseLibero(t) && (t.terrain === 'grass' || t.terrain === 'hill')
     && neighbors(t).filter(n => passable(n)).length >= 3 && !neighbors(t).some(n => n.city));
-  if (!cand.length) cand = info[aCc].spots.filter(paeseLibero);
+  if (!cand.length) cand = info[cc].spots.filter(paeseLibero);
   const main = componentePrincipale();
   const sulContinente = cand.filter(t => main.has(key(t)));
   if (sulContinente.length) cand = sulContinente;
-  const ok = t => mie.some(m => dist(m, t) >= minD);
-  for (let i = 0; i < 40 && cand.length; i++) {
-    const t = cand[Math.floor(Math.random() * cand.length)];
-    if (ok(t)) return t;
-  }
-  return cand.find(ok) || null;
+  const prof = profonditaPaesi();
+  let maxP = 0;
+  for (const t of cand) maxP = Math.max(maxP, prof[aiIdx(t)]);
+  const interne = cand.filter(t => prof[aiIdx(t)] >= Math.ceil(maxP / 2));
+  if (interne.length) cand = interne;
+  const altre = dallIndice(conCitta, t => t.city.capital && t.city.owner);
+  const lontane = cand.filter(t => altre.every(c => dist(c, t) >= minD));
+  if (lontane.length) cand = lontane;
+  return cand.length ? cand[Math.floor(Math.random() * cand.length)] : null;
+}
+function fondaCapitaleIA(cc) {
+  const t = spotCapitaleIA(cc);
+  if (!t) return false;
+  nuovoImpero(cc);
+  t.city = { owner: cc, capital: true, pop: 1 };
+  t.unit = mkUnit('warrior', cc);
+  return true;
 }
 
-// assegna i paesi ai due imperi e (ri)fonda la capitale dell'IA nel suo paese.
+// assegna il paese al giocatore (pCc, anche nessuno) e prepara gli imperi IA:
+// 'tutti' = un impero per ogni altro paese; 'duello' = uno solo, vicino (o scelto: aCc).
 // Si usa solo prima che il giocatore abbia fondato la capitale.
 function assegnaPaesi(pCc, aCc) {
-  const old = aCapital();
-  if (old) { old.city = null; if (old.unit && old.unit.owner === 'a') old.unit = null; }
   const info = paesiInfo(), lista = Object.keys(info);
-  if (!info[pCc]) pCc = lista[Math.floor(Math.random() * lista.length)];
-  let ordine;
-  if (aCc && aCc !== pCc && info[aCc]) ordine = [aCc];
-  else {
-    const vicini = paesiVicini(pCc), primi = vicini.slice(0, PAESI_VICINI);
-    for (let i = primi.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [primi[i], primi[j]] = [primi[j], primi[i]]; }
-    ordine = primi.concat(vicini.slice(PAESI_VICINI));
+  if (pCc && !info[pCc]) pCc = lista[Math.floor(Math.random() * lista.length)];
+  players.p.country = pCc || null;
+  players.p.stars = 7 + (pCc ? bonusPaese(pCc) : 0);
+  if (modoPartita === 'tutti') {
+    if (players[pCc]) togliImpero(pCc); // il tuo paese non è più dell'IA
+    // gli altri paesi, ognuno con il suo impero (in ordine sparso: chi muove prima cambia a ogni partita)
+    const mancano = lista.filter(cc => cc !== pCc && !players[cc]);
+    for (let i = mancano.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [mancano[i], mancano[j]] = [mancano[j], mancano[i]]; }
+    for (const cc of mancano) fondaCapitaleIA(cc);
+  } else {
+    for (const o of [...ordineIA]) togliImpero(o);
+    if (pCc) {
+      let ordine;
+      if (aCc && aCc !== pCc && info[aCc]) ordine = [aCc];
+      else {
+        const vicini = paesiVicini(pCc), primi = vicini.slice(0, PAESI_VICINI);
+        for (let i = primi.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [primi[i], primi[j]] = [primi[j], primi[i]]; }
+        ordine = primi.concat(vicini.slice(PAESI_VICINI));
+      }
+      for (const cc of ordine) if (fondaCapitaleIA(cc)) break;
+    }
   }
-  let ac = null;
-  for (const cc of ordine) { ac = spotCapitaleIA(cc, pCc); if (ac) { aCc = cc; break; } }
-  if (!ac) { ac = randomCapitalSpot(); aCc = ac.country; } // non dovrebbe mai servire
-  ac.city = { owner: 'a', capital: true, pop: 1 };
-  ac.unit = mkUnit('warrior', 'a');
-  players.p.country = pCc; players.a.country = aCc;
-  players.p.stars = 7 + bonusPaese(pCc);
-  players.a.stars = 7 + bonusPaese(aCc);
   placeSet = computePlaceSet();
 }
 function inPatria(t, owner) {
   return !!(t.country && players[owner] && players[owner].country === t.country);
 }
 function msgPiazzamento() {
-  const p = players.p.country, a = players.a.country, b = bonusPaese(p);
-  msg(`🏛️ Giochi con ${bandiera(p)} ${nomePaese(p)}${b ? ` (+${b}⭐ di compenso: pochi villaggi)` : ''} contro ${bandiera(a)} ${nomePaese(a)}. FONDA LA TUA CAPITALE in patria: tocca una casella evidenziata. Per cambiare paese toccalo sulla mappa o usa 🌍.`);
+  const p = players.p.country;
+  if (!p) {
+    msg(modoPartita === 'tutti'
+      ? `🌍 TOCCA SULLA MAPPA IL PAESE CHE VUOI GUIDARE. Ogni paese colorato è un impero guidato dall'IA (${imperiIA().length} in tutto): quello che scegli diventa tuo.`
+      : '🌍 TOCCA SULLA MAPPA IL PAESE CHE VUOI GUIDARE: il nemico sarà un paese vicino.');
+    return;
+  }
+  const b = bonusPaese(p), info = paesiInfo()[p];
+  const contro = modoPartita === 'tutti' ? `contro ${imperiIA().length} imperi` : `contro ${bandiera(imperiIA()[0])} ${nomePaese(imperiIA()[0])}`;
+  msg(`🏛️ Hai scelto ${bandiera(p)} ${nomePaese(p)} (${tagliaPaese(p)}, ${info.vill} ${info.vill === 1 ? 'villaggio' : 'villaggi'}${b ? `, +${b}⭐ di compenso` : ''}) ${contro}. FONDA LA CAPITALE: tocca una casella evidenziata. Per cambiare paese tocca un altro paese.`);
 }
 
-// --- menu di scelta del paese ---
+// --- menu di scelta del paese (un aiuto: il paese si sceglie anche toccandolo sulla mappa) ---
 function apriSceltaPaese() {
   if (!placing) return;
   const info = paesiInfo();
@@ -1285,16 +1405,32 @@ function apriSceltaPaese() {
     return `<button class="paese-btn${cc === players.p.country ? ' sel' : ''}" onclick="scegliPaese('${cc}')">${bandiera(cc)} ${nomePaese(cc)}`
       + `<small>${tagliaPaese(cc)} · ${v} ${v === 1 ? 'villaggio' : 'villaggi'}${b ? ` · +${b}⭐` : ''}</small></button>`;
   }).join('');
-  const sel = document.getElementById('paeseNemico');
-  sel.innerHTML = '<option value="">🎲 Un paese vicino, a caso</option>'
-    + lista.filter(cc => cc !== players.p.country).map(cc => `<option value="${cc}">${bandiera(cc)} ${nomePaese(cc)}</option>`).join('');
-  sel.value = paeseNemicoScelto && paeseNemicoScelto !== players.p.country ? paeseNemicoScelto : '';
-  document.getElementById('paesiNemicoOra').textContent = `${bandiera(players.a.country)} ${nomePaese(players.a.country)}`;
+  const duello = modoPartita === 'duello';
+  document.getElementById('paesiNemicoBox').style.display = duello ? 'block' : 'none';
+  if (duello) {
+    const sel = document.getElementById('paeseNemico');
+    sel.innerHTML = '<option value="">🎲 Un paese vicino, a caso</option>'
+      + lista.filter(cc => cc !== players.p.country).map(cc => `<option value="${cc}">${bandiera(cc)} ${nomePaese(cc)}</option>`).join('');
+    sel.value = paeseNemicoScelto && paeseNemicoScelto !== players.p.country ? paeseNemicoScelto : '';
+    const a = imperiIA()[0];
+    document.getElementById('paesiNemicoOra').textContent = a ? `${bandiera(a)} ${nomePaese(a)}` : '(prima scegli il tuo paese)';
+  }
   document.getElementById('paesi').style.display = 'flex';
 }
 function chiudiSceltaPaese() {
   document.getElementById('paesi').style.display = 'none';
-  if (placing && placeSet.length) scrollToTile(placeSet[Math.floor(Math.random() * placeSet.length)], false);
+  if (placing && players.p.country) zoomSuPaese(players.p.country);
+}
+// inquadra un paese intero (senza avvicinarsi più del 100%)
+function zoomSuPaese(cc) {
+  const wrap = document.getElementById('mapwrap'), info = paesiInfo()[cc];
+  if (!wrap || !info || typeof wrap.scrollTo !== 'function') return;
+  let x0 = Infinity, x1 = -Infinity, y0 = Infinity, y1 = -Infinity;
+  for (const t of info.spots) { const p = center(t); x0 = Math.min(x0, p.x); x1 = Math.max(x1, p.x); y0 = Math.min(y0, p.y); y1 = Math.max(y1, p.y); }
+  const W = wrap.clientWidth || 800, H = wrap.clientHeight || 600;
+  applyZoom(Math.min(1, 0.8 * W / Math.max(1, x1 - x0 + 4 * S), 0.8 * H / Math.max(1, y1 - y0 + 4 * S)));
+  wrap.scrollTo({ left: Math.max(0, (x0 + x1) / 2 * zoom + PADX - W / 2), top: Math.max(0, (y0 + y1) / 2 * zoom + PADY - H / 2), behavior: 'auto' });
+  scheduleRender();
 }
 function cambiaPaese(cc) {
   if (!placing || !paesiInfo()[cc]) return;
@@ -1306,7 +1442,27 @@ function cambiaPaese(cc) {
 function scegliPaese(cc) { cambiaPaese(cc); apriSceltaPaese(); }
 function scegliNemico(cc) {
   paeseNemicoScelto = cc || null;
-  if (placing) { assegnaPaesi(players.p.country, paeseNemicoScelto); msgPiazzamento(); ui(); render(); apriSceltaPaese(); }
+  if (placing && players.p.country) { assegnaPaesi(players.p.country, paeseNemicoScelto); msgPiazzamento(); ui(); render(); apriSceltaPaese(); }
+}
+
+// la caduta di un impero: chi gli prende la capitale la tiene (come città qualunque),
+// le altre sue città tornano villaggi liberi, l'esercito si scioglie, porti e ospedali restano vuoti
+let conquistatoreP = null; // chi ha preso la tua capitale
+function cadeImpero(o, chi, t) {
+  t.city.capital = false;
+  if (o === 'p') { conquistatoreP = chi; return; } // la partita finisce: il resto non serve
+  players[o].vivo = false;
+  caduti.push(o);
+  for (const x of cities(o)) x.city.owner = null;
+  for (const x of unitsOf(o)) x.unit = null;
+  for (const x of ports(o)) x.port.owner = null;
+  for (const x of dallIndice(conOsp, x => x.hosp.owner === o)) x.hosp = { owner: null, level: 0, hp: 0 };
+  const resto = imperiIA().length;
+  if (chi === 'p') {
+    msg(modoPartita === 'tutti'
+      ? `👑 Hai preso la capitale: ${bandiera(o)} ${nomePaese(o)} è caduto! Le sue città tornano villaggi liberi. ${resto ? `Restano ${resto} imperi.` : ''}`
+      : `👑 Hai preso la capitale nemica!`);
+  } else aiLogAdd(`🏳️ ${bandiera(o)} ${nomePaese(o)} è caduto: ${bandiera(chi)} ${nomeImpero(chi)} ne ha preso la capitale. Restano ${resto} imperi.`, true);
 }
 
 // campo delle distanze dal mare (BFS multi-sorgente, aggira le montagne)
@@ -1362,8 +1518,6 @@ function findCapitalSpot(side) {
   return null;
 }
 
-function pCapital() { return cities('p').find(t => t.city.capital); }
-function aCapital() { return cities('a').find(t => t.city.capital); }
 
 // terra "percorribile" ai fini della connettività: le montagne si scalano, quindi collegano
 function crossable(t) { return passable(t) || t.terrain === 'mountain'; }
@@ -1790,35 +1944,26 @@ function playerFound() {
 
 function captureIfCity(t, owner) {
   if (t.city && t.city.owner !== owner) {
-    const was = t.city.owner;
+    const was = t.city.owner, capitale = !!t.city.capital;
     t.city.owner = owner;
     // la guerra fa fuggire parte degli abitanti
-    if (was === 'p' || was === 'a') t.city.pop = Math.max(1, (t.city.pop || 1) - 1);
+    if (was) t.city.pop = Math.max(1, (t.city.pop || 1) - 1);
     if (owner === 'p') {
       msg(was === null ? '⛺ Villaggio conquistato! Ora produce stelle.' : '🔥 Città nemica conquistata! (parte della popolazione è fuggita)');
       if (was === null) tutEvent('capture');
     } else {
       if (was === null) aiLogAdd('⛺ Il nemico ha conquistato un villaggio neutrale');
       else if (was === 'p') {
-        aiLogAdd(t.city.capital ? '💀 Il nemico ha preso la tua CAPITALE!' : '⚠️ Il nemico ha conquistato una tua città!');
+        aiLogAdd(capitale ? '💀 Il nemico ha preso la tua CAPITALE!' : '⚠️ Il nemico ha conquistato una tua città!', true);
         document.getElementById('msg').textContent = '⚠️ Il nemico ha conquistato una tua città!';
-      }
+      } else aiLogAdd(`🔥 Il nemico ha conquistato una città di ${bandiera(was)} ${nomeImpero(was)}`);
     }
+    if (was && capitale) cadeImpero(was, owner, t);
   }
 }
 
-function cities(owner) {
-  const out = [];
-  for (let r = 0; r < ROWS; r++) for (let c = 0; c < COLS; c++)
-    if (map[r][c].city && map[r][c].city.owner === owner) out.push(map[r][c]);
-  return out;
-}
-function unitsOf(owner) {
-  const out = [];
-  for (let r = 0; r < ROWS; r++) for (let c = 0; c < COLS; c++)
-    if (map[r][c].unit && map[r][c].unit.owner === owner) out.push(map[r][c]);
-  return out;
-}
+function cities(owner) { return dallIndice(conCitta, t => t.city.owner === owner); }
+function unitsOf(owner) { return dallIndice(conUnita, t => t.unit.owner === owner); }
 function income(owner) {
   return cities(owner).reduce((s, t) => s + (t.city.capital ? 3 : 2) + ((t.city.pop || 1) - 1), 0)
        + ports(owner).length * PORT_INCOME;
@@ -1868,21 +2013,25 @@ function congedaClick(t) {
   refreshSets(); ui(); render();
 }
 
+// si perde quando cade la propria capitale, si vince quando non resta nessun impero IA
 function checkEnd() {
-  if (gameOver) return;
-  const pCap = cities('p').some(t => t.city.capital);
-  const aCap = cities('a').some(t => t.city.capital);
-  if (!aCap) endGame(true);
-  else if (!pCap) endGame(false);
+  if (gameOver || placing) return;
+  if (!pCapital()) endGame(false);
+  else if (!imperiIA().length) endGame(true);
 }
 
 function endGame(win) {
   gameOver = true;
   const ov = document.getElementById('overlay');
+  const chi = conquistatoreP && players[conquistatoreP];
   document.getElementById('ovTitle').textContent = win ? '🏆 VITTORIA!' : '💀 SCONFITTA';
   document.getElementById('ovText').textContent = win
-    ? `Hai conquistato la capitale dell'Impero Cremisi in ${turn} turni. Il continente è tuo!`
-    : `L'Impero Cremisi ha preso la tua capitale al turno ${turn}. Andrà meglio la prossima volta!`;
+    ? (modoPartita === 'tutti'
+      ? `Hai fatto cadere tutti gli imperi in ${turn} turni. L'Europa è tua!`
+      : `Hai conquistato la capitale dell'Impero Cremisi in ${turn} turni. Il continente è tuo!`)
+    : (modoPartita === 'tutti' && chi
+      ? `${bandiera(conquistatoreP)} ${chi.name} ha preso la tua capitale al turno ${turn}. Andrà meglio la prossima volta!`
+      : `L'Impero Cremisi ha preso la tua capitale al turno ${turn}. Andrà meglio la prossima volta!`);
   ov.style.display = 'flex';
   render();
 }
@@ -1895,10 +2044,16 @@ function endTurn() {
   healIdle('p');
   selected = null; moveSet = []; attackSet = []; mergeSet = []; bridgeSet = []; embarkSet = []; disembarkSet = [];
   undoStack = []; // il turno è chiuso: niente più annullamenti
-  current = 'a';
-  document.getElementById('msg').textContent = '🔴 L\'Impero Cremisi sta muovendo… (cronaca in basso a sinistra sulla mappa)';
+  aiGiro = imperiIA();
+  aiPreparaGiro();
+  aiLog = [];
+  if (modoPartita === 'tutti') aiLogAdd(`— Turno ${turn}: muovono ${aiGiro.length} imperi (qui le mosse vicino a te) —`, true);
+  current = aiGiro[0] || 'p';
+  document.getElementById('msg').textContent = modoPartita === 'tutti'
+    ? '🔴 Gli imperi stanno muovendo… (cronaca in basso a sinistra sulla mappa)'
+    : '🔴 L\'Impero Cremisi sta muovendo… (cronaca in basso a sinistra sulla mappa)';
   ui(); render();
-  setTimeout(aiTurn, 350);
+  setTimeout(() => aiTurn(0), 350);
 }
 
 function healIdle(owner) {
@@ -1927,7 +2082,7 @@ function healIdle(owner) {
 function startPlayerTurn() {
   if (gameOver) return;
   turn++;
-  current = 'p';
+  current = 'p'; aiMe = null;
   players.p.stars += income('p');           // prima incassi...
   const upk = upkeep('p');
   if (upk > players.p.stars) {               // ...e se non puoi pagare, scegli chi congedare
@@ -1946,7 +2101,7 @@ function startPlayerTurn() {
 // Fotografia completa dello stato (con i flag mosso/attaccato) per l'undo
 function snapshot() {
   return JSON.stringify({
-    ps: players.p.stars, as: players.a.stars, turn,
+    stelle: Object.fromEntries(Object.keys(players).map(o => [o, players[o].stars])), vivi: imperiIA(), turn,
     tiles: map.flat().map(t => ({
       g: t.terrain, b: t.bridge ? 1 : 0,
       y: t.city ? { o: t.city.owner, k: t.city.capital, p: t.city.pop || 1 } : 0,
@@ -1962,6 +2117,7 @@ function snapshot() {
   });
 }
 function restoreSnapshot(s) {
+  pontiCache = null;
   const d = JSON.parse(s);
   let i = 0;
   for (let r = 0; r < ROWS; r++) for (let c = 0; c < COLS; c++) {
@@ -1979,7 +2135,12 @@ function restoreSnapshot(s) {
     t.hosp = x.s ? { owner: x.s.o, level: x.s.l, hp: x.s.p } : null;
     t.port = x.q ? { owner: x.q.o } : null;
   }
-  players.p.stars = d.ps; players.a.stars = d.as; turn = d.turn;
+  for (const o of Object.keys(players)) {
+    if (o in d.stelle) players[o].stars = d.stelle[o];
+    if (o !== 'p') players[o].vivo = d.vivi.includes(o); // un impero fatto cadere e poi annullato torna in vita
+  }
+  caduti = caduti.filter(o => !d.vivi.includes(o));
+  turn = d.turn;
   terrainDirty = true;
 }
 function pushUndo() {
@@ -2013,14 +2174,24 @@ function serialize() {
       q: t.port ? { o: t.port.owner } : 0
     });
   }
-  return { v: 16, rows: ROWS, cols: COLS, turn, stars: { p: players.p.stars, a: players.a.stars },
-           paesi: { p: players.p.country || null, a: players.a.country || null },
+  // v17: gli imperi IA sono i paesi (l'id di ogni impero è il codice del suo paese)
+  const imperi = imperiIA();
+  return { v: 17, rows: ROWS, cols: COLS, turn, modo: modoPartita, imperi, caduti,
+           stars: Object.fromEntries(['p', ...imperi].map(o => [o, players[o].stars])),
+           paesi: Object.fromEntries(['p', ...imperi].map(o => [o, players[o].country || null])),
            ia: aiLivello, tiles };
 }
 
 function applySave(data) {
   const TERR = ['grass','forest','mountain','water','river','desert','hill'];
-  if (!data || ![6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16].includes(data.v) || !Array.isArray(data.tiles) || !data.stars) return false;
+  if (!data || ![6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17].includes(data.v) || !Array.isArray(data.tiles) || !data.stars) return false;
+  // chi può possedere qualcosa: tu ('p') e gli imperi IA. Fino alla v16 c'era un solo
+  // nemico, 'a': diventa l'impero del suo paese e la partita prosegue come duello
+  const imperi = data.v >= 17
+    ? (Array.isArray(data.imperi) ? data.imperi : []).filter(o => typeof o === 'string' && /^[A-Za-z]{1,3}$/.test(o) && o !== 'p')
+    : ['a'];
+  const validi = new Set(['p', ...imperi]);
+  const proprietario = o => validi.has(o);
   // se il salvataggio è di un'altra taglia di mappa, cambia taglia automaticamente;
   // i salvataggi PRE-estensione atlantica (v<12) hanno le vecchie dimensioni: si
   // caricano spostati di EXTC colonne e le nuove terre si ridisegnano da sole
@@ -2043,7 +2214,7 @@ function applySave(data) {
   const offR = (legacy || semi) ? EXTN : 0;
   if (data.tiles.length !== (legacy ? FITROWS * FITCOLS : semi ? (ROWS - EXTN) * COLS : ROWS * COLS)) return false;
   const newMap = [];
-  for (let r = 0; r < ROWS; r++) { newMap[r] = []; for (let c = 0; c < COLS; c++) newMap[r][c] = { terrain:'water', city:null, unit:null, hosp:null, port:null, country:null, r, c }; }
+  for (let r = 0; r < ROWS; r++) { newMap[r] = []; for (let c = 0; c < COLS; c++) newMap[r][c] = new Casella(r, c); }
   for (const s of data.tiles) {
     if (!Number.isInteger(s.r) || !Number.isInteger(s.c) || s.r < 0 || s.r >= (legacy ? FITROWS : ROWS - offR) || s.c < 0 || s.c >= (legacy ? FITCOLS : COLS)) return false;
     if (!TERR.includes(s.g)) return false;
@@ -2051,11 +2222,11 @@ function applySave(data) {
     t.terrain = s.g;
     t.bridge = !!s.b && (s.g === 'river' || s.g === 'water'); // un ponte esiste solo su fiume o stretto
     if (s.y) {
-      if (s.y.o !== 'p' && s.y.o !== 'a' && s.y.o !== null) return false;
+      if (s.y.o !== null && !proprietario(s.y.o)) return false;
       t.city = { owner: s.y.o, capital: !!s.y.k, pop: Math.min(MAX_POP, Math.max(1, (s.y.p | 0) || 1)) };
     }
     if (s.u) {
-      if (!(s.u.t in UNIT_TYPES) || (s.u.o !== 'p' && s.u.o !== 'a')) return false;
+      if (!(s.u.t in UNIT_TYPES) || !proprietario(s.u.o)) return false;
       const n = Math.min(maxStackFor(s.u.t), Math.max(1, s.u.n | 0));
       const mh = UNIT_TYPES[s.u.t].hp * n;
       t.unit = { type: s.u.t, owner: s.u.o, count: n, maxHp: mh,
@@ -2079,16 +2250,18 @@ function applySave(data) {
     }
     if (s.s) {
       const l = Math.min(3, Math.max(0, s.s.l | 0));
-      if (l > 0 && s.s.o !== 'p' && s.s.o !== 'a') return false;
+      if (l > 0 && !proprietario(s.s.o)) return false;
       t.hosp = { owner: l > 0 ? s.s.o : null, level: l,
                  hp: l > 0 ? Math.min(HOSP_HP * l, Math.max(1, s.s.p | 0)) : 0 };
     }
     if (s.q) {
-      if (s.q.o !== 'p' && s.q.o !== 'a') return false;
+      if (s.q.o !== null && !proprietario(s.q.o)) return false; // dalla v17 un porto può restare senza padrone
       t.port = { owner: s.q.o };
     }
   }
   map = newMap;
+  for (const ind of [conUnita, conCitta, conPorto, conOsp]) // via le caselle della partita di prima
+    for (const t of ind) if (!map[t.r] || map[t.r][t.c] !== t) ind.delete(t);
   if (legacy || semi) { // un salvataggio di una mappa piu' piccola: ridisegna le nuove terre
     const g2 = geoSetup();
     for (const t of map.flat()) {
@@ -2110,13 +2283,33 @@ function applySave(data) {
   assegnaDeserti(); // riconosce erg/reg/chott sul deserto salvato (solo aspetto)
   terrainDirty = true;
   turn = Math.max(1, data.turn | 0);
-  players.p.stars = Math.max(0, data.stars.p | 0);
-  players.a.stars = Math.max(0, data.stars.a | 0);
-  // i paesi (v16); nei salvataggi precedenti, quello in cui sorge ciascuna capitale
-  for (const o of ['p', 'a']) {
-    const cc = data.paesi && data.paesi[o];
-    const cap = o === 'p' ? pCapital() : aCapital();
-    players[o].country = (typeof cc === 'string' && COUNTRY_NAMES[cc]) ? cc : (cap && cap.country) || null;
+  // gli imperi: il paese di ciascuno (v16+), o quello in cui sorge la sua capitale
+  const paeseDi = o => {
+    const cc = data.paesi && data.paesi[o], cap = capitaleDi(o);
+    return (typeof cc === 'string' && COUNTRY_NAMES[cc]) ? cc : (cap && cap.country) || null;
+  };
+  modoPartita = data.v >= 17 && data.modo === 'tutti' ? 'tutti' : 'duello';
+  players = { p: { stars: Math.max(0, data.stars.p | 0), color:'#4da3ff', dark:'#1f5fa8', name:'Tu', country: paeseDi('p'), vivo: true } };
+  ordineIA = []; aiStato = {}; conquistatoreP = null; aiMe = null;
+  caduti = data.v >= 17 && Array.isArray(data.caduti) ? data.caduti.filter(o => typeof o === 'string' && !validi.has(o)) : [];
+  for (const o0 of imperi) {
+    let o = o0;
+    const cc = paeseDi(o0);
+    if (o0 === 'a' && cc && cc !== 'p') { // il nemico dei vecchi salvataggi prende il nome del suo paese
+      o = cc;
+      for (const t of dallIndice(conUnita, () => true)) {
+        if (t.unit.owner === 'a') t.unit.owner = o;
+        if (t.unit.cargo && t.unit.cargo.owner === 'a') t.unit.cargo.owner = o;
+      }
+      for (const t of dallIndice(conCitta, x => x.city.owner === 'a')) t.city.owner = o;
+      for (const t of dallIndice(conPorto, x => x.port.owner === 'a')) t.port.owner = o;
+      for (const t of dallIndice(conOsp, x => x.hosp.owner === 'a')) t.hosp.owner = o;
+    }
+    nuovoImpero(o);
+    players[o].country = cc;
+    players[o].stars = Math.max(0, data.stars[o0] | 0);
+    // un impero senza capitale nel file è già caduto
+    if (!capitaleDi(o)) { players[o].vivo = false; if (!caduti.includes(o)) caduti.push(o); }
   }
   // la difficoltà dell'IA (campo facoltativo): i salvataggi che non ce l'hanno giocano a Normale
   setDifficolta(AI_LIVELLI[data.ia] ? data.ia : 'normale');
@@ -2175,7 +2368,7 @@ const TUT_STEPS = [
     event: 'selectCity', target: () => cities('p').find(t => t.city.capital) || null },
   { text: "<b>Passo 4/6 — Addestrare.</b> Ogni unità costa stelle ⭐ (le vedi in alto). <b>Clicca «⚔️ Guerriero — 2⭐»</b> nel pannello a destra per reclutarlo.",
     event: 'train', target: () => cities('p').find(t => t.city.capital) || null },
-  { text: "<b>Passo 5/6 — Fine turno.</b> La nuova unità sarà pronta dal prossimo turno. Quando hai finito le mosse, premi <b>✅ Fine turno</b>: poi muoverà l'Impero Cremisi.",
+  { text: "<b>Passo 5/6 — Fine turno.</b> La nuova unità sarà pronta dal prossimo turno. Quando hai finito le mosse, premi <b>✅ Fine turno</b>: poi muoverà l'Impero Cremisi (nel tutorial c'è un solo nemico).",
     event: 'endTurn', target: () => null, pulseEnd: true },
   { text: "<b>Passo 6/6 — Conquista!</b> A inizio turno hai incassato le stelle delle tue città. Ora <b>porta un'unità sul villaggio ⛺ evidenziato</b> (può servire più di un turno): diventerà una tua città e produrrà 2⭐ a turno.",
     event: 'capture', target: () => {
@@ -2372,7 +2565,7 @@ try { const v = localStorage.getItem('piccoliImperi.ia'); if (AI_LIVELLI[v]) aiL
 function aiDiff() { return AI_LIVELLI[aiLivello] || AI_LIVELLI.normale; }
 function aiTregua() { return turn < aiDiff().tregua; }
 // la rendita che l'IA incassa davvero, secondo la difficoltà
-function aiEntrata() { return Math.round(income('a') * aiDiff().economia); }
+function aiEntrata(o = aiMe) { return Math.round(income(o) * aiDiff().economia); }
 function aggiornaSelIA() {
   for (const id of ['iaSel', 'iaSelIntro']) { const el = document.getElementById(id); if (el) el.value = aiLivello; }
 }
@@ -2386,70 +2579,129 @@ function setDifficolta(liv) {
     msg(`🤖 Difficoltà dell'IA: ${aiDiff().nome}. Vale dal prossimo turno del nemico.`);
 }
 
-function aiTurn() {
+// ============ IL GIRO DEGLI IMPERI IA ============
+// Dopo il tuo turno muove ogni impero IA, uno dopo l'altro. Con un impero per paese
+// si vedono (con la pausa e la vista che segue) solo le mosse vicino a te: le altre
+// si fanno di colpo, a blocchi di qualche decina di millisecondi, per non bloccare la pagina.
+let aiMe = null;          // l'impero IA che sta muovendo
+let aiGiro = [];          // gli imperi che muovono in questo turno, in ordine
+let aiVisibile = true;    // la mossa in corso è vicino a te (si mostra e si racconta)
+let aiMostrate = 0;       // mosse mostrate nel turno di questo impero
+let aiZona = null;        // caselle vicine alle tue città e unità
+const AI_BLOCCO_MS = 30;  // lavoro di fila prima di lasciar respirare la pagina
+function aiMostra(t) {
+  return modoPartita !== 'tutti' || !aiZona || !t || aiZona[aiIdx(t)] === 1;
+}
+// le caselle entro qualche esagono dalle tue città e unità: lì le mosse IA si vedono
+function aiCalcolaZona() {
+  const R = aiR(6), z = new Uint8Array(ROWS * COLS);
+  let q = dallIndice(conCitta, t => t.city.owner === 'p').concat(unitsOf('p'));
+  for (const t of q) z[aiIdx(t)] = 1;
+  for (let d = 0; d < R && q.length; d++) {
+    const next = [];
+    for (const t of q) for (const n of neighbors(t)) if (!z[aiIdx(n)]) { z[aiIdx(n)] = 1; next.push(n); }
+    q = next;
+  }
+  return z;
+}
+// una volta per giro: i costi della mappa di marcia (uguali per tutti) e la zona visibile
+function aiPreparaGiro() {
+  aiCostiBase = new Uint8Array(ROWS * COLS);
+  aiMareIdx = new Uint8Array(ROWS * COLS);
+  for (let r = 0; r < ROWS; r++) for (let c = 0; c < COLS; c++) {
+    aiCostiBase[r * COLS + c] = aiCostoCasella(map[r][c]);
+    aiMareIdx[r * COLS + c] = aiMare(map[r][c]) ? 1 : 0;
+  }
+  aiZona = modoPartita === 'tutti' ? aiCalcolaZona() : null;
+}
+
+function aiTurn(i) {
   if (gameOver) return;
-  players.a.stars += aiEntrata();
+  while (i < aiGiro.length && !(players[aiGiro[i]] && players[aiGiro[i]].vivo)) i++;
+  if (i >= aiGiro.length) { aiMe = null; aiActive = null; render(); startPlayerTurn(); return; }
+  aiMe = current = aiGiro[i];
+  aiGiroIdx = i;
+  // lo stato dell'impero che muove (ponti e navi che aspetta, offensiva)
+  const st = aiStato[aiMe] || (aiStato[aiMe] = nuovoStatoIA());
+  aiBisogni = st.bisogni; aiFronte = st.fronte; aiSenzaPorto = st.senzaPorto; aiOffensiva = st.offensiva;
+  aiMostrate = 0; aiVisibile = false;
+  const me = players[aiMe];
+  me.stars += aiEntrata();
   let congedati = 0;
-  while (upkeep('a') > players.a.stars) {    // anche il nemico congeda: prima i più malridotti
-    const mil = unitsOf('a').filter(x => !UNIT_TYPES[x.unit.type].ship && UNIT_TYPES[x.unit.type].atk > 0);
+  while (upkeep(aiMe) > me.stars) {    // anche il nemico congeda: prima i più malridotti
+    const mil = unitsOf(aiMe).filter(x => !UNIT_TYPES[x.unit.type].ship && UNIT_TYPES[x.unit.type].atk > 0);
     let scelto = null;
     if (mil.length) { mil.sort((x, y) => x.unit.hp / x.unit.maxHp - y.unit.hp / y.unit.maxHp); scelto = mil[0]; }
-    else scelto = unitsOf('a').find(x => UNIT_TYPES[x.unit.type].ship);
+    else scelto = unitsOf(aiMe).find(x => UNIT_TYPES[x.unit.type].ship);
     if (!scelto) break;
     congedaUno(scelto);
     congedati++;
   }
-  players.a.stars = Math.max(0, players.a.stars - upkeep('a'));
+  me.stars = Math.max(0, me.stars - upkeep(aiMe));
   aiPreparaTurno();
-  aiLog = [];
-  aiLogAdd(`— Turno ${turn}: l'Impero Cremisi (${aiDiff().nome}) incassa +${aiEntrata()} ⭐, paga ${upkeep('a')} di mantenimento —`);
-  if (congedati) aiLogAdd(`💸 Il nemico non riusciva a pagare l'esercito: congedate ${congedati} truppe`);
-  runAiQueue(unitsOf('a'), 0);
+  if (modoPartita !== 'tutti') {
+    aiLog = [];
+    aiLogAdd(`— Turno ${turn}: l'Impero Cremisi (${aiDiff().nome}) incassa +${aiEntrata()} ⭐, paga ${upkeep(aiMe)} di mantenimento —`, true);
+  }
+  if (congedati && modoPartita !== 'tutti') aiLogAdd(`💸 Il nemico non riusciva a pagare l'esercito: congedate ${congedati} truppe`);
+  ui();
+  runAiQueue(unitsOf(aiMe), 0);
 }
+let aiGiroIdx = 0;
 
 function runAiQueue(queue, i) {
-  if (gameOver) { aiActive = null; render(); return; }
-  if (i >= queue.length) { aiActive = null; render(); setTimeout(aiTrainPhase, AI_DELAY); return; }
-  const t = queue[i];
-  let acted = false;
-  if (t.unit && t.unit.owner === 'a') {
+  const t0 = Date.now();
+  for (; i < queue.length; i++) {
+    if (gameOver) { aiActive = null; render(); return; }
+    const t = queue[i];
+    if (!t.unit || t.unit.owner !== aiMe) continue;
+    aiVisibile = aiMostra(t);
     const before = aiLog.length;
-    aiActive = aiActUnit(t) || t;   // evidenzia la casella dove l'unità ha agito
+    const dove = aiActUnit(t) || t;
     aiLiberaCitta(t);
-    acted = aiLog.length > before;
-    if (acted) scrollToTile(aiActive);
-    render();
+    if (aiVisibile && aiLog.length > before) { // una mossa vicino a te: si mostra, poi una pausa
+      aiMostrate++;
+      aiActive = dove;   // evidenzia la casella dove l'unità ha agito
+      scrollToTile(aiActive);
+      render();
+      setTimeout(() => runAiQueue(queue, i + 1), AI_DELAY);
+      return;
+    }
+    if (Date.now() - t0 > AI_BLOCCO_MS) { setTimeout(() => runAiQueue(queue, i + 1), 0); return; }
   }
-  setTimeout(() => runAiQueue(queue, i + 1), acted ? AI_DELAY : 40);
+  aiActive = null; aiVisibile = false;
+  if (aiMostrate) render();
+  setTimeout(aiTrainPhase, aiMostrate ? AI_DELAY : 0);
 }
 
 function aiTrainPhase() {
   if (gameOver) return;
-  const cap = aCapital();
-  const capThreat = cap && unitsOf('p').some(e => dist(cap, e) <= aiR(5));
+  const cap = capitaleDi(aiMe);
+  const capThreat = cap && nemiciVicino(cap, aiR(5)).length > 0;
   aiFaseNavi();
-  const conta = f => unitsOf('a').filter(x => f(UNIT_TYPES[x.unit.type])).length;
+  const conta = f => unitsOf(aiMe).filter(x => f(UNIT_TYPES[x.unit.type])).length;
   let settlers = conta(d => d.settler), builders = conta(d => d.builder), medics = conta(d => d.medic);
-  const spazio = cities('a').some(x => (x.city.pop || 1) < MAX_POP) || cities(null).length > 0;
+  const spazio = cities(aiMe).some(x => (x.city.pop || 1) < MAX_POP) || cities(null).length > 0;
   // si mettono da parte le stelle per la nave che l'esercito aspetta sulla costa
-  const naveLibera = unitsOf('a').some(x => UNIT_TYPES[x.unit.type].ship && !x.unit.cargo);
-  const risparmio = aiAttese().length > 0 && !naveLibera && ports('a').length > 0;
+  const naveLibera = unitsOf(aiMe).some(x => UNIT_TYPES[x.unit.type].ship && !x.unit.cargo);
+  const risparmio = aiAttese().length > 0 && !naveLibera && ports(aiMe).length > 0;
   // capitale per prima, così le stelle vanno prima alla difesa
-  const cts = cities('a').sort((a, b) => (b.city.capital ? 1 : 0) - (a.city.capital ? 1 : 0));
+  const cts = cities(aiMe).sort((a, b) => (b.city.capital ? 1 : 0) - (a.city.capital ? 1 : 0));
   for (const ct of cts) {
     if (ct.unit) continue;
-    const stelle = players.a.stars;
+    aiVisibile = aiMostra(ct);
+    const stelle = players[aiMe].stars;
     // mantenimento ancora sostenibile: l'esercito non deve mangiarsi più di una quota della rendita
     // (60% in difficile; con la cassa piena si può spendere di più: le stelle ferme non servono a nulla)
     // in tregua l'esercito resta piccolo: metà della quota e niente spese extra con la cassa piena
-    const margine = aiTregua() ? Math.floor(aiEntrata() * aiDiff().spesa / 2) - upkeep('a')
-      : Math.floor(aiEntrata() * aiDiff().spesa) - upkeep('a') + Math.floor(stelle / 15);
+    const margine = aiTregua() ? Math.floor(aiEntrata() * aiDiff().spesa / 2) - upkeep(aiMe)
+      : Math.floor(aiEntrata() * aiDiff().spesa) - upkeep(aiMe) + Math.floor(stelle / 15);
     let pick = null;
     if (capThreat && ct.city.capital && stelle >= 2) pick = 'warrior'; // presidio d'emergenza
     else if (!capThreat && (aiBisogni.ponti.size || aiSenzaPorto.length) && builders < (stelle >= 30 ? 3 : 2) && stelle >= 6) pick = 'builder';
     else if (!capThreat && builders < 1 && stelle >= 6 && Math.random() < 0.3) pick = 'builder';
     else if (!capThreat && settlers < 3 && spazio && stelle >= 3 && Math.random() < aiDiff().coloni) pick = 'citizen';
-    else if (stelle >= 6 && Math.random() < 0.15 && unitsOf('a').length >= 3 && medics < 2) pick = 'medic';
+    else if (stelle >= 6 && Math.random() < 0.15 && unitsOf(aiMe).length >= 3 && medics < 2) pick = 'medic';
     else if (risparmio && !capThreat) pick = null;
     else if (margine >= 1 || capThreat) {
       if (stelle >= 5 && Math.random() < 0.55) pick = 'knight';
@@ -2464,8 +2716,8 @@ function aiTrainPhase() {
         if (!capThreat) n = Math.min(n, margine * 2);
         n = Math.max(1, n);
       }
-      players.a.stars -= d.cost * n;
-      const u = mkUnit(pick, 'a');
+      players[aiMe].stars -= d.cost * n;
+      const u = mkUnit(pick, aiMe);
       u.count = n; u.maxHp = d.hp * n; u.hp = u.maxHp;
       ct.unit = u;
       if (d.settler) settlers++; else if (d.builder) builders++; else if (d.medic) medics++;
@@ -2473,9 +2725,15 @@ function aiTrainPhase() {
                      : `${d.icon} Il nemico addestra un ${d.name} ${ct.city.capital ? 'nella capitale' : 'in una città'}`);
     }
   }
-  healIdle('a');
-  render();
-  setTimeout(startPlayerTurn, AI_DELAY);
+  healIdle(aiMe);
+  aiVisibile = false;
+  const st = aiStato[aiMe];
+  if (st) { st.senzaPorto = aiSenzaPorto; st.offensiva = aiOffensiva; }
+  aiCampi = null;
+  // tocca al prossimo impero (la pausa solo se questo ha mosso vicino a te)
+  if (aiMostrate) render();
+  const i = aiGiroIdx + 1;
+  setTimeout(() => aiTurn(i), aiMostrate ? AI_DELAY : 0);
 }
 
 // direzione approssimativa di un movimento, per la cronaca
@@ -2520,7 +2778,14 @@ function bridgeCostFor(to) {
   if (to.terrain !== 'water') return BRIDGE_COST;
   return Math.ceil(SEA_BRIDGE_COST * Math.pow(1.1, Math.max(0, distCosta(to) - 1)));
 }
+// tutti i ponti della mappa (per i Costruttori IA), ricalcolati solo quando ne nasce uno
+let pontiCache = null;
+function pontiTutti() {
+  if (!pontiCache || pontiCache.map !== map) pontiCache = { map, lista: map.flat().filter(x => x.bridge) };
+  return pontiCache.lista;
+}
 function doBuildBridge(from, to) {
+  pontiCache = null;
   const u = from.unit;
   const costo = bridgeCostFor(to);
   players[u.owner].stars -= costo;
@@ -2555,7 +2820,7 @@ function playerBuildPort() {
   doBuildPort(selected);
   refreshSets(); ui(); render();
 }
-function ports(owner) { return map.flat().filter(t => t.port && t.port.owner === owner); }
+function ports(owner) { return dallIndice(conPorto, t => t.port.owner === owner); }
 
 // raggio IA scalato sulla taglia della mappa (FIX: su media/gigante l'IA "vedeva" troppo corto)
 function aiR(x) { return Math.max(x, Math.round(x * tileScale())); }
@@ -2567,10 +2832,10 @@ function aiR(x) { return Math.max(x, Math.round(x * tileScale())); }
 // in linea d'aria, che le faceva incastrare contro fiumi e coste.
 const AI_INF = 1e9;
 const AI_ARMATA_MAX = 3;  // le armate in marcia si fermano a 3: entrano in una nave di livello 1
-let aiCosti = null, aiMareIdx = null, aiCampi = null, aiOffensiva = false;
+let aiCosti = null, aiCostiBase = null, aiMareIdx = null, aiCampi = null, aiOffensiva = false;
 // fiumi da attraversare (servono ponti) e armate ferme sulla costa (servono navi)
 let aiBisogni = { ponti: new Map(), imbarchi: new Map() };
-const aiFronte = new Map(); // per ogni armata in attesa, il mare su cui vuole salpare
+let aiFronte = new Map(); // per ogni armata in attesa, il mare su cui vuole salpare
 let aiSenzaPorto = []; // armate sulla costa di un mare dove l'IA non ha porti
 function aiIdx(t) { return t.r * COLS + t.c; }
 // costo in "terzi di turno": a piedi una casella al turno, in nave tre
@@ -2578,8 +2843,7 @@ function aiCostoCasella(t) {
   if (t.terrain === 'mountain') return 9;                 // scalata: si resta fermi un turno
   if (t.terrain === 'river') return t.bridge ? 3 : 12;    // senza ponte serve il Costruttore
   if (t.terrain === 'water') return t.bridge ? 3 : 1;
-  if (t.hosp && t.hosp.level > 0 && t.hosp.owner === 'p') return 18;
-  return 3;
+  return 3; // gli ospedali nemici attivi (18) li segna aiPreparaTurno, impero per impero
 }
 const AI_PAZIENZA = 6; // turni d'attesa sulla costa prima di cercare una strada via terra
 const AI_IMBARCO = 9; // passare fra terra e mare costa l'attesa della nave
@@ -2587,19 +2851,41 @@ function aiMare(t) { return t.terrain === 'water' && !t.bridge; }
 // Dijkstra a secchi dagli obiettivi verso tutta la mappa (vicini calcolati in linea:
 // sulla mappa gigante sono centinaia di migliaia di caselle)
 const AI_DIR = [[[1,0],[-1,0],[0,-1],[-1,-1],[0,1],[-1,1]], [[1,0],[-1,0],[1,-1],[0,-1],[1,1],[0,1]]];
-function aiCampo(sorgenti, costi = aiCosti) {
+// Con "mete" (le caselle delle proprie unità) il calcolo resta in una finestra attorno
+// alle unità (con AI_FINESTRA esagoni di margine) e si ferma poco dopo averle raggiunte
+// tutte: le caselle escluse restano AI_INF, cioè "più lontane di qualsiasi unità", ed è
+// quello che serve per scegliere il passo. Se nella finestra non c'è nessun obiettivo
+// raggiungibile si rifà su tutta la mappa. Con un impero per paese fa la differenza.
+const AI_OLTRE = 60;     // margine oltre l'unità più lontana (una mossa costa al massimo una ventina)
+const AI_FINESTRA = 30;  // esagoni di margine attorno alle unità (scalati sulla taglia della mappa)
+function aiCampo(sorgenti, costi = aiCosti, mete = null, finestra = true) {
   const d = new Int32Array(ROWS * COLS).fill(AI_INF);
+  if (mete && !mete.length) return d;
+  let r0 = 0, r1 = ROWS - 1, c0 = 0, c1 = COLS - 1;
+  if (mete && finestra) {
+    r0 = ROWS; r1 = -1; c0 = COLS; c1 = -1;
+    for (const i of mete) { const r = (i / COLS) | 0, c = i % COLS; r0 = Math.min(r0, r); r1 = Math.max(r1, r); c0 = Math.min(c0, c); c1 = Math.max(c1, c); }
+    const M = aiR(AI_FINESTRA);
+    r0 = Math.max(0, r0 - M); r1 = Math.min(ROWS - 1, r1 + M); c0 = Math.max(0, c0 - M); c1 = Math.min(COLS - 1, c1 + M);
+  }
   const secchi = [[]];
-  for (const t of sorgenti) { const i = aiIdx(t); if (d[i]) { d[i] = 0; secchi[0].push(i); } }
-  for (let k = 0; k < secchi.length; k++) {
+  let fuori = 0;
+  for (const t of sorgenti) {
+    if (t.r < r0 || t.r > r1 || t.c < c0 || t.c > c1) { fuori++; continue; }
+    const i = aiIdx(t); if (d[i]) { d[i] = 0; secchi[0].push(i); }
+  }
+  const daTrovare = mete ? new Set(mete) : null;
+  let stop = AI_INF;
+  for (let k = 0; k < secchi.length && k <= stop; k++) {
     const b = secchi[k];
     if (!b) continue;
     for (const i of b) {
       if (d[i] !== k) continue;
+      if (daTrovare && daTrovare.delete(i) && !daTrovare.size) stop = k + AI_OLTRE;
       const r = (i / COLS) | 0, c = i % COLS, mare = aiMareIdx[i];
       for (const [dc, dr] of AI_DIR[r & 1]) {
         const rr = r + dr, cc = c + dc;
-        if (rr < 0 || rr >= ROWS || cc < 0 || cc >= COLS) continue;
+        if (rr < r0 || rr > r1 || cc < c0 || cc > c1) continue;
         const ni = rr * COLS + cc;
         const nd = k + costi[i] + (aiMareIdx[ni] !== mare ? AI_IMBARCO : 0);
         if (nd < d[ni]) { d[ni] = nd; (secchi[nd] || (secchi[nd] = [])).push(ni); }
@@ -2607,6 +2893,9 @@ function aiCampo(sorgenti, costi = aiCosti) {
     }
     secchi[k] = null;
   }
+  // qualche unità non vede nessun obiettivo nella finestra, ma fuori ce ne sono: tutta la mappa
+  if (daTrovare && daTrovare.size && fuori && (r0 > 0 || c0 > 0 || r1 < ROWS - 1 || c1 < COLS - 1))
+    return aiCampo(sorgenti, costi, mete, false);
   return d;
 }
 function aiSoldati(owner) {
@@ -2618,34 +2907,58 @@ function aiSoldati(owner) {
   }
   return s;
 }
+// le unità di altri imperi entro R esagoni da t (scansione locale, come attacksFor;
+// se le unità in campo sono poche si guardano direttamente quelle)
+function nemiciVicino(t, R, owner = aiMe) {
+  const out = [];
+  if (conUnita.size < (2 * R + 1) * (2 * R + 3)) {
+    for (const n of conUnita) if (n.unit.owner !== owner && dist(t, n) <= R && map[n.r][n.c] === n) out.push(n);
+    return out;
+  }
+  for (let r = Math.max(0, t.r - R); r <= Math.min(ROWS - 1, t.r + R); r++)
+    for (let c = Math.max(0, t.c - R - 1); c <= Math.min(COLS - 1, t.c + R + 1); c++) {
+      const n = map[r][c];
+      if (n.unit && n.unit.owner !== owner && dist(t, n) <= R) out.push(n);
+    }
+  return out;
+}
+// le città di tutti gli altri imperi: gli obiettivi dell'offensiva (guerra contro tutti)
+function cittaNemiche() { return dallIndice(conCitta, t => t.city.owner && t.city.owner !== aiMe); }
+// l'impero nemico più vicino: la sua forza decide quando passare all'offensiva
+function aiRivale() {
+  const casa = capitaleDi(aiMe) || cities(aiMe)[0];
+  if (!casa) return 'p';
+  let best = null, bd = Infinity;
+  for (const t of cittaNemiche()) { const d = dist(casa, t); if (d < bd) { bd = d; best = t.city.owner; } }
+  return best || 'p';
+}
 // all'inizio del turno IA: ripulisce i bisogni vecchi e ricalcola le mappe di marcia
 function aiPreparaTurno() {
   const vivo = t => map[t.r] && map[t.r][t.c] === t;
   for (const [k, t] of aiBisogni.ponti) if (!vivo(t) || t.bridge) aiBisogni.ponti.delete(k);
   for (const [k, t] of aiBisogni.imbarchi)
-    if (!vivo(t) || !t.unit || t.unit.owner !== 'a' || UNIT_TYPES[t.unit.type].ship) aiBisogni.imbarchi.delete(k);
-  aiCosti = new Uint8Array(ROWS * COLS);
-  aiMareIdx = new Uint8Array(ROWS * COLS);
-  for (let r = 0; r < ROWS; r++) for (let c = 0; c < COLS; c++) {
-    aiCosti[r * COLS + c] = aiCostoCasella(map[r][c]);
-    aiMareIdx[r * COLS + c] = aiMare(map[r][c]) ? 1 : 0;
-  }
+    if (!vivo(t) || !t.unit || t.unit.owner !== aiMe || UNIT_TYPES[t.unit.type].ship) aiBisogni.imbarchi.delete(k);
+  if (!aiCostiBase || aiCostiBase.length !== ROWS * COLS) aiPreparaGiro();
+  aiCosti = aiCostiBase.slice();
+  for (const t of dallIndice(conOsp, x => x.hosp.level > 0 && x.hosp.owner !== aiMe)) aiCosti[aiIdx(t)] = 18;
   // la stessa mappa ma "via terra": il mare costa carissimo, per chi ha aspettato troppo una nave
   // calcolate solo quando servono davvero
   const pigro = f => { let v = null; return () => v || (v = f()); };
-  const att = pigro(() => aiCampo(cities('p'))), esp = pigro(() => aiCampo(cities(null)));
-  const terra = pigro(() => aiCampo(cities('p'), aiCosti.map(c => c === 1 ? 60 : c)));
+  // le mappe si fermano poco oltre l'unità più lontana: il resto della mappa non serve
+  const mie = unitsOf(aiMe).map(aiIdx);
+  const att = pigro(() => aiCampo(cittaNemiche(), aiCosti, mie)), esp = pigro(() => aiCampo(cities(null), aiCosti, mie));
+  const terra = pigro(() => aiCampo(cittaNemiche(), aiCosti.map(c => c === 1 ? 60 : c), mie));
   aiCampi = { get attacco() { return att(); }, get espansione() { return esp(); }, get attaccoTerra() { return terra(); } };
   // offensiva quando l'esercito è abbastanza forte (con isteresi, per non tentennare),
   // e mai prima della fine della tregua decisa dalla difficoltà
   const D = aiDiff();
-  const mie = aiSoldati('a'), soglia = Math.max(D.soglia, Math.ceil(aiSoldati('p') * D.rapporto));
-  aiOffensiva = !aiTregua() && (aiOffensiva ? mie >= Math.ceil(soglia / 2) : mie >= soglia);
+  const forza = aiSoldati(aiMe), soglia = Math.max(D.soglia, Math.ceil(aiSoldati(aiRivale()) * D.rapporto));
+  aiOffensiva = !aiTregua() && (aiOffensiva ? forza >= Math.ceil(soglia / 2) : forza >= soglia);
 }
 // le armate che aspettano davvero una nave (chi nel frattempo si è mosso non conta più)
 function aiAttese() {
   for (const [k, t] of aiBisogni.imbarchi)
-    if (!t.unit || t.unit.owner !== 'a' || UNIT_TYPES[t.unit.type].ship) aiBisogni.imbarchi.delete(k);
+    if (!t.unit || t.unit.owner !== aiMe || UNIT_TYPES[t.unit.type].ship) aiBisogni.imbarchi.delete(k);
   return [...aiBisogni.imbarchi.values()];
 }
 // x è un buon approdo per l'armata in a: accanto a lei e sullo stesso mare che vuole attraversare
@@ -2676,7 +2989,7 @@ function aiPasso(t, campo) {
   const civile = UNIT_TYPES[t.unit.type].builder, tregua = aiTregua();
   for (const m of movesFor(t)) {
     if (!civile && aiRiservata(m)) continue;
-    if (tregua && m.city && m.city.owner === 'p') continue; // in tregua non prende le tue città
+    if (tregua && m.city && m.city.owner && m.city.owner !== aiMe) continue; // in tregua non prende le città altrui
     const v = campo[aiIdx(m)];
     if (v < bv) { bv = v; best = m; }
   }
@@ -2723,8 +3036,8 @@ function aiSegui(t, path) {
 // (tranne il presidio della capitale minacciata)
 function aiLiberaCitta(t) {
   const u = t.unit;
-  if (!u || u.owner !== 'a' || u.moved || !t.city || t.city.owner !== 'a') return;
-  if (t.city.capital && unitsOf('p').some(e => dist(t, e) <= aiR(6))) return;
+  if (!u || u.owner !== aiMe || u.moved || !t.city || t.city.owner !== aiMe) return;
+  if (t.city.capital && nemiciVicino(t, aiR(6)).length) return;
   const fuori = movesFor(t).find(m => !m.city && m.terrain !== 'mountain');
   if (fuori) doMove(t, fuori);
 }
@@ -2732,12 +3045,12 @@ function aiLiberaCitta(t) {
 function aiAcqua(n) { return (n.terrain === 'water' || n.terrain === 'river') && !n.unit; }
 // navi: varate quando un'armata aspetta sulla costa, potenziate se l'armata non ci sta
 function aiFaseNavi() {
-  const navi = unitsOf('a').filter(x => UNIT_TYPES[x.unit.type].ship);
+  const navi = unitsOf(aiMe).filter(x => UNIT_TYPES[x.unit.type].ship);
   const attese = aiAttese();
   if (!attese.length) return;
   const piuGrande = Math.max(...attese.map(a => aliveCount(a.unit)));
   for (const n of navi) {
-    if (!n.unit.cargo && navCap(n.unit.lvl) < piuGrande && players.a.stars >= shipUpgradeCost(n.unit.lvl) + 3 && upgradeShip(n, 'a'))
+    if (!n.unit.cargo && navCap(n.unit.lvl) < piuGrande && players[aiMe].stars >= shipUpgradeCost(n.unit.lvl) + 3 && upgradeShip(n, aiMe))
       aiLogAdd(`🚢⬆️ Il nemico potenzia una nave (livello ${n.unit.lvl})`);
   }
   const libere = navi.filter(x => !x.unit.cargo).length;
@@ -2745,10 +3058,10 @@ function aiFaseNavi() {
   if (attese.length > libere && navi.length < 6) {
     // solo da un porto che per mare arriva davvero fino all'armata (non da un fiume o un lago chiuso)
     for (const a of attese.slice(0, 3)) {
-      const porti = ports('a').filter(p => canBuyShip(p, 'a')).sort((x, y) => dist(x, a) - dist(y, a)).slice(0, 3);
+      const porti = ports(aiMe).filter(p => canBuyShip(p, aiMe)).sort((x, y) => dist(x, a) - dist(y, a)).slice(0, 3);
       const porto = porti.find(p => aiPercorso(freeSeaAround(p)[0], aiAcqua, x => aiApprodo(a, x)));
-      if (porto) { buyShip(porto, 'a'); aiLogAdd('🚢 Il nemico vara una nave per trasportare le truppe'); break; }
-      if (players.a.stars >= SHIP_COST) aiSenzaPorto.push(a); // nessun porto su quel mare: serve un Costruttore
+      if (porto) { aiVisibile = aiMostra(porto); buyShip(porto, aiMe); aiLogAdd('🚢 Il nemico vara una nave per trasportare le truppe'); break; }
+      if (players[aiMe].stars >= SHIP_COST) aiSenzaPorto.push(a); // nessun porto su quel mare: serve un Costruttore
     }
   }
 }
@@ -2788,17 +3101,17 @@ function aiActBuilder(t) {
   const subito = pontiUtili(t);
   if (subito.length) { doBuildBridge(t, subito[0]); aiBisogni.ponti.delete(key(subito[0])); return t; }
   // 2. porto: +1⭐ a turno e un posto dove varare le navi
-  const portoVicino = x => ports('a').some(p => dist(p, x) <= aiR(5));
+  const portoVicino = x => ports(aiMe).some(p => dist(p, x) <= aiR(5));
   if (canBuildPort(t) && !portoVicino(t) && (aiAttese().length || Math.random() < 0.7)) { doBuildPort(t); return t; }
-  const terra = n => passable(n) && !n.unit && !(n.hosp && n.hosp.level > 0 && n.hosp.owner !== 'a')
-    && !(n.city && n.city.owner && n.city.owner !== 'a');
+  const terra = n => passable(n) && !n.unit && !(n.hosp && n.hosp.level > 0 && n.hosp.owner !== aiMe)
+    && !(n.city && n.city.owner && n.city.owner !== aiMe);
   // 3. raggiungi il fiume che sbarra la strada all'esercito
   if (aiBisogni.ponti.size) {
     const dove = aiSegui(t, aiPercorso(t, terra, x => neighbors(x).some(n => aiBisogni.ponti.has(key(n)))));
     if (dove) { aiLogAdd('👷 Il Costruttore nemico va a gettare un ponte'); return dove; }
   }
   // 4. armate ferme sulla costa di un mare senza porti: vai ad aprirne uno su quella costa
-  const attese = aiSenzaPorto.filter(a => a.unit && a.unit.owner === 'a');
+  const attese = aiSenzaPorto.filter(a => a.unit && a.unit.owner === aiMe);
   if (attese.length) {
     const costa = x => (x.terrain === 'grass' || x.terrain === 'forest' || x.terrain === 'desert') && !x.city && !x.port && !x.hosp
       && neighbors(x).some(n => n.terrain === 'water' && attese.some(a => aiFronte.has(key(a)) && dist(aiFronte.get(key(a)), n) <= 2));
@@ -2807,8 +3120,8 @@ function aiActBuilder(t) {
     if (dove) { aiLogAdd('👷 Il Costruttore nemico va ad aprire un porto'); return dove; }
   }
   // 5. con la cassa piena, ponti sui fiumi ancora sguarniti (come prima)
-  if (players.a.stars < 8) return t;
-  const allBridges = map.flat().filter(x => x.bridge);
+  if (players[aiMe].stars < 8) return t;
+  const allBridges = pontiTutti();
   const farFromBridges = x => !allBridges.some(b => dist(x, b) <= aiR(4));
   const good = bridgesFor(t).find(s => s.terrain === 'river' && farFromBridges(s));
   if (good) { doBuildBridge(t, good); return t; }
@@ -2820,9 +3133,9 @@ function aiActBuilder(t) {
 // comportamento del Cittadino IA: si insedia, forma carovane, fonda villaggi
 function aiActCitizen(t) {
   const u = t.unit;
-  const danger = unitsOf('p').some(e => dist(t, e) <= aiR(2));
+  const danger = nemiciVicino(t, aiR(2)).length > 0;
   // 0. appena addestrato in una propria città con spazio: si insedia subito lì
-  if (t.city && t.city.owner === 'a' && (t.city.pop || 1) < MAX_POP) { settleIfCitizen(t); return t; }
+  if (t.city && t.city.owner === aiMe && (t.city.pop || 1) < MAX_POP) { settleIfCitizen(t); return t; }
   // 1. carovana pronta: fonda un villaggio (qui o su una casella raggiungibile)
   if (u.count >= FOUND_MIN) {
     if (canFoundTile(t)) { foundVillage(t); return t; }
@@ -2835,11 +3148,11 @@ function aiActCitizen(t) {
     if (ms.length && Math.random() < 0.6) { doMerge(t, ms[0]); return ms[0]; }
   }
   // 3. vai a insediarti: villaggio neutrale o città propria con spazio, per la strada vera
-  const meta = x => !x.unit && x.city && (x.city.owner === null || (x.city.owner === 'a' && (x.city.pop || 1) < MAX_POP));
+  const meta = x => !x.unit && x.city && (x.city.owner === null || (x.city.owner === aiMe && (x.city.pop || 1) < MAX_POP));
   const direct = movesFor(t).find(meta);
   if (direct) { doMove(t, direct); return direct; }
-  const terra = n => passable(n) && !n.unit && !(n.hosp && n.hosp.level > 0 && n.hosp.owner !== 'a')
-    && !(n.city && n.city.owner && n.city.owner !== 'a');
+  const terra = n => passable(n) && !n.unit && !(n.hosp && n.hosp.level > 0 && n.hosp.owner !== aiMe)
+    && !(n.city && n.city.owner && n.city.owner !== aiMe);
   const dove = aiSegui(t, aiPercorso(t, terra, meta));
   if (dove) { aiLogAdd('👨‍🌾 Un Cittadino nemico è in viaggio'); return dove; }
   return t;
@@ -2857,7 +3170,7 @@ function aiActUnit(t) {
 
   // 0. unisce le truppe quando il nemico è vicino (anche l'IA forma gruppi!)
   if (u.count < MAX_STACK) {
-    const enemyNear = unitsOf('p').some(e => dist(t, e) <= aiR(6));
+    const enemyNear = nemiciVicino(t, aiR(6)).length > 0;
     if (enemyNear && Math.random() < 0.65) {
       const ms = mergesFor(t).filter(m => u.count + m.unit.count <= MAX_STACK);
       if (ms.length) {
@@ -2873,12 +3186,12 @@ function aiActUnit(t) {
   if (hitTile) return t.unit ? t : hitTile; // in mischia può aver occupato la casella del bersaglio
 
   // 2. difesa della capitale: se è minacciata e sguarnita, le unità vicine ripiegano
-  const cap = aCapital();
+  const cap = capitaleDi(aiMe);
   if (cap) {
-    const threats = unitsOf('p').filter(e => dist(cap, e) <= aiR(4)).length;
-    const defenders = unitsOf('a').filter(f => f !== t && dist(cap, f) <= aiR(2)).length;
+    const threats = nemiciVicino(cap, aiR(4)).length;
+    const defenders = unitsOf(aiMe).filter(f => f !== t && dist(cap, f) <= aiR(2)).length;
     // chi presidia la capitale minacciata non la lascia
-    if (t === cap && unitsOf('p').some(e => dist(cap, e) <= aiR(6))) return t;
+    if (t === cap && nemiciVicino(cap, aiR(6)).length) return t;
     if (threats > defenders && dist(t, cap) >= 1 && dist(t, cap) <= aiR(8)) {
       const moves = movesFor(t);
       const back = moves.filter(m => dist(m, cap) < dist(t, cap)).sort((a, b) => dist(a, cap) - dist(b, cap))[0];
@@ -2892,12 +3205,13 @@ function aiActUnit(t) {
   }
 
   // 3. intercetta i nemici entrati nel proprio territorio
-  const invasori = unitsOf('p').filter(e => dist(t, e) <= aiR(4) && cities('a').some(c => dist(c, e) <= aiR(5)));
+  const mieCitta = cities(aiMe);
+  const invasori = nemiciVicino(t, aiR(4)).filter(e => mieCitta.some(c => dist(c, e) <= aiR(5)));
   if (invasori.length) {
     const e = invasori.sort((a, b) => dist(t, a) - dist(t, b))[0];
     const step = movesFor(t).filter(m => dist(m, e) < dist(t, e)).sort((a, b) => dist(a, e) - dist(b, e))[0];
     if (step) {
-      aiLogAdd(`${icon} Il ${name} nemico corre incontro ai tuoi invasori`);
+      aiLogAdd(`${icon} Il ${name} nemico corre incontro ${e.unit.owner === 'p' ? 'ai tuoi invasori' : 'agli invasori'}`);
       doMove(t, step);
       aiTryAttack(step);
       return step;
@@ -2919,7 +3233,7 @@ function aiActUnit(t) {
   }
   const dove = aiPasso(t, campo);
   if (dove) {
-    const capturing = dove.city && dove.city.owner !== 'a';
+    const capturing = dove.city && dove.city.owner !== aiMe;
     if (!capturing) aiLogAdd(`${icon} Il ${name} nemico avanza verso ${dirName(t, dove)}`);
     doMove(t, dove); // se conquista, il messaggio arriva da captureIfCity
     aiTryAttack(dove);
@@ -2944,7 +3258,10 @@ function aiTryAttack(tile) {
   if (!tile.unit || tile.unit.attacked) return null;
   let atks = attacksFor(tile);
   // in tregua l'IA colpisce solo chi entra nel suo territorio, e mai dentro le tue città
-  if (aiTregua()) atks = atks.filter(to => !(to.city && to.city.owner === 'p') && cities('a').some(c => dist(c, to) <= aiR(3)));
+  if (aiTregua()) {
+    const mie = cities(aiMe);
+    atks = atks.filter(to => !(to.city && to.city.owner && to.city.owner !== aiMe) && mie.some(c => dist(c, to) <= aiR(3)));
+  }
   if (!atks.length) return null;
   const u = tile.unit, d = UNIT_TYPES[u.type];
   const myDmg = to => Math.max(1, Math.round(d.atk * 3 * (u.hp / d.hp)) - (to.unit ? defOf(to) : 1));
@@ -2956,7 +3273,7 @@ function aiTryAttack(tile) {
     if (to.unit && to.unit.type === 'archer') s += 15;           // elimina prima gli arcieri
     if (to.unit && UNIT_TYPES[to.unit.type].medic) s += 14;      // e i medici!
     if (to.unit && UNIT_TYPES[to.unit.type].civil) s += 10 + to.unit.count * 2; // carovane: bersagli succosi
-    if (to.city && to.city.owner === 'p') s += 10;               // scaccia i difensori delle città
+    if (to.city && to.city.owner && to.city.owner !== aiMe) s += 10; // scaccia i difensori delle città
     if (to.unit && dist(tile, to) > UNIT_TYPES[to.unit.type].range) s += 8; // attacco senza risposta
     return s;
   };
@@ -2968,7 +3285,7 @@ function aiTryAttack(tile) {
 // comportamento del Medico IA: fonda ospedali nelle retrovie, segue e cura i feriti
 function aiActMedic(t) {
   const u = t.unit;
-  const enemyClose = unitsOf('p').some(e => dist(t, e) <= aiR(3));
+  const enemyClose = nemiciVicino(t, aiR(3)).length > 0;
   // 1. fonda/potenzia un ospedale (o rifonda un abbandonato) se non è sotto tiro
   if (!enemyClose) {
     const ms = mergesFor(t);
@@ -2978,7 +3295,7 @@ function aiActMedic(t) {
     if (ruin) { doMove(t, ruin); return ruin; } // conquista un ospedale abbandonato
   }
   // 2. raggiungi l'alleato più ferito (o restagli accanto a curare)
-  const wounded = unitsOf('a').filter(x => x !== t && x.unit.hp < x.unit.maxHp && !UNIT_TYPES[x.unit.type].medic);
+  const wounded = unitsOf(aiMe).filter(x => x !== t && x.unit.hp < x.unit.maxHp && !UNIT_TYPES[x.unit.type].medic);
   if (wounded.length) {
     wounded.sort((a, b) => (a.unit.hp / a.unit.maxHp) - (b.unit.hp / b.unit.maxHp));
     const target = wounded[0];
@@ -2993,7 +3310,7 @@ function aiActMedic(t) {
     return t; // resta accanto ai feriti: li curerà a fine turno
   }
   // 3. nessun ferito: segui l'esercito restando indietro
-  const allies = unitsOf('a').filter(x => x !== t && !UNIT_TYPES[x.unit.type].medic);
+  const allies = unitsOf(aiMe).filter(x => x !== t && !UNIT_TYPES[x.unit.type].medic);
   if (allies.length) {
     allies.sort((a, b) => dist(a, t) - dist(b, t));
     const near = allies[0];
@@ -3108,7 +3425,12 @@ function onTileClick(t) {
   // fase di piazzamento della capitale
   if (placing) {
     if (placeSet.includes(t)) placePlayerCapital(t);
-    else if (t.country && t.country !== players.p.country && paesiInfo()[t.country]) cambiaPaese(t.country); // tocco su un altro paese: lo scegli
+    else if (t.country && t.country !== players.p.country && paesiInfo()[t.country]) { // tocco su un paese: lo scegli
+      const primo = !players.p.country;
+      cambiaPaese(t.country);
+      if (primo) zoomSuPaese(t.country); // la prima volta la vista si avvicina al paese scelto
+    }
+    else if (!players.p.country) msg('🌍 Tocca un paese (sulla terraferma) per sceglierlo: diventerà il tuo impero.');
     else msg('⚠️ Posizione non valida: scegli una casella evidenziata in verde chiaro, nel tuo paese.');
     return;
   }
@@ -3452,15 +3774,21 @@ function render() {
   const k = S / 42;
   ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
   // territori: il paese di ciascun impero, velato e contornato nel suo colore
-  const terrP = players.p.country, terrA = players.a.country;
-  if (terrP || terrA) {
-    const lati = { p: [], a: [] }, dentro = { p: [], a: [] }; // segmenti x1,y1,x2,y2 e centri x,y
+  const terr = {}; // paese -> impero che lo guida (il tuo vince, se un vecchio salvataggio li sovrappone)
+  for (const o of imperiIA()) if (players[o].country) terr[players[o].country] = o;
+  if (players.p.country) terr[players.p.country] = 'p';
+  const imperiTerr = [...new Set(Object.values(terr))];
+  if (imperiTerr.length) {
+    const lati = {}, dentro = {}; // segmenti x1,y1,x2,y2 e centri x,y
+    for (const o of imperiTerr) { lati[o] = []; dentro[o] = []; }
+    let nDentro = 0;
     for (let r = vis.r0; r <= vis.r1; r++) for (let c = vis.c0; c <= vis.c1; c++) {
       const t = map[r][c], cc = t.country;
-      if (!cc || (cc !== terrP && cc !== terrA)) continue;
-      const o = cc === terrP ? 'p' : 'a', path = lati[o];
+      const o = cc && terr[cc];
+      if (!o) continue;
+      const path = lati[o];
       const p = center(t);
-      dentro[o].push(p.x, p.y);
+      dentro[o].push(p.x, p.y); nDentro += 2;
       for (const n of neighbors(t)) {
         if (n.country === cc) continue;
         const q = center(n), ang = Math.atan2(q.y - p.y, q.x - p.x);
@@ -3470,9 +3798,9 @@ function render() {
       }
     }
     // il velo solo se le caselle sullo schermo non sono troppe (mappa gigante tutta in vista)
-    if (dentro.p.length + dentro.a.length < 60000) {
+    if (nDentro < 60000) {
       ctx.globalAlpha = 0.16;
-      for (const o of ['p', 'a']) {
+      for (const o of imperiTerr) {
         const d = dentro[o];
         if (!d.length) continue;
         ctx.beginPath();
@@ -3485,7 +3813,7 @@ function render() {
     }
     ctx.lineWidth = Math.max(4*k, 3 / scale); ctx.lineCap = 'round'; // almeno 3 pixel anche da lontano
     ctx.globalAlpha = 0.9;
-    for (const o of ['p', 'a']) {
+    for (const o of imperiTerr) {
       const s = lati[o];
       if (!s.length) continue;
       ctx.beginPath();
@@ -3520,7 +3848,7 @@ function render() {
     ctx.setLineDash([7*k, 5*k]); ctx.stroke(); ctx.setLineDash([]);
     hexPathOn(ctx, p.x, p.y); ctx.fillStyle = 'rgba(255,215,110,.18)'; ctx.fill();
   }
-  if (aiActive && current === 'a') {
+  if (aiActive && current !== 'p') {
     const p = center(aiActive);
     hexPathOn(ctx, p.x, p.y);
     ctx.lineWidth = Math.max(1.5, 4*k); ctx.strokeStyle = '#ff9d3a';
@@ -3535,9 +3863,8 @@ function render() {
     if (t.city || t.hosp || t.port) {
       hexPathOn(ctx, p.x, p.y);
       ctx.lineWidth = Math.max(1.2, 3.5*k);
-      ctx.strokeStyle = t.city ? (t.city.owner ? players[t.city.owner].color : '#d8c9a3')
-                     : t.hosp ? (t.hosp.level > 0 ? players[t.hosp.owner].color : '#d8c9a3')
-                     : players[t.port.owner].color;
+      const col = o => (o && players[o] ? players[o].color : '#d8c9a3');
+      ctx.strokeStyle = t.city ? col(t.city.owner) : t.hosp ? col(t.hosp.level > 0 && t.hosp.owner) : col(t.port.owner);
       ctx.stroke();
     }
     // città
@@ -3647,11 +3974,17 @@ function render() {
 
 // ============ UI ============
 function msg(s) {
-  if (current === 'a') { aiLogAdd(s); return; } // durante il turno IA i messaggi vanno nella cronaca
+  if (current !== 'p') { aiLogAdd(s); return; } // durante il turno IA i messaggi vanno nella cronaca
   document.getElementById('msg').textContent = s;
 }
-function aiLogAdd(s) {
+// la cronaca: con un impero per paese racconta solo le mosse vicine a te (aiVisibile)
+// e i fatti importanti (forza), con la bandiera di chi muove
+function aiLogAdd(s, forza) {
+  const ia = current !== 'p' && players[current];
+  if (ia && !forza && !aiVisibile) return;
+  if (ia && modoPartita === 'tutti' && !forza) s = `${bandiera(current)} ${s}`;
   aiLog.push(s);
+  if (aiLog.length > 80) aiLog.shift();
   updateAiLog();
 }
 function updateAiLog() {
@@ -3676,11 +4009,22 @@ function ui() {
   const panel = document.getElementById('panel');
   panel.innerHTML = '';
 
-  if (current !== 'p') { panel.innerHTML = '<i>🔴 L\'Impero Cremisi sta muovendo…</i>'; return; }
-  const paesiTxt = players.p.country
-    ? `${bandiera(players.p.country)} <b>${nomePaese(players.p.country)}</b> contro ${bandiera(players.a.country)} ${nomePaese(players.a.country)}` : '';
+  const nImp = imperiIA().length;
+  const ie = document.getElementById('imperi');
+  if (ie) { ie.textContent = nImp; ie.title = `Imperi IA ancora in piedi: ${nImp}${caduti.length ? ` (caduti: ${caduti.map(bandiera).join(' ')})` : ''}`; }
+  if (current !== 'p') {
+    panel.innerHTML = modoPartita === 'tutti' && players[current]
+      ? `<i>🔴 Muove ${bandiera(current)} ${players[current].name}… (${aiGiroIdx + 1}/${aiGiro.length})</i>`
+      : '<i>🔴 L\'Impero Cremisi sta muovendo…</i>';
+    return;
+  }
+  const a1 = imperiIA()[0];
+  const paesiTxt = !players.p.country ? ''
+    : `${bandiera(players.p.country)} <b>${nomePaese(players.p.country)}</b> contro `
+      + (modoPartita === 'tutti' ? `${nImp} imperi` : a1 ? `${bandiera(a1)} ${nomePaese(players[a1].country)}` : 'nessuno');
   if (placing) {
-    panel.innerHTML = `<span id="unitinfo">${paesiTxt}</span> <button class="btn" style="background:#3a5a8c" onclick="apriSceltaPaese()">🌍 Cambia paese</button>`;
+    panel.innerHTML = (paesiTxt ? `<span id="unitinfo">${paesiTxt}</span> ` : '<span id="unitinfo">👆 Tocca un paese sulla mappa</span> ')
+      + `<button class="btn" style="background:#3a5a8c" onclick="apriSceltaPaese()">🌍 Elenco dei paesi</button>`;
     return;
   }
 
@@ -3745,6 +4089,7 @@ function ui() {
 
 setMapSize('piccola');
 aggiornaSelIA(); // la difficoltà scelta l'ultima volta
+{ const el = document.getElementById('avvSelIntro'); if (el) el.value = modoAvversari; } // e gli avversari
 newGame(); // la partita parte sotto la schermata di benvenuto
 </script>
 </body>
