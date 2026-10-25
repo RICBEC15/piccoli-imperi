@@ -12,7 +12,7 @@ In locale: apri `piccoli_imperi.html` nel browser con un doppio clic. Non serve 
 
 - `piccoli_imperi.html`: il gioco completo (HTML, CSS e JavaScript in un unico file).
 - `index.html`: pagina d'ingresso per GitHub Pages, rimanda subito a `piccoli_imperi.html`.
-- `stub.js`, `shiptest.js`, `savetest.js`, `playtest.js`, `aitest.js`, `paesitest.js`, `imperitest.js`, `difficoltatest.js`, `mappatest.js`, `browser_check.js`, `mobile_check.js`, `pantest.js`: test automatici (`mobile_check.js` prova il gioco su un iPhone emulato con Playwright, `pantest.js` lo spostamento nella mappa col mouse, le frecce e il dito).
+- `stub.js`, `shiptest.js`, `savetest.js`, `playtest.js`, `aitest.js`, `paesitest.js`, `imperitest.js`, `difficoltatest.js`, `mappatest.js`, `diplotest.js`, `browser_check.js`, `mobile_check.js`, `pantest.js`: test automatici (`mobile_check.js` prova il gioco su un iPhone emulato con Playwright, `pantest.js` lo spostamento nella mappa col mouse, le frecce e il dito).
 - `build_russia.js`: script che ha estratto il confine della Russia dal dataset Natural Earth.
 - `build_biomi.py`, `export_tiles.js`: costruiscono i biomi fissi dai dati di OpenStreetMap.
 - `ISTRUZIONI_MIGRAZIONE.md`: note di sviluppo, storia delle ultime versioni e istruzioni dettagliate.
@@ -29,6 +29,7 @@ cat stub.js game.js imperitest.js > _run.js && node _run.js   # tutti i paesi co
 cat stub.js game.js aitest.js > _run.js && node _run.js   # IA: 150 turni, circa un minuto
 cat stub.js game.js difficoltatest.js > _run.js && node _run.js   # difficoltà IA: circa 40 secondi
 cat stub.js game.js mappatest.js > _run.js && node _run.js
+cat stub.js game.js diplotest.js > _run.js && node _run.js   # diplomazia: circa 15 secondi
 ```
 
 ## La mappa
@@ -42,6 +43,15 @@ C'è **una sola mappa per ogni grandezza** (piccola, media, gigante), uguale a o
 Ogni modifica alla mappa va verificata con `mappatest.js`, che controlla anche che due partite abbiano la stessa mappa.
 
 ## Versione
+
+v61 (formato di salvataggio v17 con il campo facoltativo `diplomazia`): la **diplomazia**. Toccando il territorio di un altro impero (con niente di selezionato) si apre la sua scheda: puoi proporgli la pace o un'alleanza, o dichiarargli guerra. All'inizio sei in guerra con tutti.
+
+- In pace o alleati non vi attaccate e non entrate nelle città e nei porti dell'altro (né tu né l'IA). L'alleanza dà +1⭐ a turno di commercio a testa.
+- L'IA accetta o rifiuta secondo la forza dei due imperi (soldati + 2 per città), le tue truppe vicine alle sue città, la difficoltà e la fiducia che ha in te. La scheda mostra la probabilità (alta, media, nessuna). Dopo un rifiuto si riprova fra 3 turni.
+- Rompere un patto costa la fiducia dell'impero tradito e un po' di quella di tutti gli altri. Un impero in pace con te che diventa molto più forte può tornare in guerra da solo (dopo almeno 15 turni di pace); le alleanze le rompi solo tu.
+- Vittoria diplomatica: se tutti gli imperi rimasti sono tuoi alleati.
+- Fra gli imperi IA resta la guerra di tutti contro tutti. Nel duello e nel tutorial la diplomazia non c'è.
+- Il salvataggio tiene patti, fiducia e rifiuti; un salvataggio che non li ha riparte in guerra con tutti.
 
 v60 (formato di salvataggio v17): **ogni paese è un impero guidato dall'IA** e il paese si sceglie toccandolo sulla mappa.
 
