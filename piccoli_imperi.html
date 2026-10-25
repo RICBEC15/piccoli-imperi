@@ -238,7 +238,7 @@
     <div class="ovbox">
       <h2>🌍 Scegli il tuo paese</h2>
       <p>Il paese si sceglie <b>toccandolo sulla mappa</b>; questo elenco è un aiuto per trovarlo.
-      Il tuo territorio è il paese che scegli: lì fondi la capitale e lì le tue unità si difendono meglio (+1 🛡️ in patria).
+      Il tuo territorio è il paese che scegli: la capitale la fondi nella sua vera capitale (Roma, Madrid, Parigi...) e lì le tue unità si difendono meglio (+1 🛡️ in patria).
       I paesi con pochi villaggi partono con qualche stella in più.</p>
       <div class="paesi-grid" id="paesiLista"></div>
       <div id="paesiNemicoBox">
@@ -302,7 +302,7 @@
       <h4>🎯 Obiettivo</h4>
       <p><b>Ogni paese della mappa è un impero</b>: il tuo e, uno per ciascun altro paese, gli imperi guidati dall'IA, ognuno con la sua capitale 🏛️ (bordo del suo colore), le sue truppe e la sua economia. Sono <b>tutti in guerra con tutti</b>: si espandono, si combattono fra loro e prima o poi vengono a cercare te.
       Quando un impero perde la capitale <b>cade</b>: chi l'ha presa la tiene, le sue altre città tornano villaggi liberi e il suo esercito si scioglie. <b>Vinci quando sono caduti tutti</b>; se cade la tua capitale, hai perso.
-      <b>A inizio partita tocca sulla mappa il paese che vuoi guidare</b> (il menu 🌍 Elenco dei paesi aiuta a trovarlo) e poi <b>dove fondare la capitale</b>: ovunque nel tuo paese — isole comprese — tranne che su <b>montagne e deserto</b>, e il più lontano possibile dalle capitali vicine (caselle evidenziate).
+      <b>A inizio partita tocca sulla mappa il paese che vuoi guidare</b> (il menu 🌍 Elenco dei paesi aiuta a trovarlo) e poi toccalo ancora per <b>fondare la capitale</b>: ogni impero, il tuo e quelli dell'IA, comincia dalla <b>vera capitale</b> del suo paese (la Spagna a Madrid, la Francia a Parigi...) o dalla casella libera più vicina (evidenziata).
       Nella schermata iniziale puoi scegliere anche il <b>duello</b>: un solo nemico, l'Impero Cremisi, in un paese vicino al tuo.</p>
       <h4>🏳️ Territori</h4>
       <p>Il <b>territorio</b> di ogni impero è il suo paese, contornato sulla mappa nel suo colore (azzurro il tuo; ogni impero IA ha il suo).
@@ -321,7 +321,7 @@
         <li><b>Montagna</b> ⛰️: si può <b>scalare</b> — ci sali (il movimento finisce lì), il turno dopo resti <b>fermo in parete</b>, e da quello successivo puoi ripartire. In vetta hai <b>+1 difesa</b>. L'<b>acqua</b> (blu) resta invalicabile.</li>
         <li><b>Fiume</b> (azzurro chiaro): invalicabile. I <b>ponti 🌉</b> non esistono all'inizio: li costruisce il <b>Costruttore 👷</b> (2⭐, casella arancione adiacente). Sul ponte si è allo scoperto (−1 difesa) e il ponte è utilizzabile da entrambi gli imperi.</li>
       </ul>
-      <p>La mappa è <b>una sola per ogni grandezza</b>, uguale a ogni partita (cambia solo dove si nasconde la capitale nemica). Boschi, montagne, colline, deserti e tundra vengono dai dati reali di <b>OpenStreetMap</b>: coperture del suolo e quote delle cime. Confini: Natural Earth.<br>
+      <p>La mappa è <b>una sola per ogni grandezza</b>, uguale a ogni partita, e anche le capitali sono sempre le stesse: quelle vere. Boschi, montagne, colline, deserti e tundra vengono dai dati reali di <b>OpenStreetMap</b>: coperture del suolo e quote delle cime. Confini: Natural Earth.<br>
       <small>Dati della mappa © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener" style="color:#9cc9ff">OpenStreetMap contributors</a> (ODbL), tramite Overture Maps.</small></p>
       <h4>🏛️ Città e stelle</h4>
       <ul>
@@ -554,18 +554,12 @@ function newGame(tut = false) {
   modoPartita = tut ? 'duello' : modoAvversari; // il tutorial è sempre un duello
   genMap();
   if (tutorial) {
-    // nel tutorial giochi l'Italia contro un vicino di terra; la capitale viene piazzata
-    // in automatico (in un punto "comodo": collegato al continente e con spazio intorno)
+    // nel tutorial giochi l'Italia contro un vicino di terra; la capitale si fonda
+    // da sola, a Roma (come ogni impero, nella sua vera capitale)
     const vicini = PAESI_TUTORIAL.filter(cc => paesiInfo()[cc]);
     assegnaPaesi('IT', vicini[Math.floor(Math.random() * vicini.length)]);
     placing = false;
-    const ac = capitaleDi(imperiIA()[0]);
-    const flood = ac ? floodFrom(ac) : new Set();
-    const spots = computePlaceSet().filter(t =>
-      t.terrain === 'grass' && flood.has(key(t))
-      && neighbors(t).filter(n => passable(n)).length >= 3);
-    placePlayerCapital(spots.length ? spots[Math.floor(Math.random() * spots.length)]
-      : placeSet.length ? placeSet[Math.floor(Math.random() * placeSet.length)] : randomCapitalSpot());
+    placePlayerCapital(placeSet.length ? placeSet[0] : randomCapitalSpot());
     ensureTutorialVillage();
     tutStep = -1;
     nextTutStep();
@@ -1188,20 +1182,12 @@ function floodFrom(t) {
 }
 
 // --- fase di piazzamento della capitale del giocatore ---
-// La capitale si fonda in PATRIA, nel paese scelto (isole comprese!),
-// tranne che su montagne e deserto — e il più lontano possibile dalle capitali nemiche.
+// La capitale si fonda nella VERA capitale del paese scelto (Madrid per la Spagna...),
+// o nella casella libera più vicina: è l'unica casella evidenziata.
 function computePlaceSet() {
-  const cc = players.p.country, info = paesiInfo();
-  if (!cc || !info[cc]) return [];
-  const caps = imperiIA().map(capitaleDi).filter(Boolean);
-  const base = info[cc].spots.filter(t => !t.city && !t.hosp && !t.port && !t.unit);
-  // 10 caselle dalle capitali nemiche; nei paesi piccoli stretti fra i vicini si cede un po'
-  for (const f of [1, 0.5, 0]) {
-    const minD = Math.round(10 * tileScale() * f);
-    const s = base.filter(t => caps.every(c => dist(t, c) >= minD));
-    if (s.length) return s;
-  }
-  return base;
+  const cc = players.p.country;
+  const t = cc ? casellaCapitale(cc) : null;
+  return t ? [t] : [];
 }
 function placePlayerCapital(t) {
   t.terrain = 'grass';
@@ -1210,10 +1196,10 @@ function placePlayerCapital(t) {
   t.unit = mkUnit('warrior','p');
   placing = false; placeSet = [];
   document.getElementById('paesi').style.display = 'none';
-  const n = imperiIA().length;
+  const n = imperiIA().length, dove = nomeCapitale(players.p.country);
   msg(modoPartita === 'tutti'
-    ? `🏛️ Capitale fondata! Contro di te ci sono ${n} imperi, uno per paese, in guerra fra loro e con te. Tocca a te.`
-    : '🏛️ Capitale fondata! Espanditi e conquista. Tocca a te.');
+    ? `🏛️ Capitale fondata${dove ? ' a ' + dove : ''}! Contro di te ci sono ${n} imperi, uno per paese, in guerra fra loro e con te. Tocca a te.`
+    : `🏛️ Capitale fondata${dove ? ' a ' + dove : ''}! Espanditi e conquista. Tocca a te.`);
   ui(); render();
   scrollToTile(t, false);
 }
@@ -1336,29 +1322,50 @@ function togliImpero(o) {
   ordineIA = ordineIA.filter(x => x !== o);
 }
 
-// la capitale di un impero IA nel suo paese: sul continente se possibile, verso l'interno
-// (non addosso ai vicini), non attaccata ai villaggi e lontana dalle altre capitali
-function spotCapitaleIA(cc) {
-  const info = paesiInfo(), minD = Math.round(10 * tileScale());
+// le vere capitali dei paesi (nome, longitudine, latitudine): ogni impero, il tuo e quelli
+// dell'IA, comincia lì. Se la casella non va bene (mare, montagna, un villaggio...) si usa
+// la casella libera più vicina del paese.
+const CAPITALI_REALI = {
+  IT: ['Roma', 12.50, 41.90],        CH: ['Berna', 7.45, 46.95],         AT: ['Vienna', 16.37, 48.21],
+  LI: ['Vaduz', 9.52, 47.14],        SI: ['Lubiana', 14.51, 46.06],      HR: ['Zagabria', 15.98, 45.81],
+  BA: ['Sarajevo', 18.41, 43.86],    ME: ['Podgorica', 19.26, 42.44],    TN: ['Tunisi', 10.18, 36.81],
+  FR: ['Parigi', 2.35, 48.86],       ES: ['Madrid', -3.70, 40.42],       DZ: ['Algeri', 3.06, 36.75],
+  MA: ['Rabat', -6.84, 34.02],       AL: ['Tirana', 19.82, 41.33],       LY: ['Tripoli', 13.19, 32.89],
+  PT: ['Lisbona', -9.14, 38.72],     BE: ['Bruxelles', 4.35, 50.85],     LU: ['Lussemburgo', 6.13, 49.61],
+  AD: ['Andorra la Vella', 1.52, 42.51], MC: ['Monaco', 7.42, 43.74],    GR: ['Atene', 23.73, 37.98],
+  EG: ['Il Cairo', 31.24, 30.04],    TR: ['Ankara', 32.85, 39.93],       CY: ['Nicosia', 33.36, 35.17],
+  BG: ['Sofia', 23.32, 42.70],       MK: ['Skopje', 21.43, 42.00],       XK: ['Pristina', 21.17, 42.66],
+  RS: ['Belgrado', 20.46, 44.79],    RO: ['Bucarest', 26.10, 44.43],     HU: ['Budapest', 19.04, 47.50],
+  MD: ['Chișinău', 28.86, 47.01],    UA: ['Kiev', 30.52, 50.45],         RU: ['Mosca', 37.62, 55.76],
+  GE: ['Tbilisi', 44.79, 41.72],     UK: ['Londra', -0.13, 51.51],       IE: ['Dublino', -6.26, 53.35],
+  NL: ['Amsterdam', 4.90, 52.37],    DE: ['Berlino', 13.40, 52.52]
+};
+let capRealiCache = null;
+function nomeCapitale(cc) { return CAPITALI_REALI[cc] ? CAPITALI_REALI[cc][0] : null; }
+// la casella dove sorge la vera capitale del paese (null se il paese non c'è):
+// la più vicina al punto vero fra quelle libere del paese dove si può fondare una città,
+// sul continente e con spazio per uscire (Podgorica, fra monti e lago, non chiude l'impero)
+function casellaCapitale(cc) {
+  const info = paesiInfo(), cap = CAPITALI_REALI[cc];
   if (!info[cc]) return null;
-  let cand = info[cc].spots.filter(t => paeseLibero(t) && (t.terrain === 'grass' || t.terrain === 'hill')
-    && neighbors(t).filter(n => passable(n)).length >= 3 && !neighbors(t).some(n => n.city));
-  if (!cand.length) cand = info[cc].spots.filter(paeseLibero);
+  let cand = info[cc].spots.filter(paeseLibero);
+  if (!cand.length) return null;
   const main = componentePrincipale();
-  const sulContinente = cand.filter(t => main.has(key(t)));
-  if (sulContinente.length) cand = sulContinente;
-  const prof = profonditaPaesi();
-  let maxP = 0;
-  for (const t of cand) maxP = Math.max(maxP, prof[aiIdx(t)]);
-  const interne = cand.filter(t => prof[aiIdx(t)] >= Math.ceil(maxP / 2));
-  if (interne.length) cand = interne;
-  const altre = dallIndice(conCitta, t => t.city.capital && t.city.owner);
-  const lontane = cand.filter(t => altre.every(c => dist(c, t) >= minD));
-  if (lontane.length) cand = lontane;
-  return cand.length ? cand[Math.floor(Math.random() * cand.length)] : null;
+  const spazio = cand.filter(t => neighbors(t).filter(n => passable(n)).length >= 3);
+  const comode = spazio.filter(t => main.has(key(t)));
+  cand = comode.length ? comode : spazio.length ? spazio : cand;
+  if (!cap) return cand[0];
+  if (!capRealiCache || capRealiCache.map !== map) capRealiCache = { map, g: geoSetup() };
+  const q = geoToPx(cap[1], cap[2], capRealiCache.g);
+  let best = null, bd = Infinity;
+  for (const t of cand) {
+    const p = center(t), d = (p.x - q.x) ** 2 + (p.y - q.y) ** 2;
+    if (d < bd) { bd = d; best = t; }
+  }
+  return best;
 }
 function fondaCapitaleIA(cc) {
-  const t = spotCapitaleIA(cc);
+  const t = casellaCapitale(cc);
   if (!t) return false;
   nuovoImpero(cc);
   t.city = { owner: cc, capital: true, pop: 1 };
@@ -1408,7 +1415,7 @@ function msgPiazzamento() {
   }
   const b = bonusPaese(p), info = paesiInfo()[p];
   const contro = modoPartita === 'tutti' ? `contro ${imperiIA().length} imperi` : `contro ${bandiera(imperiIA()[0])} ${nomePaese(imperiIA()[0])}`;
-  msg(`🏛️ Hai scelto ${bandiera(p)} ${nomePaese(p)} (${tagliaPaese(p)}, ${info.vill} ${info.vill === 1 ? 'villaggio' : 'villaggi'}${b ? `, +${b}⭐ di compenso` : ''}) ${contro}. FONDA LA CAPITALE: tocca una casella evidenziata. Per cambiare paese tocca un altro paese.`);
+  msg(`🏛️ Hai scelto ${bandiera(p)} ${nomePaese(p)} (${tagliaPaese(p)}, ${info.vill} ${info.vill === 1 ? 'villaggio' : 'villaggi'}${b ? `, +${b}⭐ di compenso` : ''}) ${contro}. FONDA LA CAPITALE A ${(nomeCapitale(p) || 'casa').toUpperCase()}: tocca la casella evidenziata (o il tuo paese). Per cambiare paese tocca un altro paese.`);
 }
 
 // --- menu di scelta del paese (un aiuto: il paese si sceglie anche toccandolo sulla mappa) ---
@@ -3385,8 +3392,19 @@ function aiActUnit(t) {
   if (cap) {
     const threats = nemiciVicino(cap, aiR(4)).length;
     const defenders = unitsOf(aiMe).filter(f => f !== t && dist(cap, f) <= aiR(2)).length;
-    // chi presidia la capitale minacciata non la lascia
-    if (t === cap && nemiciVicino(cap, aiR(6)).length) return t;
+    // chi presidia la capitale minacciata non la lascia, a meno che sia l'unico soldato e ci
+    // siano le stelle per un altro: allora fa un passo verso il nemico e libera la capitale,
+    // dove nella fase di addestramento nasce subito un nuovo presidio (con le capitali vere
+    // i vicini sono a pochi passi: Pristina-Sofia, e l'impero restava fermo per sempre)
+    const vicini6 = t === cap ? nemiciVicino(cap, aiR(6)) : [];
+    if (vicini6.length) {
+      if (!defenders && players[aiMe].stars >= UNIT_TYPES.warrior.cost && UNIT_TYPES[t.unit.type].atk > 0) {
+        const fuori = movesFor(t).filter(m => dist(m, cap) === 1)
+          .sort((a, b) => Math.min(...vicini6.map(e => dist(a, e))) - Math.min(...vicini6.map(e => dist(b, e))))[0];
+        if (fuori) { doMove(t, fuori); aiTryAttack(fuori); return fuori; }
+      }
+      return t;
+    }
     if (threats > defenders && dist(t, cap) >= 1 && dist(t, cap) <= aiR(8)) {
       const moves = movesFor(t);
       const back = moves.filter(m => dist(m, cap) < dist(t, cap)).sort((a, b) => dist(a, cap) - dist(b, cap))[0];
@@ -3619,14 +3637,15 @@ document.getElementById('mapwrap').addEventListener('click', e => {
 function onTileClick(t) {
   // fase di piazzamento della capitale
   if (placing) {
-    if (placeSet.includes(t)) placePlayerCapital(t);
+    // un tocco sulla casella evidenziata, o in qualunque punto del tuo paese, fonda la capitale
+    if (placeSet.includes(t) || (placeSet.length && t.country && t.country === players.p.country)) placePlayerCapital(placeSet[0]);
     else if (t.country && t.country !== players.p.country && paesiInfo()[t.country]) { // tocco su un paese: lo scegli
       const primo = !players.p.country;
       cambiaPaese(t.country);
       if (primo) zoomSuPaese(t.country); // la prima volta la vista si avvicina al paese scelto
     }
     else if (!players.p.country) msg('🌍 Tocca un paese (sulla terraferma) per sceglierlo: diventerà il tuo impero.');
-    else msg('⚠️ Posizione non valida: scegli una casella evidenziata in verde chiaro, nel tuo paese.');
+    else msg(`⚠️ Tocca il tuo paese per fondare la capitale a ${nomeCapitale(players.p.country) || 'casa'}, oppure un altro paese per cambiarlo.`);
     return;
   }
   // clic su mossa evidenziata
@@ -4023,7 +4042,15 @@ function render() {
   }
   // evidenziazioni: solo sulle caselle interessate
   const paint = (arr, style) => { for (const t of arr) { const p = center(t); hexPathOn(ctx, p.x, p.y); ctx.fillStyle = style; ctx.fill(); } };
-  if (placing) paint(placeSet, 'rgba(120,255,160,.28)');
+  if (placing) {
+    paint(placeSet, 'rgba(120,255,160,.28)');
+    // la vera capitale del paese scelto: un anello che si vede anche con la mappa intera
+    for (const t of placeSet) {
+      const p = center(t);
+      ctx.beginPath(); ctx.arc(p.x, p.y, Math.max(S * 1.3, 12 / zoom), 0, Math.PI * 2);
+      ctx.lineWidth = 3 / zoom; ctx.strokeStyle = '#7dffa8'; ctx.stroke();
+    }
+  }
   paint(moveSet, 'rgba(120,255,140,.35)');
   paint(attackSet, 'rgba(255,80,80,.4)');
   if (congedo) { // truppe congedabili in rosso

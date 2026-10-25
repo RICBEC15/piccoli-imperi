@@ -22,9 +22,8 @@ assert(players.p.country === 'DE' && !players.DE && imperiIA().length === tutti.
 assert(placeSet.length && placeSet.every(t => t.country === 'DE'), 'le caselle per la capitale sono in Germania');
 tocca('IT');
 assert(players.p.country === 'IT' && players.DE && players.DE.vivo && capitaleDi('DE'), 'cambiando paese la Germania torna un impero IA');
-const caps = imperiIA().map(capitaleDi);
-assert(placeSet.every(t => caps.every(c => dist(t, c) >= 5)), 'la tua capitale nasce lontana dalle capitali vicine');
-placePlayerCapital(placeSet[Math.floor(placeSet.length / 2)]);
+assert(placeSet.length === 1 && placeSet[0] === casellaCapitale('IT'), 'la tua capitale nasce a Roma (capitalitest.js prova le capitali reali)');
+placePlayerCapital(placeSet[0]);
 assert(!placing && pCapital().country === 'IT', 'capitale fondata in Italia');
 
 // 2. la caduta di un impero: chi ne prende la capitale la tiene, il resto si scioglie
@@ -45,6 +44,7 @@ assert(!gameOver, 'la partita continua: restano altri imperi');
 undoMove();
 assert(players.FR.vivo && capitaleDi('FR') === capF && altra.city.owner === 'FR', "annullando la mossa la Francia torna in piedi");
 altra.city = null; soldato.unit = null;
+if (vicino.unit && vicino.unit.owner === 'p') vicino.unit = null; // il cavaliere della prova torna via
 
 // 3. la cronaca racconta le mosse vicino a te, non quelle lontane
 const ospite = imperiIA()[0];
@@ -56,6 +56,10 @@ const lontani = new Set(imperiIA().filter(o => o !== ospite && cities(o).every(c
 assert(!aiLog.some(s => [...lontani].some(o => s.startsWith(bandiera(o)))), 'e non quelle degli imperi lontani');
 
 // 4. il giro dei turni: tutti gli imperi muovono, senza errori e in tempi ragionevoli
+// (il giocatore qui non muove mai: un presidio robusto tiene Roma, che con le capitali vere
+// ha i vicini a pochi passi, così si vedono i 40 turni interi)
+pCapital().unit = Object.assign(mkUnit('warrior', 'p'), { count: 20, hp: 20 * UNIT_TYPES.warrior.hp, maxHp: 20 * UNIT_TYPES.warrior.hp });
+players.p.stars = 1000; // per pagarne il mantenimento
 let lento = 0, presi = 0;
 const t0 = Date.now();
 try {
@@ -82,7 +86,8 @@ assert(applySave(data) && modoPartita === 'tutti', 'il salvataggio si ricarica')
 const dopo = JSON.stringify({ imp: imperiIA(), st: imperiIA().map(o => players[o].stars), c: imperiIA().map(o => cities(o).length), cad: caduti });
 assert(prima === dopo, 'imperi, stelle, città e caduti identici dopo il caricamento');
 try { endTurn(); } catch (e) { console.error('CRASH', e.stack); process.exit(1); }
-assert(current === 'p', 'dopo il caricamento i turni proseguono');
+// (il giocatore qui non muove mai: la sua capitale può anche cadere proprio in questo turno)
+assert(current === 'p' || (gameOver && !pCapital()), 'dopo il caricamento i turni proseguono');
 
 // 6. vittoria: quando cadono tutti gli imperi
 for (const o of imperiIA()) { const c = capitaleDi(o); c.unit = null; captureIfCity(c, 'p'); }
