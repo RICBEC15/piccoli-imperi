@@ -30,6 +30,7 @@
     position:absolute; inset:0; z-index:1; overflow:auto;
     scrollbar-color:#3a5a8c #16202e; cursor:pointer;
   }
+  #mapwrap.trascina { cursor:grabbing; }
   #mapsizer { width:1px; height:1px; }
   #loading {
     position:fixed; inset:0; z-index:200; display:flex;
@@ -358,6 +359,7 @@
         <li><b>🎖️ Grandi armate:</b> nelle città puoi arruolare le truppe <b>già in gruppo</b> (×2, ×3, ×4, ×5) pagando il costo moltiplicato, e con le unioni sul campo un'armata può crescere <b>fino a 50 unità</b>: il danno cresce col numero dei vivi.</li>
         <li><b>Tasti rapidi:</b> <b>R</b> regole · <b>E</b> enciclopedia · <b>T</b> tutorial · <b>S</b> salva · <b>C</b> carica · <b>U</b>/<b>Z</b> annulla · <b>F</b> fonda villaggio · <b>P</b> costruisci porto · <b>Spazio</b>/<b>Invio</b> fine turno · <b>Esc</b> chiude o deseleziona.</li>
         <li><b>🔍 Zoom:</b> <b>+</b> e <b>−</b> ingrandiscono e rimpiccioliscono, <b>0</b> torna al 100%, <b>9</b> mostra tutta la mappa. Funzionano anche i pulsanti in basso a destra e <b>Ctrl+rotella</b> del mouse (o il pizzico sul trackpad), centrati sul cursore.</li>
+        <li><b>🧭 Spostarsi:</b> <b>trascina</b> la mappa col mouse (o col dito sul telefono), usa la rotella o le <b>frecce</b> della tastiera. Funziona a qualunque zoom, anche con tutta la mappa nello schermo.</li>
       </ul>
       <h4>💡 Consigli</h4>
       <ul>
@@ -573,8 +575,8 @@ function scrollToTile(t, smooth = true) {
   if (!wrap || typeof wrap.scrollTo !== 'function' || !t) return;
   const p = center(t);
   wrap.scrollTo({
-    left: Math.max(0, p.x * zoom - (wrap.clientWidth || 0) / 2),
-    top:  Math.max(0, p.y * zoom - (wrap.clientHeight || 0) / 2),
+    left: Math.max(0, p.x * zoom + PADX - (wrap.clientWidth || 0) / 2),
+    top:  Math.max(0, p.y * zoom + PADY - (wrap.clientHeight || 0) / 2),
     behavior: smooth ? 'smooth' : 'auto'
   });
 }
@@ -584,24 +586,39 @@ let zoom = 1;
 // minimo basso: anche su un telefono "tutta la mappa" entra nello schermo
 // (a zoom piccoli si disegnano tessere a bassa risoluzione, quindi costa poco)
 const ZOOM_MIN = 0.02, ZOOM_MAX = 3;
-// l'area che scorre ha la misura della mappa zoomata; il disegno lo fa il canvas sotto
+// l'area che scorre ha la misura della mappa zoomata piu' un bordo di mezzo schermo
+// per lato: cosi' ci si sposta sempre, anche quando la mappa intera sta nello schermo,
+// e ogni casella (anche quelle sul bordo) si puo' portare al centro.
+// il disegno lo fa il canvas sotto
+let PADX = 0, PADY = 0;
 function sizeWorld() {
   const sz = document.getElementById('mapsizer');
   if (!sz) return;
-  sz.style.width = Math.round(WORLD_W * zoom) + 'px';
-  sz.style.height = Math.round(WORLD_H * zoom) + 'px';
+  const wrap = document.getElementById('mapwrap');
+  const px = Math.round(((wrap && wrap.clientWidth) || 0) / 2), py = Math.round(((wrap && wrap.clientHeight) || 0) / 2);
+  sz.style.width = Math.round(WORLD_W * zoom + 2 * px) + 'px';
+  sz.style.height = Math.round(WORLD_H * zoom + 2 * py) + 'px';
+  // se il bordo cambia (finestra ridimensionata) la vista resta sullo stesso punto
+  if (wrap && (px !== PADX || py !== PADY)) {
+    wrap.scrollLeft = Math.max(0, (wrap.scrollLeft || 0) + px - PADX);
+    wrap.scrollTop = Math.max(0, (wrap.scrollTop || 0) + py - PADY);
+  }
+  PADX = px; PADY = py;
 }
+// angolo in alto a sinistra della vista, in pixel della mappa zoomata
+function viewX(wrap) { return (wrap.scrollLeft || 0) - PADX; }
+function viewY(wrap) { return (wrap.scrollTop || 0) - PADY; }
 function applyZoom(z, cx, cy) {
   const wrap = document.getElementById('mapwrap');
   z = Math.max(ZOOM_MIN, Math.min(ZOOM_MAX, z));
   if (!wrap) { zoom = z; return; }
   // il punto della mappa sotto (cx, cy) resta fermo mentre si zooma
   if (cx === undefined) { cx = (wrap.clientWidth || 0) / 2; cy = (wrap.clientHeight || 0) / 2; }
-  const mx = ((wrap.scrollLeft || 0) + cx) / zoom, my = ((wrap.scrollTop || 0) + cy) / zoom;
+  const mx = (viewX(wrap) + cx) / zoom, my = (viewY(wrap) + cy) / zoom;
   zoom = z;
   sizeWorld();
-  wrap.scrollLeft = Math.max(0, mx * zoom - cx);
-  wrap.scrollTop = Math.max(0, my * zoom - cy);
+  wrap.scrollLeft = Math.max(0, mx * zoom - cx + PADX);
+  wrap.scrollTop = Math.max(0, my * zoom - cy + PADY);
   scheduleRender();
 }
 function zoomIn() { applyZoom(zoom * 1.25); }
@@ -611,7 +628,9 @@ function zoomFit() { // tutta la mappa nello schermo
   const wrap = document.getElementById('mapwrap');
   if (!wrap || !WORLD_W) return;
   applyZoom(Math.min((wrap.clientWidth || 1) / WORLD_W, (wrap.clientHeight || 1) / WORLD_H));
-  wrap.scrollLeft = 0; wrap.scrollTop = 0;
+  // mappa al centro dello schermo
+  wrap.scrollLeft = Math.max(0, Math.round(PADX + (WORLD_W * zoom - (wrap.clientWidth || 0)) / 2));
+  wrap.scrollTop = Math.max(0, Math.round(PADY + (WORLD_H * zoom - (wrap.clientHeight || 0)) / 2));
 }
 
 // Garantisce un villaggio vicino alla capitale per il tutorial
@@ -3315,12 +3334,56 @@ function aiActMedic(t) {
     applyZoom(zoom * (e.deltaY < 0 ? 1.13 : 1 / 1.13), e.clientX - r.left, e.clientY - r.top);
   }, { passive: false });
 })();
+// trascinare la mappa col mouse (tasto sinistro) la sposta, a qualunque zoom.
+// Col dito lo fa gia' lo scorrimento nativo del browser. Un trascinamento vero
+// (oltre qualche pixel) non conta come click sulla casella.
+let dragPan = null, dragMoved = false;
+(function () {
+  const wrap = document.getElementById('mapwrap');
+  if (!wrap || typeof wrap.addEventListener !== 'function') return;
+  wrap.addEventListener('pointerdown', e => {
+    if (e.pointerType !== 'mouse' || e.button !== 0) return;
+    dragPan = { x: e.clientX, y: e.clientY, sl: wrap.scrollLeft, st: wrap.scrollTop, id: e.pointerId };
+    dragMoved = false;
+  });
+  wrap.addEventListener('pointermove', e => {
+    if (!dragPan || e.pointerId !== dragPan.id) return;
+    const dx = e.clientX - dragPan.x, dy = e.clientY - dragPan.y;
+    if (!dragMoved && dx * dx + dy * dy < 36) return;
+    if (!dragMoved) {
+      dragMoved = true;
+      wrap.classList.add('trascina');
+      try { wrap.setPointerCapture(e.pointerId); } catch (err) {}
+    }
+    wrap.scrollLeft = dragPan.sl - dx;
+    wrap.scrollTop = dragPan.st - dy;
+  });
+  const fine = e => {
+    if (!dragPan || e.pointerId !== dragPan.id) return;
+    dragPan = null;
+    wrap.classList.remove('trascina');
+  };
+  wrap.addEventListener('pointerup', fine);
+  wrap.addEventListener('pointercancel', fine);
+  // dopo un trascinamento il click che segue va ignorato
+  wrap.addEventListener('click', e => {
+    if (dragMoved) { dragMoved = false; e.stopImmediatePropagation(); }
+  }, true);
+})();
+// frecce della tastiera: spostano la vista di un quarto di schermo
+function panBy(dx, dy) {
+  const wrap = document.getElementById('mapwrap');
+  if (!wrap) return;
+  wrap.scrollLeft = Math.max(0, (wrap.scrollLeft || 0) + dx);
+  wrap.scrollTop = Math.max(0, (wrap.scrollTop || 0) + dy);
+  scheduleRender();
+}
 // dal punto cliccato (coordinate della finestra) alle coordinate della mappa intera
 function screenToWorld(e) {
   const wrap = document.getElementById('mapwrap');
   const r = wrap.getBoundingClientRect();
-  return { x: (e.clientX - r.left + (wrap.scrollLeft || 0)) / zoom,
-           y: (e.clientY - r.top + (wrap.scrollTop || 0)) / zoom };
+  return { x: (e.clientX - r.left + viewX(wrap)) / zoom,
+           y: (e.clientY - r.top + viewY(wrap)) / zoom };
 }
 // caselle (righe e colonne) che toccano un rettangolo della mappa, con un margine
 function tileRange(x0, y0, x1, y1, m) {
@@ -3480,6 +3543,15 @@ function anyModalOpen() {
 }
 if (typeof document.addEventListener === 'function') {
   document.addEventListener('keydown', e => {
+    // frecce: spostano la vista (anche tenendole premute)
+    const freccia = { ArrowLeft: [-1, 0], ArrowRight: [1, 0], ArrowUp: [0, -1], ArrowDown: [0, 1] }[e.key];
+    const tag = e.target && e.target.tagName;
+    if (freccia && !e.ctrlKey && !e.metaKey && !e.altKey && tag !== 'SELECT' && tag !== 'INPUT' && !anyModalOpen()) {
+      const wrap = document.getElementById('mapwrap');
+      e.preventDefault();
+      panBy(freccia[0] * Math.round(((wrap && wrap.clientWidth) || 800) / 4), freccia[1] * Math.round(((wrap && wrap.clientHeight) || 600) / 4));
+      return;
+    }
     if (e.repeat || e.ctrlKey || e.metaKey || e.altKey) return;
     const k = e.key.toLowerCase();
     if (e.key === 'Escape') {
@@ -3675,13 +3747,13 @@ function scheduleRender() {
 (function () {
   const wrap = document.getElementById('mapwrap');
   if (wrap && typeof wrap.addEventListener === 'function') wrap.addEventListener('scroll', scheduleRender, { passive: true });
-  if (typeof window.addEventListener === 'function') window.addEventListener('resize', scheduleRender);
+  if (typeof window.addEventListener === 'function') window.addEventListener('resize', () => { sizeWorld(); scheduleRender(); });
 })();
 
 function render() {
   if (terrainDirty) renderBase();
   const { wrap, dpr, w, h } = fitCanvas();
-  const sl = wrap.scrollLeft || 0, st = wrap.scrollTop || 0;
+  const sl = viewX(wrap), st = viewY(wrap);
   const vx0 = sl / zoom, vy0 = st / zoom, vx1 = (sl + w) / zoom, vy1 = (st + h) / zoom;
   ctx.setTransform(1, 0, 0, 1, 0, 0);
   ctx.clearRect(0, 0, cv.width, cv.height);
