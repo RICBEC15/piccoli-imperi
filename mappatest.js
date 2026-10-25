@@ -8,12 +8,12 @@ for (const taglia of ['piccola', 'media']) {
   let fantasma = 0, kola = 0, kolaTot = 0;
   for (const t of map.flat()) {
     const { lon, lat } = tileLonLat(t, g);
-    // Svezia e Finlandia del nord non sono nel gioco: li' deve esserci solo mare
-    if (lat > 65.3 && lat < 68.8 && lon > 18.5 && lon < 28) { if (t.terrain !== 'water') fantasma++; }
+    // la Lapponia (v65: Svezia e Finlandia sono nel gioco) non e' Russia
+    if (lat > 65.3 && lat < 68.8 && lon > 18.5 && lon < 28) { if (t.country === 'RU') fantasma++; }
     // l'interno della penisola di Kola e' Russia
     if (lat > 67.6 && lat < 68.6 && lon > 34 && lon < 38) { kolaTot++; if (t.country === 'RU') kola++; }
   }
-  check(fantasma === 0, `${taglia}: nessuna terra finta a nord fra Svezia e Finlandia (${fantasma})`);
+  check(fantasma === 0, `${taglia}: nessuna "Russia fantasma" fra Svezia e Finlandia (${fantasma})`);
   check(kolaTot > 0 && kola / kolaTot > 0.9, `${taglia}: la penisola di Kola e' terra russa (${kola}/${kolaTot})`);
 }
 // determinismo: una sola mappa per taglia, uguale a ogni partita (cambia solo la capitale nemica)
