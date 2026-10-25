@@ -12,7 +12,7 @@ In locale: apri `piccoli_imperi.html` nel browser con un doppio clic. Non serve 
 
 - `piccoli_imperi.html`: il gioco completo (HTML, CSS e JavaScript in un unico file).
 - `index.html`: pagina d'ingresso per GitHub Pages, rimanda subito a `piccoli_imperi.html`.
-- `stub.js`, `shiptest.js`, `savetest.js`, `playtest.js`, `aitest.js`, `paesitest.js`, `imperitest.js`, `difficoltatest.js`, `mappatest.js`, `diplotest.js`, `conquistatest.js`, `browser_check.js`, `mobile_check.js`, `pantest.js`: test automatici (`mobile_check.js` prova il gioco su un iPhone emulato con Playwright, `pantest.js` lo spostamento nella mappa col mouse, le frecce e il dito, `conquista_check.js` la conquista delle caselle con tocchi veri, su computer e telefono).
+- `stub.js`, `shiptest.js`, `savetest.js`, `playtest.js`, `aitest.js`, `paesitest.js`, `imperitest.js`, `difficoltatest.js`, `mappatest.js`, `diplotest.js`, `conquistatest.js`, `browser_check.js`, `mobile_check.js`, `pantest.js`: test automatici (`mobile_check.js` prova il gioco su un iPhone emulato con Playwright, `pantest.js` lo spostamento nella mappa col mouse, le frecce e il dito, `conquista_check.js` la conquista delle caselle con tocchi veri, su computer e telefono, `citta_check.js` le città del paese già tue dopo la scelta).
 - `build_russia.js`: script che ha estratto il confine della Russia dal dataset Natural Earth.
 - `build_biomi.py`, `export_tiles.js`: costruiscono i biomi fissi dai dati di OpenStreetMap.
 - `ISTRUZIONI_MIGRAZIONE.md`: note di sviluppo, storia delle ultime versioni e istruzioni dettagliate.
@@ -44,6 +44,13 @@ C'è **una sola mappa per ogni grandezza** (piccola, media, gigante), uguale a o
 Ogni modifica alla mappa va verificata con `mappatest.js`, che controlla anche che due partite abbiano la stessa mappa.
 
 ## Versione
+
+v63 (formato di salvataggio invariato, v17): **ogni impero parte con tutte le città del suo paese**. Quando scegli un paese, i suoi villaggi sono già tue città (e lo stesso vale per ogni impero IA nel suo paese).
+
+- I villaggi neutrali restano solo dove non c'è un impero: nel duello gli altri paesi, e le città che tornano libere quando un impero cade.
+- Cambiando paese durante la scelta, le città passano con te e quelle del paese lasciato tornano al suo impero IA.
+- Bilanciamento: un paese con meno di 5 città (oltre alla capitale) parte con 5⭐ in più per ogni città mancante (prima: 2⭐ sotto i 4 villaggi). L'elenco dei paesi mostra quante città ha ognuno.
+- Test: `paesitest.js` e `imperitest.js` aggiornati; `citta_check.js` prova nel browser, su computer e telefono, la scelta della Francia toccandola e la fondazione della capitale.
 
 v62 (formato di salvataggio v17 con il campo facoltativo `conquiste`): **in guerra il territorio si conquista**. Un'unità di qualunque tipo che entra in una casella del territorio di un impero con cui il suo impero è in guerra la conquista: la casella passa al colore del nuovo padrone (contorno e un velo più deciso delle altre caselle).
 

@@ -31,15 +31,25 @@ onTileClick(tileIT);
 assert(players.p.country === 'IT' && placeSet.every(t => t.country === 'IT'), 'toccare un altro paese sulla mappa lo sceglie');
 assert(A() === 'DE', 'il nemico scelto a mano resta la Germania');
 
-// 4. compenso di stelle: un paese con pochi villaggi parte con piu' stelle
+// 3b. (v63) ogni impero parte con tutte le citta' del suo paese; gli altri paesi del duello restano liberi
+const cittaDi = cc => map.flat().filter(t => t.city && !t.city.capital && t.country === cc);
+assert(cittaDi('IT').length > 0 && cittaDi('IT').every(t => t.city.owner === 'p'), `le ${cittaDi('IT').length} citta' italiane sono gia' tue`);
+assert(cittaDi('DE').every(t => t.city.owner === 'DE'), "quelle tedesche sono del nemico");
+assert(cittaDi('ES').length > 0 && cittaDi('ES').every(t => t.city.owner === null), "nel duello la Spagna, senza impero, ha villaggi liberi");
+assert(map.flat().every(t => !t.city || t.city.owner === null || t.city.owner === 'p' || t.city.owner === 'DE'), 'nessuna citta di un impero che non esiste');
+cambiaPaese('ES');
+assert(cittaDi('ES').every(t => t.city.owner === 'p') && cittaDi('IT').every(t => t.city.owner === null), "cambiando paese le citta' passano con te");
+cambiaPaese('IT');
+
+// 4. compenso di stelle: un paese con poche citta' parte con piu' stelle
 const info = paesiInfo();
 const povero = Object.keys(info).find(cc => info[cc].vill < PAESE_VILL_BASE && cc !== 'DE');
 scegliNemico(null);
 cambiaPaese(povero);
 assert(players.p.stars === 7 + PAESE_VILL_STELLE * (PAESE_VILL_BASE - info[povero].vill),
-  `${nomePaese(povero)} (${info[povero].vill} villaggi) parte con ${players.p.stars} stelle`);
+  `${nomePaese(povero)} (${info[povero].vill} citta') parte con ${players.p.stars} stelle`);
 cambiaPaese('FR');
-assert(info.FR.vill >= PAESE_VILL_BASE && players.p.stars === 7, 'la Francia, ricca di villaggi, parte con 7 stelle');
+assert(info.FR.vill >= PAESE_VILL_BASE && players.p.stars === 7, "la Francia, ricca di citta', parte con 7 stelle");
 
 // 5. fondazione della capitale in patria e bonus di difesa
 placePlayerCapital(placeSet[0]);
@@ -78,4 +88,5 @@ setAvversari('tutti');
 newGame(true);
 assert(modoPartita === 'duello' && players.p.country === 'IT' && PAESI_TUTORIAL.includes(A()) && pCapital().country === 'IT',
   `tutorial: Italia contro ${nomePaese(A())}`);
+assert(cities('p').length > 1 && cities(null).some(v => dist(pCapital(), v) <= 3), "tutorial: le citta' italiane sono tue e c'e' un villaggio libero vicino da conquistare");
 console.log('TUTTI I TEST PAESI SUPERATI');
