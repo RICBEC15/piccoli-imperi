@@ -60,7 +60,8 @@ const out = process.argv[3] || '.';
       aspetta();
     }));
     const ok = dopoScelta.paese === 'FR' && dopoScelta.tutteMie && dopoScelta.citta > 10 && !fondata.placing
-      && fondata.citta === dopoScelta.citta + 1 && !errori.length;
+      // la capitale sorge sul villaggio di Parigi (dalla v66), quindi le città restano tante quante
+      && (fondata.citta === dopoScelta.citta || fondata.citta === dopoScelta.citta + 1) && !errori.length;
     tuttoOk = tuttoOk && ok;
     console.log(JSON.stringify({ nome, dopoScelta, fondata, giro, errori, ok }));
     await ctx.close();
