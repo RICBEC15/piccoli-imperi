@@ -1,6 +1,6 @@
 # Piccoli Imperi
 
-Gioco di strategia a turni su esagoni, in stile Polytopia, su una mappa geografica reale dell'Europa, dall'Islanda e dalle Canarie agli Urali. A inizio partita tocchi sulla mappa il paese da guidare: il suo territorio è la tua patria. **Ogni altro paese è un impero guidato dall'IA**, in guerra con tutti. Un impero cade quando perde la capitale; vinci quando sono caduti tutti. Nella schermata iniziale si può scegliere anche il duello: un solo nemico, l'"Impero Cremisi", in un paese vicino.
+Gioco di strategia a turni su esagoni, in stile Polytopia, su una mappa geografica reale dell'Europa, dall'Islanda e dalle Canarie agli Urali. A inizio partita scegli l'epoca (oggi, 1938, 1914, 1800, 1500 o l'anno Mille) e tocchi sulla mappa il paese da guidare: il suo territorio è la tua patria. **Ogni altro paese è un impero guidato dall'IA**, in guerra con tutti. Un impero cade quando perde la capitale; vinci quando sono caduti tutti. Nella schermata iniziale si può scegliere anche il duello: un solo nemico, l'"Impero Cremisi", in un paese vicino.
 
 ## Come giocare
 
@@ -12,11 +12,12 @@ In locale: apri `piccoli_imperi.html` nel browser con un doppio clic. Non serve 
 
 - `piccoli_imperi.html`: il gioco completo (HTML, CSS e JavaScript in un unico file).
 - `index.html`: pagina d'ingresso per GitHub Pages, rimanda subito a `piccoli_imperi.html`.
-- `stub.js`, `shiptest.js`, `savetest.js`, `playtest.js`, `aitest.js`, `paesitest.js`, `imperitest.js`, `difficoltatest.js`, `mappatest.js`, `diplotest.js`, `conquistatest.js`, `capitalitest.js`, `paesinuovitest.js`, `microstatitest.js`, `popolazionetest.js`, `biomitest.js`, `browser_check.js`, `mobile_check.js`, `pantest.js`, `conquista_check.js`, `citta_check.js`: test automatici (`mobile_check.js` prova il gioco su un iPhone emulato con Playwright, `pantest.js` lo spostamento nella mappa col mouse, le frecce e il dito).
+- `stub.js`, `shiptest.js`, `savetest.js`, `playtest.js`, `aitest.js`, `paesitest.js`, `imperitest.js`, `difficoltatest.js`, `mappatest.js`, `diplotest.js`, `conquistatest.js`, `capitalitest.js`, `paesinuovitest.js`, `microstatitest.js`, `popolazionetest.js`, `biomitest.js`, `epochetest.js`, `browser_check.js`, `mobile_check.js`, `pantest.js`, `conquista_check.js`, `citta_check.js`: test automatici (`mobile_check.js` prova il gioco su un iPhone emulato con Playwright, `pantest.js` lo spostamento nella mappa col mouse, le frecce e il dito).
 - `build_russia.js`: script che ha estratto il confine della Russia dal dataset Natural Earth.
 - `build_paesi_nord.py`: estrae da Natural Earth i confini dei paesi aggiunti nella v65 (`POLY_NORD`, `SEMI_NORD`).
 - `build_biomi.py`, `export_tiles.js`: costruiscono i biomi fissi dai dati di OpenStreetMap.
 - `build_popolazione.js`: costruisce la lista delle città vere con i loro abitanti (Natural Earth).
+- `build_epoche.py`: costruisce gli stati storici di ogni epoca (con `export_tiles.js`).
 - `ISTRUZIONI_MIGRAZIONE.md`: note di sviluppo, storia delle ultime versioni e istruzioni dettagliate.
 
 ## Test
@@ -28,6 +29,7 @@ cat stub.js game.js savetest.js > _run.js && node _run.js
 cat stub.js game.js playtest.js > _run.js && node _run.js
 cat stub.js game.js paesitest.js > _run.js && node _run.js
 cat stub.js game.js imperitest.js > _run.js && node _run.js   # tutti i paesi contro tutti: circa 30 secondi
+cat stub.js game.js epochetest.js > _run.js && node _run.js   # epoche: circa 3 minuti (anche la mappa gigante)
 cat stub.js game.js aitest.js > _run.js && node _run.js   # IA: 150 turni, circa un minuto
 cat stub.js game.js difficoltatest.js > _run.js && node _run.js   # difficoltà IA: circa 40 secondi
 cat stub.js game.js mappatest.js > _run.js && node _run.js
@@ -50,15 +52,26 @@ C'è **una sola mappa per ogni grandezza** (piccola, media, gigante), uguale a o
 
 ## Città e abitanti
 
-Ogni città ha i suoi **abitanti veri**: quelli dell'agglomerato urbano (campo `POP_MAX`) del dataset Natural Earth *populated places* 1:10m, di pubblico dominio (naturalearthdata.com). Roma ha 3.339.000 abitanti, Parigi 9.904.000, Milano 2.945.000. Le 1142 città che cadono sulle terre del gioco sono nella lista `CITTA_REALI` dentro `piccoli_imperi.html`, scritta da `build_popolazione.js` (istruzioni in testa al file).
+Ogni città ha i suoi **abitanti veri**: quelli dell'agglomerato urbano (campo `POP_MAX`) del dataset Natural Earth *populated places* 1:10m, di pubblico dominio (naturalearthdata.com). Roma ha 3.339.000 abitanti, Parigi 9.904.000, Milano 2.945.000. Le 1366 città che cadono sulle terre del gioco sono nella lista `CITTA_REALI` dentro `piccoli_imperi.html`, scritta da `build_popolazione.js` (istruzioni in testa al file).
 
 - Ogni città vera da un milione di abitanti in su ha il suo villaggio neutrale sulla mappa.
 - Ogni villaggio prende nome e abitanti della città vera più popolosa entro poco più di una casella (almeno 25 km); quelli lontani da città note hanno abitanti **stimati** (da 2.000 a 30.000, nel deserto da 500 a 8.000), fissi per casella.
 - La rendita cresce con gli abitanti, a scaglioni: sotto 5.000 abitanti 1⭐, da 5.000 2⭐, da 50.000 3⭐, da 200.000 4⭐, da 700.000 5⭐, da 2 milioni 6⭐, da 5 milioni 7⭐. La capitale rende 1⭐ in più (almeno 3⭐), e ogni livello di crescita portato dai cittadini aggiunge 1⭐.
 
+## Le epoche
+
+Nella schermata iniziale (e nella scelta del paese, prima di fondare la capitale) si sceglie l'epoca: **oggi** (come prima), **1938**, **1914**, **1800**, **1500** o **l'anno Mille**. La mappa resta la stessa (terre, biomi, fiumi, villaggi): cambiano gli stati, con i confini e i nomi italiani di quell'anno, da 29 a 44 secondo l'epoca. Ogni stato storico ha un emblema al posto della bandiera (👑 impero, 🏰 regno, 🌙 stato islamico, ⛺ popoli e orde, 🏛️ repubblica). Il Sahara, senza stati nei dati, è terra di nessuno: ci sono villaggi ma non si può giocare. Il tutorial è sempre ai giorni nostri. Ogni stato storico è un impero (o, nel duello, il tuo avversario) e la sua capitale sorge nella sua città più popolosa. L'epoca si salva nel file della partita (i salvataggi precedenti si caricano a oggi).
+
+- Fonte dei confini: **historical-basemaps** di André Ourednik (https://github.com/aourednik/historical-basemaps), licenza **GPL-3.0**. I dati derivati (la riga `const EPOCHE = ...` del gioco, circa 100 KB) restano sotto GPL-3.0.
+- Gli altri siti consultabili (OpenHistoricalMap, historiqly, backthen.world, Running Reality, GeaCron) non si possono scaricare dal server di sviluppo o non offrono dati scaricabili: OpenHistoricalMap (dati CC0) resta la fonte migliore se in futuro si potrà leggerla.
+- I dati sono grossolani: `build_epoche.py` corregge gli errori trovati (nel 1938 la Turchia orientale finiva all'"Armenia" sovietica, nel 1914 la Georgia e la Finlandia erano fuori dall'Impero russo), unisce gli staterelli di 1-2 caselle al vicino e traduce i nomi. Per rifare i dati: istruzioni in testa a `build_epoche.py`.
+- Dalla v68 le epoche coprono anche le terre aggiunte nella v65: Svezia, Danimarca, Islanda, Baltici, Polonia... (con `build_epoche.py` rifatto sulla mappa grande).
+
 Ogni modifica alla mappa va verificata con `mappatest.js`, che controlla anche che due partite abbiano la stessa mappa.
 
 ## Versione
+
+v68 (formato di salvataggio v17, con il campo facoltativo `epoca`): **si sceglie l'epoca storica** a inizio partita: oggi, 1938, 1914, 1800, 1500 o l'anno Mille (vedi «Le epoche»). Ogni stato storico è un impero IA, con la capitale nella sua città più popolosa; le epoche coprono anche i paesi aggiunti nella v65.
 
 v67 (formato di salvataggio v17, i salvataggi precedenti si caricano): tutti i biomi di OpenStreetMap. Il prato si divide in palude, campi coltivati, vigneti e frutteti, città, macchia, brughiera e prateria, e le montagne coperte dai ghiacci diventano ghiacciai; le tre mappe fisse sono state rifatte con i nuovi dati. Ogni bioma ha il suo colore e piccoli segni; toccando una casella libera si legge che terreno è. Regole nuove: la palude ferma il movimento come la foresta e lì non si fondano capitali né villaggi; la città dà +1 difesa; una città con almeno 3 caselle coltivate (campi o vigneti) fra la sua e le 6 vicine rende +1⭐. Macchia, brughiera e prateria si giocano come il prato, il ghiacciaio come la montagna. Il bioma non si salva: viene dalla mappa fissa, quindi non serve un nuovo formato.
 
