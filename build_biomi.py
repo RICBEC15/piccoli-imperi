@@ -6,8 +6,9 @@
 #
 # Passi:
 #   1) python3 build_biomi.py estrai DIR      rasterizza boschi, rocce, ghiacciai, sabbie,
-#                                             zone umide, brughiere e le cime (con quota)
-#                                             su una griglia di 0.01 gradi (~25 minuti)
+#                                             zone umide, macchie, brughiere, praterie, le cime
+#                                             (con quota) e, dal tema land_use, campi, vigneti e
+#                                             frutteti, citta' e saline su una griglia di 0.01 gradi
 #   2) node: esporta le caselle di terra di ogni taglia (vedi export_tiles.js)
 #        cat stub.js game.js export_tiles.js > _run.js && OUT=tiles.json node _run.js
 #   3) python3 build_biomi.py classifica DIR tiles.json piccoli_imperi.html
@@ -20,16 +21,35 @@ import numpy as np
 REL = "2026-10-21.0"
 LON0, LON1, LAT0, LAT1, RES = -18.0, 62.0, 26.0, 72.0, 0.01
 W, H = round((LON1 - LON0) / RES), round((LAT1 - LAT0) / RES)
-CH = {  # canale -> coppie (subtype, class) di Overture/OSM
+CH = {  # canale -> coppie (subtype, class) di Overture/OSM (tema base/land)
     'forest': {('forest', 'forest'), ('forest', 'wood')},
     'rock': {('rock', 'bare_rock'), ('rock', 'scree'), ('rock', 'rock'), ('rock', 'stone')},
     'glacier': {('glacier', 'glacier')},
     'sand': {('sand', 'sand'), ('sand', 'dune'), ('desert', 'desert'), ('sand', 'desert')},
     'wetland': {('wetland', 'wetland'), ('wetland', 'bog'), ('wetland', 'marsh'), ('wetland', 'swamp')},
     'shrub': {('shrub', 'heath'), ('shrub', 'scrub'), ('grass', 'fell'), ('shrub', 'tundra'), ('grass', 'tundra')},
+    # i canali seguenti distinguono i biomi del prato (v60)
+    'scrub': {('shrub', 'scrub'), ('shrub', 'shrub'), ('shrub', 'shrubbery')},
+    'heath': {('shrub', 'heath')},
+    'grassland': {('grass', 'grassland'), ('grass', 'meadow'), ('grass', 'grass')},
+}
+# canali dal tema base/land_use (landuse=* di OSM): per ognuno le coppie (subtype, class),
+# oppure un insieme di soli subtype (chiave stringa)
+USO = {
+    'agri': {'agriculture', 'horticulture'},   # tutti i coltivi: serve al deserto del Nord Africa
+    'campi': {('agriculture', 'farmland'), ('agriculture', 'farmyard'), ('horticulture', 'greenhouse_horticulture')},
+    'vigne': {('horticulture', 'vineyard'), ('horticulture', 'orchard'), ('agriculture', 'plantation'),
+              ('horticulture', 'plantation')},
+    'urbano': {('residential', 'residential'), ('developed', 'industrial'), ('developed', 'commercial'),
+               ('developed', 'retail'), ('developed', 'brownfield'), ('developed', 'works'),
+               ('construction', 'construction'), ('residential', 'garages')},
+    'sale': {('resource_extraction', 'salt_pond')},
 }
 NAMES = list(CH)
-LOOK = {k: i for i, n in enumerate(NAMES) for k in CH[n]}
+LOOK = {}  # coppia -> canali (una coppia puo' stare in piu' canali)
+for i, n in enumerate(NAMES):
+    for k in CH[n]:
+        LOOK.setdefault(k, []).append(i)
 
 # ---------------------------------------------------------------- 1) estrazione
 def estrai_file(args):
@@ -63,7 +83,8 @@ def estrai_file(args):
                 if elev[j] is not None and geoms[j].geom_type == 'Point':
                     peaks.append((geoms[j].x, geoms[j].y, elev[j]))
             elif geoms[j].geom_type in ('Polygon', 'MultiPolygon'):
-                groups.setdefault(LOOK[(sub[i], cls[i])], []).append(geoms[j])
+                for c in LOOK[(sub[i], cls[i])]:
+                    groups.setdefault(c, []).append(geoms[j])
         for c, gs in groups.items():
             rasterize(((x, 1) for x in gs), out=arr[c], transform=tr)
     np.savez_compressed(os.path.join(out, os.path.basename(path) + '.npz'), arr=arr,
@@ -82,36 +103,58 @@ def estrai(out):
         for r in p.imap_unordered(estrai_file, todo):
             print(r, flush=True)
 
-# campi coltivati (tema base/land_use) solo per il Nord Africa: distinguono le coste
-# verdi e la valle del Nilo dal deserto, dove OSM non mappa la sabbia o la pietra
-AGRI_BB = (-18.0, 37.0, 26.0, 37.3)
-AGRI = {'agriculture', 'horticulture'}
-
-def estrai_agri(out):
+# coperture del tema base/land_use (landuse=* di OSM): coltivi, vigneti e frutteti,
+# citta', saline. Una griglia per canale, sulla stessa maglia di 0.01 gradi.
+UNAMES = list(USO)
+def estrai_uso_file(args):
+    path, out = args
     import pyarrow.fs as pfs, pyarrow.parquet as pq, shapely
     from rasterio.features import rasterize
     from rasterio.transform import from_origin
     tr = from_origin(LON0, LAT1, RES, RES)
     s3 = pfs.S3FileSystem(anonymous=True, region='us-west-2')
-    agri = np.zeros((H, W), np.uint8)
+    arr = np.zeros((len(UNAMES), H, W), np.uint8)
+    pf = pq.ParquetFile(s3.open_input_file(path)); md = pf.metadata
+    names = [md.schema.column(i).path for i in range(md.num_columns)]; ix = {n: i for i, n in enumerate(names)}
+    for rg in range(md.num_row_groups):
+        g = md.row_group(rg); st = lambda n: g.column(ix[n]).statistics
+        if st('bbox.xmax').max < LON0 or st('bbox.xmin').min > LON1 or st('bbox.ymax').max < LAT0 or st('bbox.ymin').min > LAT1:
+            continue
+        tb = pf.read_row_group(rg, columns=['subtype', 'class', 'geometry', 'bbox'])
+        sub = tb['subtype'].to_pylist(); cls = tb['class'].to_pylist()
+        bb = tb['bbox'].combine_chunks()
+        inb = ((bb.field('xmax').to_numpy() >= LON0) & (bb.field('xmin').to_numpy() <= LON1)
+               & (bb.field('ymax').to_numpy() >= LAT0) & (bb.field('ymin').to_numpy() <= LAT1))
+        chans = {}
+        for i in np.nonzero(inb)[0]:
+            for c, n in enumerate(UNAMES):
+                if sub[i] in USO[n] or (sub[i], cls[i]) in USO[n]:
+                    chans.setdefault(i, []).append(c)
+        if not chans:
+            continue
+        idx = list(chans)
+        geoms = shapely.from_wkb(tb['geometry'].take(idx).to_numpy(zero_copy_only=False))
+        groups = {}
+        for j, i in enumerate(idx):
+            if geoms[j].geom_type in ('Polygon', 'MultiPolygon'):
+                for c in chans[i]:
+                    groups.setdefault(c, []).append(geoms[j])
+        for c, gs in groups.items():
+            rasterize(((x, 1) for x in gs), out=arr[c], transform=tr)
+    np.savez_compressed(os.path.join(out, 'uso-' + os.path.basename(path) + '.npz'), arr=arr)
+    return path
+
+def estrai_uso(out):
+    import pyarrow.fs as pfs
+    from multiprocessing import Pool
+    os.makedirs(out, exist_ok=True)
+    s3 = pfs.S3FileSystem(anonymous=True, region='us-west-2')
     files = [f.path for f in s3.get_file_info(pfs.FileSelector(f"overturemaps-us-west-2/release/{REL}/theme=base/type=land_use/"))]
-    for path in files:
-        pf = pq.ParquetFile(s3.open_input_file(path)); md = pf.metadata
-        names = [md.schema.column(i).path for i in range(md.num_columns)]; ix = {n: i for i, n in enumerate(names)}
-        for rg in range(md.num_row_groups):
-            g = md.row_group(rg); st = lambda n: g.column(ix[n]).statistics
-            if st('bbox.xmax').max < AGRI_BB[0] or st('bbox.xmin').min > AGRI_BB[1] or st('bbox.ymax').max < AGRI_BB[2] or st('bbox.ymin').min > AGRI_BB[3]:
-                continue
-            tb = pf.read_row_group(rg, columns=['subtype', 'geometry'])
-            idx = [i for i, v in enumerate(tb['subtype'].to_pylist()) if v in AGRI]
-            if not idx:
-                continue
-            geoms = [x for x in shapely.from_wkb(tb['geometry'].take(idx).to_numpy(zero_copy_only=False))
-                     if x.geom_type in ('Polygon', 'MultiPolygon')]
-            if geoms:
-                rasterize(((x, 1) for x in geoms), out=agri, transform=tr)
-        print(path, flush=True)
-    np.savez_compressed(os.path.join(out, 'agri.npz'), agri=agri)
+    todo = [(f, out) for f in files if not os.path.exists(os.path.join(out, 'uso-' + os.path.basename(f) + '.npz'))]
+    print(len(files), 'file land_use,', len(todo), 'da fare', flush=True)
+    with Pool(4) as p:
+        for r in p.imap_unordered(estrai_uso_file, todo):
+            print(r, flush=True)
 
 # ---------------------------------------------------------------- 2) classificazione
 KM_LON, KM_LAT = 82.5, 111.0  # la proiezione del gioco (GEO.kmLon, GEO.kmLat)
@@ -140,8 +183,12 @@ def frazioni(S, lon, lat, half_lon, half_lat):
 
 AFRICA = {'MA', 'DZ', 'TN', 'LY', 'EG'}
 
+# i biomi del prato (v60): soglia di copertura di ciascuno; vince quello che la supera di piu'
+PRATO = [('a', 'grassland', 0.12), ('b', 'heath', 0.08), ('k', 'scrub', 0.12), ('c', 'campi', 0.3),
+         ('v', 'vigne', 0.08), ('p', 'wetland', 0.15), ('u', 'urbano', 0.15)]
+
 def classifica(f, P, lat, paese, jit):
-    fo, ro, gl, sa, we, sh, ag = (f[n] for n in NAMES + ['agri'])
+    fo, ro, gl, sa, we, sh, ag = (f[n] for n in NAMES[:6] + ['agri'])
     out = np.full(len(lat), 'g')
     out[fo >= 0.45] = 'f'                                     # bosco
     hill = (P >= 600) | ((ro >= 0.15) & (P >= 300))            # rilievi medi
@@ -159,6 +206,17 @@ def classifica(f, P, lat, paese, jit):
     out[africa & (out == 'r') & (sa >= 0.08)] = 'e'
     mount = (gl >= 0.08) | (P >= 1900) | ((P >= 1200) & (ro >= 0.06)) | ((P >= 800) & (ro >= 0.3))
     out[mount] = 'm'                                          # montagne: ghiacciai, cime alte, roccia
+    out[mount & (gl >= 0.05)] = 'z'                           # ghiacciaio
+    # il prato si divide nei biomi di OSM: il bioma la cui copertura supera di piu' la sua soglia
+    prato = out == 'g'
+    best = np.ones(len(lat)); scelta = np.full(len(lat), 'g')
+    for sym, ch, soglia in PRATO:
+        r = f[ch] / soglia
+        m = prato & (r >= best)
+        scelta[m] = sym; best = np.where(m, r, best)
+    out[prato] = scelta[prato]
+    out[(out == 'f') & (we >= 0.45) & (we > fo)] = 'p'        # boschi allagati: torbiere e paludi
+    out[((out == 'g') | (out == 'e') | (out == 'r')) & (f['sale'] >= 0.2)] = 's'  # saline
     return out
 
 def rle(grid):
@@ -176,8 +234,13 @@ def classifica_tutto(dirn, tiles_json, html):
     print('griglia', arr.shape, 'cime', len(peaks), flush=True)
     integ = {n: integrale(arr[i]) for i, n in enumerate(NAMES)}
     del arr
-    agri = os.path.join(dirn, 'agri.npz')
-    integ['agri'] = integrale(np.load(agri)['agri'] if os.path.exists(agri) else np.zeros((H, W), np.uint8))
+    uso = None
+    for fu in sorted(glob.glob(os.path.join(dirn, 'uso-*.npz'))):
+        a = np.load(fu)['arr']
+        uso = a if uso is None else np.maximum(uso, a)
+    for i, n in enumerate(UNAMES):
+        integ[n] = integrale(uso[i])
+    del uso
     data = json.load(open(tiles_json))
     biomi = {}; stat = {}
     for m, d in data.items():
@@ -185,7 +248,7 @@ def classifica_tutto(dirn, tiles_json, html):
         paese = np.array([x[4] for x in d['tiles']])
         r, c, lon, lat = t[:, 0].astype(int), t[:, 1].astype(int), t[:, 2], t[:, 3]
         half = 0.465 * d['hexKm']  # lato del quadrato con l'area dell'esagono, a meta'
-        f = {n: frazioni(integ[n], lon, lat, half / KM_LON, half / KM_LAT) for n in NAMES + ['agri']}
+        f = {n: frazioni(integ[n], lon, lat, half / KM_LON, half / KM_LAT) for n in NAMES + UNAMES}
         # quota della cima piu' alta dentro ogni esagono (la casella piu' vicina)
         tree = cKDTree(np.c_[lon * KM_LON, lat * KM_LAT])
         dd, ii = tree.query(np.c_[peaks[:, 0] * KM_LON, peaks[:, 1] * KM_LAT], distance_upper_bound=d['hexKm'] * 0.58)
@@ -212,8 +275,8 @@ def classifica_tutto(dirn, tiles_json, html):
 if __name__ == '__main__':
     if sys.argv[1] == 'estrai':
         estrai(sys.argv[2])
-        estrai_agri(sys.argv[2])
-    elif sys.argv[1] == 'estrai_agri':
-        estrai_agri(sys.argv[2])
+        estrai_uso(sys.argv[2])
+    elif sys.argv[1] == 'estrai_uso':
+        estrai_uso(sys.argv[2])
     elif sys.argv[1] == 'classifica':
         classifica_tutto(sys.argv[2], sys.argv[3], sys.argv[4])
