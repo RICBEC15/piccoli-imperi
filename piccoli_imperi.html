@@ -1279,7 +1279,7 @@ function profonditaPaesi() {
 
 // ============ GLI IMPERI ============
 // 'tutti': ogni paese della mappa è un impero guidato dall'IA, in guerra con tutti;
-// 'duello': come prima della v59, un solo impero nemico in un paese vicino.
+// 'duello': come fino alla v59, un solo impero nemico in un paese vicino.
 let modoAvversari = 'tutti'; // la scelta del menu iniziale, ricordata fra una partita e l'altra
 try { const v = localStorage.getItem('piccoliImperi.avversari'); if (v === 'tutti' || v === 'duello') modoAvversari = v; } catch (e) {}
 let modoPartita = 'tutti';   // la modalità della partita in corso (un salvataggio vecchio è un duello)
@@ -1429,7 +1429,7 @@ function zoomSuPaese(cc) {
   for (const t of info.spots) { const p = center(t); x0 = Math.min(x0, p.x); x1 = Math.max(x1, p.x); y0 = Math.min(y0, p.y); y1 = Math.max(y1, p.y); }
   const W = wrap.clientWidth || 800, H = wrap.clientHeight || 600;
   applyZoom(Math.min(1, 0.8 * W / Math.max(1, x1 - x0 + 4 * S), 0.8 * H / Math.max(1, y1 - y0 + 4 * S)));
-  wrap.scrollTo({ left: Math.max(0, (x0 + x1) / 2 * zoom - W / 2), top: Math.max(0, (y0 + y1) / 2 * zoom - H / 2), behavior: 'auto' });
+  wrap.scrollTo({ left: Math.max(0, (x0 + x1) / 2 * zoom + PADX - W / 2), top: Math.max(0, (y0 + y1) / 2 * zoom + PADY - H / 2), behavior: 'auto' });
   scheduleRender();
 }
 function cambiaPaese(cc) {
@@ -2565,7 +2565,7 @@ try { const v = localStorage.getItem('piccoliImperi.ia'); if (AI_LIVELLI[v]) aiL
 function aiDiff() { return AI_LIVELLI[aiLivello] || AI_LIVELLI.normale; }
 function aiTregua() { return turn < aiDiff().tregua; }
 // la rendita che l'IA incassa davvero, secondo la difficoltà
-function aiEntrata() { return Math.round(income(aiMe) * aiDiff().economia); }
+function aiEntrata(o = aiMe) { return Math.round(income(o) * aiDiff().economia); }
 function aggiornaSelIA() {
   for (const id of ['iaSel', 'iaSelIntro']) { const el = document.getElementById(id); if (el) el.value = aiLivello; }
 }
@@ -3982,7 +3982,7 @@ function msg(s) {
 function aiLogAdd(s, forza) {
   const ia = current !== 'p' && players[current];
   if (ia && !forza && !aiVisibile) return;
-  if (ia && modoPartita === 'tutti') s = `${bandiera(current)} ${s}`;
+  if (ia && modoPartita === 'tutti' && !forza) s = `${bandiera(current)} ${s}`;
   aiLog.push(s);
   if (aiLog.length > 80) aiLog.shift();
   updateAiLog();
