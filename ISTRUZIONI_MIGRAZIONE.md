@@ -97,3 +97,7 @@ Il file di salvataggio è passato alla versione 15 (compatibile con i salvataggi
 - **Prestazioni**: le caselle sono oggetti `Casella` con setter per `unit`, `city`, `port` e `hosp`, che tengono aggiornati gli indici `conUnita`, `conCitta`, `conPorto` e `conOsp`. `cities`, `unitsOf` e `ports` leggono gli indici. `aiCampo` lavora in una finestra attorno alle unità e si ferma poco dopo l'ultima. Le mosse lontane dal giocatore (`aiZona`) si fanno senza pausa.
 - **Salvataggio v17** (`imperi`, `modo`, `caduti`, stelle per impero). Fino alla v16 il nemico si chiamava `'a'`: al caricamento prende il codice del suo paese.
 - `stub.js` esegue i `setTimeout` in coda (a trampolino): con tanti imperi le chiamate una dentro l'altra esaurivano la pila. Nuovo test `imperitest.js`.
+
+## Cosa è cambiato nella v67
+
+- **Tutti i biomi OSM.** Nuovi simboli in `BIOMI`: p palude, c campi, v vigneti e frutteti, u città, k macchia, b brughiera, a prateria (terreno base `grass`), z ghiacciaio (base `mountain`). Il terreno salvato resta quello base; il bioma si legge con `bioma(t)`, che lo restituisce solo se torna col terreno salvato. Regole: `fermaMovimento` (palude), `defOf` (città +1), `terraFertile` in `income` (+1⭐). `build_biomi.py` legge anche il tema `land_use` (canali agri, campi, vigne, urbano, sale); soglie in `PRATO`. Test `biomitest.js`.

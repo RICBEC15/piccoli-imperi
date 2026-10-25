@@ -18,8 +18,8 @@ tutorial = false;
 if (placing && placeSet.length) placePlayerCapital(placeSet[0]);
 const cap = pCapital();
 assert(cap && imperiIA().length > 3, `partita con ${imperiIA().length} imperi IA`);
-// il vicino con la capitale più vicina alla tua
-const vicino = imperiIA().slice().sort((a, b) => dist(capitaleDi(a), cap) - dist(capitaleDi(b), cap))[0];
+// il vicino con la capitale più vicina alla tua (non un microstato di una casella: serve terra da toccare)
+const vicino = imperiIA().filter(o => paesiInfo()[o].caselle > 2).sort((a, b) => dist(capitaleDi(a), cap) - dist(capitaleDi(b), cap))[0];
 assert(imperiIA().every(o => relazione('p', o) === 'guerra'), 'all\'inizio sei in guerra con tutti');
 assert(diploAttiva(), 'con un impero per paese la diplomazia è attiva');
 
@@ -103,6 +103,10 @@ function schieraIA() {
 }
 assert(schieraIA() > 0, 'l\'esercito alleato è schierato attorno alla tua capitale');
 const cittaPrima = cities('p').length;
+// un presidio robusto nella capitale dell'alleato: con l'esercito qui, i suoi vicini (più ricchi
+// dalla v66, con gli abitanti veri) non devono farlo cadere prima della prova del tradimento
+{ const capV = capitaleDi(vicino), n = 20;
+  capV.unit = Object.assign(mkUnit('warrior', vicino), { count: n, hp: n * UNIT_TYPES.warrior.hp, maxHp: n * UNIT_TYPES.warrior.hp }); }
 for (let i = 0; i < 6 && !gameOver; i++) { players.p.stars = 200; endTurn(); }
 assert(contaAttacchi.suDiTe === 0, 'in 6 turni l\'alleato non ti ha mai attaccato');
 assert(pCapital() && cities('p').every(t => t.city.owner === 'p') && !gameOver, 'e non ti ha preso nessuna città');
