@@ -15,6 +15,11 @@ assert(imperiIA().every(o => players[o].country === o && capitaleDi(o) && capita
   'ogni impero ha la sua capitale nel suo paese');
 assert(new Set(imperiIA().map(o => players[o].color)).size > tutti.length * 0.8, 'gli imperi hanno colori diversi');
 
+// (v63) ogni impero parte con tutte le città del suo paese: nei paesi non ci sono villaggi liberi
+const fuoriPosto = map.flat().filter(t => t.city && !t.city.capital && t.country && paesiInfo()[t.country] && t.city.owner !== t.country);
+assert(!fuoriPosto.length, `ogni città appartiene all'impero del suo paese (${fuoriPosto.length} fuori posto)`);
+assert(cities('FR').length === paesiInfo().FR.vill + 1 && income('FR') > income('LU'), `la Francia parte con ${cities('FR').length} città`);
+
 // 1. si sceglie toccando la mappa: il paese toccato diventa tuo, gli altri restano IA
 const tocca = cc => onTileClick(map.flat().find(t => t.country === cc && passable(t) && !t.city));
 tocca('DE');
@@ -22,6 +27,8 @@ assert(players.p.country === 'DE' && !players.DE && imperiIA().length === tutti.
 assert(placeSet.length && placeSet.every(t => t.country === 'DE'), 'le caselle per la capitale sono in Germania');
 tocca('IT');
 assert(players.p.country === 'IT' && players.DE && players.DE.vivo && capitaleDi('DE'), 'cambiando paese la Germania torna un impero IA');
+assert(cities('DE').length === paesiInfo().DE.vill + 1 && map.flat().every(t => !t.city || t.country !== 'IT' || t.city.owner === 'p'),
+  "le città tedesche tornano all'IA, quelle italiane sono tue");
 const caps = imperiIA().map(capitaleDi);
 assert(placeSet.every(t => caps.every(c => dist(t, c) >= 5)), 'la tua capitale nasce lontana dalle capitali vicine');
 placePlayerCapital(placeSet[Math.floor(placeSet.length / 2)]);

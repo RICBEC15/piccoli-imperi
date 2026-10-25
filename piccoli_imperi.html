@@ -239,7 +239,7 @@
       <h2>🌍 Scegli il tuo paese</h2>
       <p>Il paese si sceglie <b>toccandolo sulla mappa</b>; questo elenco è un aiuto per trovarlo.
       Il tuo territorio è il paese che scegli: lì fondi la capitale e lì le tue unità si difendono meglio (+1 🛡️ in patria).
-      I paesi con pochi villaggi partono con qualche stella in più.</p>
+      Parti già padrone di <b>tutte le città del tuo paese</b>; i paesi con poche città partono con qualche stella in più.</p>
       <div class="paesi-grid" id="paesiLista"></div>
       <div id="paesiNemicoBox">
         <h4>Il nemico: <span id="paesiNemicoOra"></span></h4>
@@ -257,7 +257,7 @@
     <div class="ovbox">
       <h2>⚔️ Piccoli Imperi</h2>
       <p>Un piccolo gioco di strategia a turni ispirato a Civilization e Polytopia.
-      Guidi l'<b style="color:#4da3ff">Impero Azzurro</b>: <b>tocca sulla mappa il paese</b> che vuoi guidare, fonda la capitale, espanditi, conquista i villaggi
+      Guidi l'<b style="color:#4da3ff">Impero Azzurro</b>: <b>tocca sulla mappa il paese</b> che vuoi guidare, fonda la capitale (tutte le città del tuo paese sono già tue), espanditi, conquista altre città
       e addestra un esercito. <b>Ogni altro paese è un impero guidato dall'IA</b>, in guerra con tutti: fai cadere le loro capitali prima che prendano la tua.</p>
       <p style="font-size:12px;opacity:.75">Mappa reale, uguale a ogni partita: biomi © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener" style="color:#9cc9ff">OpenStreetMap contributors</a>.</p>
       <h4>In breve</h4>
@@ -308,7 +308,8 @@
       <p>Il <b>territorio</b> di ogni impero è il suo paese, contornato sulla mappa nel suo colore (azzurro il tuo; ogni impero IA ha il suo).
       <b>In guerra il territorio si conquista</b>: un'unità di qualunque tipo che entra in una casella del territorio di un impero con cui sei in guerra la prende, e la casella passa al colore del suo nuovo impero (velo più deciso). Vale anche per l'IA: le sue truppe ti tolgono le caselle dove passano, e tu le riprendi ripassandoci. Con chi è in pace o alleato non si conquista niente.
       In patria (il tuo territorio, caselle conquistate comprese) le unità hanno <b>+1 🛡️ in difesa</b> (in città il bonus è lo stesso, non si somma).
-      Un paese con meno di 4 villaggi neutrali parte con <b>2⭐ in più per ogni villaggio mancante</b>.</p>
+      <b>Ogni impero parte con tutte le città del suo paese</b>, le tue comprese: i villaggi neutrali restano solo dove non c'è un impero (nel duello, gli altri paesi) e quelli che tornano liberi quando un impero cade.
+      Un paese con meno di 5 città (oltre alla capitale) parte con <b>5⭐ in più per ogni città mancante</b>.</p>
       <h4>🤝 Diplomazia: guerra, pace e alleanza</h4>
       <p>All'inizio sei in guerra con tutti. <b>Tocca il territorio di un altro impero</b> (con niente di selezionato) e si apre la sua scheda: lì puoi <b>proporre la pace</b>, <b>proporre un'alleanza</b> o <b>dichiarare guerra</b>.
       Con chi è in pace o alleato non vi attaccate e non entrate nelle città e nei porti dell'altro; l'alleanza dà anche <b>+1⭐ a turno</b> di commercio a testa.
@@ -1223,8 +1224,9 @@ function placePlayerCapital(t) {
 // ============ PAESI E TERRITORI ============
 // Ogni impero gioca un paese reale: il suo territorio sono tutte le caselle di quel
 // paese. La capitale si fonda in patria, e in patria le unità si difendono meglio.
-const PAESE_VILL_BASE = 4;   // sotto questo numero di villaggi neutrali il paese riceve stelle di compenso
-const PAESE_VILL_STELLE = 2; // stelle in piu' per ogni villaggio mancante
+// Ogni impero parte con tutte le città del suo paese: chi ne ha poche riceve stelle di compenso
+const PAESE_VILL_BASE = 5;   // sotto questo numero di città (oltre alla capitale) il paese riceve il compenso
+const PAESE_VILL_STELLE = 5; // stelle in piu' per ogni città mancante (circa due turni della sua rendita)
 const PAESI_VICINI = 5;      // nel duello l'IA "a caso" pesca fra i paesi piu' vicini al tuo
 const PAESI_TUTORIAL = ['FR', 'CH', 'AT', 'SI']; // nel tutorial giochi l'Italia contro un vicino di terra
 let paeseScelto = null;       // il paese del giocatore, ricordato fra una partita e l'altra
@@ -1247,7 +1249,7 @@ function paesiInfo() {
     if (!t.country || t.terrain === 'water' || t.terrain === 'river') continue;
     const p = info[t.country] || (info[t.country] = { caselle: 0, vill: 0, spots: [], x: 0, y: 0 });
     p.caselle++;
-    if (t.city && !t.city.capital && t.city.owner === null) p.vill++;
+    if (t.city && !t.city.capital) p.vill++; // le città del paese, di chiunque siano (all'inizio sono del suo impero)
     if ((t.terrain === 'grass' || t.terrain === 'forest' || t.terrain === 'hill') && !t.hosp && !t.port
         && (!t.city || t.city.capital)) { // le capitali si spostano: la loro casella resta valida
       const c = center(t);
@@ -1395,7 +1397,14 @@ function assegnaPaesi(pCc, aCc) {
       for (const cc of ordine) if (fondaCapitaleIA(cc)) break;
     }
   }
+  distribuisciCitta();
   placeSet = computePlaceSet();
+}
+// a inizio partita ogni impero possiede tutte le città del suo paese (le tue comprese);
+// restano villaggi liberi solo quelle dei paesi senza impero (nel duello) e fuori dai paesi.
+// Si ripete a ogni cambio di paese: le città del paese lasciato tornano al suo impero IA.
+function distribuisciCitta() {
+  for (const t of dallIndice(conCitta, t => !t.city.capital)) t.city.owner = padroneNaturale(t);
 }
 function inPatria(t, owner) {
   return !!(owner && players[owner] && padroneTerra(t) === owner);
@@ -1436,7 +1445,7 @@ function msgPiazzamento() {
   }
   const b = bonusPaese(p), info = paesiInfo()[p];
   const contro = modoPartita === 'tutti' ? `contro ${imperiIA().length} imperi` : `contro ${bandiera(imperiIA()[0])} ${nomePaese(imperiIA()[0])}`;
-  msg(`🏛️ Hai scelto ${bandiera(p)} ${nomePaese(p)} (${tagliaPaese(p)}, ${info.vill} ${info.vill === 1 ? 'villaggio' : 'villaggi'}${b ? `, +${b}⭐ di compenso` : ''}) ${contro}. FONDA LA CAPITALE: tocca una casella evidenziata. Per cambiare paese tocca un altro paese.`);
+  msg(`🏛️ Hai scelto ${bandiera(p)} ${nomePaese(p)} (${tagliaPaese(p)}, ${info.vill} ${info.vill === 1 ? 'città già tua' : 'città già tue'}${b ? `, +${b}⭐ di compenso` : ''}) ${contro}. FONDA LA CAPITALE: tocca una casella evidenziata. Per cambiare paese tocca un altro paese.`);
 }
 
 // --- menu di scelta del paese (un aiuto: il paese si sceglie anche toccandolo sulla mappa) ---
@@ -1447,7 +1456,7 @@ function apriSceltaPaese() {
   document.getElementById('paesiLista').innerHTML = lista.map(cc => {
     const b = bonusPaese(cc), v = info[cc].vill;
     return `<button class="paese-btn${cc === players.p.country ? ' sel' : ''}" onclick="scegliPaese('${cc}')">${bandiera(cc)} ${nomePaese(cc)}`
-      + `<small>${tagliaPaese(cc)} · ${v} ${v === 1 ? 'villaggio' : 'villaggi'}${b ? ` · +${b}⭐` : ''}</small></button>`;
+      + `<small>${tagliaPaese(cc)} · ${v} città${b ? ` · +${b}⭐` : ''}</small></button>`;
   }).join('');
   const duello = modoPartita === 'duello';
   document.getElementById('paesiNemicoBox').style.display = duello ? 'block' : 'none';
