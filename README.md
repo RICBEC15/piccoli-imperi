@@ -12,7 +12,7 @@ In locale: apri `piccoli_imperi.html` nel browser con un doppio clic. Non serve 
 
 - `piccoli_imperi.html`: il gioco completo (HTML, CSS e JavaScript in un unico file).
 - `index.html`: pagina d'ingresso per GitHub Pages, rimanda subito a `piccoli_imperi.html`.
-- `stub.js`, `shiptest.js`, `savetest.js`, `playtest.js`, `aitest.js`, `paesitest.js`, `imperitest.js`, `difficoltatest.js`, `mappatest.js`, `diplotest.js`, `conquistatest.js`, `browser_check.js`, `mobile_check.js`, `pantest.js`: test automatici (`mobile_check.js` prova il gioco su un iPhone emulato con Playwright, `pantest.js` lo spostamento nella mappa col mouse, le frecce e il dito, `conquista_check.js` la conquista delle caselle con tocchi veri, su computer e telefono, `citta_check.js` le città del paese già tue dopo la scelta).
+- `stub.js`, `shiptest.js`, `savetest.js`, `playtest.js`, `aitest.js`, `paesitest.js`, `imperitest.js`, `difficoltatest.js`, `mappatest.js`, `diplotest.js`, `conquistatest.js`, `capitalitest.js`, `browser_check.js`, `mobile_check.js`, `pantest.js`: test automatici (`mobile_check.js` prova il gioco su un iPhone emulato con Playwright, `pantest.js` lo spostamento nella mappa col mouse, le frecce e il dito, `conquista_check.js` la conquista delle caselle con tocchi veri, su computer e telefono, `citta_check.js` le città del paese già tue dopo la scelta).
 - `build_russia.js`: script che ha estratto il confine della Russia dal dataset Natural Earth.
 - `build_biomi.py`, `export_tiles.js`: costruiscono i biomi fissi dai dati di OpenStreetMap.
 - `ISTRUZIONI_MIGRAZIONE.md`: note di sviluppo, storia delle ultime versioni e istruzioni dettagliate.
@@ -31,6 +31,7 @@ cat stub.js game.js difficoltatest.js > _run.js && node _run.js   # difficoltà 
 cat stub.js game.js mappatest.js > _run.js && node _run.js
 cat stub.js game.js diplotest.js > _run.js && node _run.js   # diplomazia: circa 15 secondi
 cat stub.js game.js conquistatest.js > _run.js && node _run.js   # conquista del territorio: circa 20 secondi
+cat stub.js game.js capitalitest.js > _run.js && node _run.js   # capitali reali: pochi secondi
 ```
 
 ## La mappa
@@ -44,6 +45,12 @@ C'è **una sola mappa per ogni grandezza** (piccola, media, gigante), uguale a o
 Ogni modifica alla mappa va verificata con `mappatest.js`, che controlla anche che due partite abbiano la stessa mappa.
 
 ## Versione
+
+v64 (formato di salvataggio invariato): **ogni paese comincia dalla sua vera capitale**: la Spagna a Madrid, la Francia a Parigi, l'Italia a Roma, la Russia a Mosca, e così per tutti i 35 paesi, sia il tuo sia quelli dell'IA (anche nel duello e nel tutorial).
+
+- Nel gioco c'è la tabella `CAPITALI_REALI` (nome, longitudine, latitudine). Se il punto vero cade su un fiume, sul mare, su un villaggio o su una montagna, la capitale va nella casella libera più vicina del paese: su ogni mappa tutte stanno entro 3 caselle dal punto vero.
+- Scelto il tuo paese, l'unica casella evidenziata è la sua capitale: la tocchi (o tocchi un punto qualunque del tuo paese) e la capitale è fondata. Le capitali non dipendono più dal caso: sono le stesse a ogni partita.
+- Nuovo test `capitalitest.js`.
 
 v63 (formato di salvataggio invariato, v17): **ogni impero parte con tutte le città del suo paese**. Quando scegli un paese, i suoi villaggi sono già tue città (e lo stesso vale per ogni impero IA nel suo paese).
 
@@ -71,7 +78,7 @@ v61 (formato di salvataggio v17 con il campo facoltativo `diplomazia`): la **dip
 v60 (formato di salvataggio v17): **ogni paese è un impero guidato dall'IA** e il paese si sceglie toccandolo sulla mappa.
 
 - All'inizio la mappa si vede tutta e ogni paese ha il suo colore. Tocchi il paese che vuoi e la vista si avvicina; poi tocchi la casella dove fondare la capitale, oppure un altro paese per cambiare idea. L'elenco 🌍 resta come aiuto.
-- Ogni altro paese (34 sulla mappa) ha il suo impero: capitale nel suo paese, verso l'interno e lontana dalle altre, truppe, economia e la stessa difficoltà scelta nel menu 🤖 IA. Sono tutti in guerra con tutti: si espandono, si combattono fra loro e attaccano la città nemica più vicina, tua o di un altro impero.
+- Ogni altro paese (34 sulla mappa) ha il suo impero: capitale nel suo paese (dalla v63 la sua vera capitale), truppe, economia e la stessa difficoltà scelta nel menu 🤖 IA. Sono tutti in guerra con tutti: si espandono, si combattono fra loro e attaccano la città nemica più vicina, tua o di un altro impero.
 - Quando un impero perde la capitale cade: chi l'ha presa la tiene come città qualunque, le altre sue città tornano villaggi liberi, l'esercito si scioglie, porti e ospedali restano senza padrone. In alto 🏳️ conta gli imperi rimasti.
 - Dopo il tuo turno muovono tutti, uno dopo l'altro. Le mosse vicino a te si vedono una alla volta e finiscono nella cronaca; quelle lontane si fanno di colpo, e la cronaca riporta solo le cadute degli imperi. Un turno degli imperi dura circa 1,5 secondi sulla mappa piccola e 2-3 secondi sulla gigante, più le mosse vicino a te.
 - Per reggere 34 imperi: le caselle con unità, città, porti e ospedali stanno in indici, invece di scorrere tutta la mappa a ogni domanda, e la "mappa di marcia" di ogni impero si calcola solo attorno alle sue unità. Il turno dell'IA è circa dieci volte più veloce di prima anche nel duello.
