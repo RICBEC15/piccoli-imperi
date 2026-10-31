@@ -97,16 +97,14 @@ prova('limiti: medici e costruttori uno alla volta, civili fino a 6, guerrieri f
   return true;
 });
 
-prova("non si mette una truppa sopra un'unità nemica né nella città di chi è in pace con te", () => {
-  const o = imperiIA().find(x => unitsOf(x).length && cities(x).some(c => !c.unit));
-  const tn = unitsOf(o)[0];
-  const prima = JSON.stringify(tn.unit);
-  if (cheatMettiTruppa(tn, 'warrior', 5)) return "messa sull'unità nemica";
-  if (JSON.stringify(tn.unit) !== prima) return 'unità nemica cambiata';
-  setRelazione('p', o, 'pace');
-  const c = cities(o).find(x => !x.unit);
-  if (cheatMettiTruppa(c, 'warrior', 5)) return 'messa nella città di un impero in pace';
-  if (c.city.owner !== o) return 'città cambiata';
+prova("la truppa va anche sopra un'unità nemica (che sparisce) e nella città di chi è in pace con te", () => {
+  const tn = unitsOf(imperiIA().find(x => unitsOf(x).length))[0];
+  if (!cheatMettiTruppa(tn, tn.terrain === 'water' || (tn.terrain === 'river' && !tn.bridge) ? 'ship' : 'warrior', 5)) return "rifiutata sull'unità nemica";
+  if (tn.unit.owner !== 'p') return 'unità nemica ancora lì';
+  const c = map.flat().find(x => x.city && x.city.owner && x.city.owner !== 'p' && !x.city.capital && !x.unit);
+  setRelazione('p', c.city.owner, 'pace');
+  if (!cheatMettiTruppa(c, 'citizen', 2)) return 'rifiutata nella città di un impero in pace';
+  if (c.city.owner !== 'p') return 'città non presa';
   return true;
 });
 

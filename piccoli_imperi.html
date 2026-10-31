@@ -4119,7 +4119,8 @@ function cheatClick(t) {
   else if (cheatModo === 'ponte') cheatPonte(t);
   refreshSets(); ui(); render();
 }
-// mette una truppa del giocatore sulla casella (sostituisce una tua unità che c'era già).
+// mette una truppa del giocatore sulla casella, ovunque: un'unità che c'era già (anche nemica)
+// sparisce, e nelle città e nei porti degli altri entra anche se sei in pace con loro.
 // Restituisce true se l'ha messa.
 function cheatMettiTruppa(t, tipo, n = 1, liv = 1, owner = 'p') {
   const d = UNIT_TYPES[tipo];
@@ -4127,19 +4128,14 @@ function cheatMettiTruppa(t, tipo, n = 1, liv = 1, owner = 'p') {
   const acqua = t.terrain === 'water' || t.terrain === 'river';
   if (d.ship && !acqua) { msg('🧪 Una nave va messa sul mare o su un fiume.'); return false; }
   if (!d.ship && acqua && !t.bridge) { msg('🧪 Una truppa di terra va messa sulla terraferma (o su un ponte).'); return false; }
-  if (t.unit && t.unit.owner !== owner) { msg(`🧪 Lì c'è già un'unità di ${nomeImpero(t.unit.owner)}: scegli un'altra casella.`); return false; }
-  const altro = (t.city && t.city.owner && t.city.owner !== owner && t.city.owner)
-             || (t.port && t.port.owner && t.port.owner !== owner && t.port.owner)
-             || (t.hosp && t.hosp.level > 0 && t.hosp.owner && t.hosp.owner !== owner && t.hosp.owner);
-  if (altro && !ostile(owner, altro)) { msg(`🧪 Con ${nomeImpero(altro)} non sei in guerra: qui non puoi mettere truppe.`); return false; }
-  if (altro && d.civil && t.city) { msg('🧪 I civili non entrano nelle città degli altri: metti una truppa armata.'); return false; }
   pushUndo();
   n = Math.min(cheatMaxNumero(tipo), Math.max(1, n | 0));
   const u = mkUnit(tipo, owner);
   u.count = n; u.hp = d.hp * n; u.maxHp = d.hp * n;
   if (d.ship) u.lvl = Math.min(NAVE_MAX_LIV, Math.max(1, liv | 0));
+  const via = t.unit && t.unit.owner !== owner ? ` (tolta l'unità di ${nomeImpero(t.unit.owner)})` : '';
   t.unit = u;
-  msg(`🧪 ${d.ship ? `Nave di livello ${u.lvl}` : uName(u)} messa sulla mappa: può muovere subito.`);
+  msg(`🧪 ${d.ship ? `Nave di livello ${u.lvl}` : uName(u)} messa sulla mappa: può muovere subito.${via}`);
   if (!d.ship) arrivalEffects(t); // come se ci fosse arrivata: conquista, città, porti, ospedali...
   return true;
 }
