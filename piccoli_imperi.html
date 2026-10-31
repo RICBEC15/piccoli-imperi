@@ -267,7 +267,7 @@
       <h2>⚔️ Piccoli Imperi</h2>
       <p>Un piccolo gioco di strategia a turni ispirato a Civilization e Polytopia.
       Guidi l'<b style="color:#4da3ff">Impero Azzurro</b>: <b>tocca sulla mappa il paese</b> che vuoi guidare, fonda la capitale (tutte le città del tuo paese sono già tue), espanditi, conquista altre città
-      e addestra un esercito. <b>Ogni altro paese è un impero guidato dall'IA</b>, in guerra con tutti: fai cadere le loro capitali prima che prendano la tua.</p>
+      e addestra un esercito. <b>Ogni altro paese è un impero guidato dall'IA</b>. All'inizio tutti sono <b>in pace</b>: per attaccare qualcuno bisogna prima <b>dichiarargli guerra</b>. Fai cadere le loro capitali prima che prendano la tua.</p>
       <p style="font-size:12px;opacity:.75">Mappa reale, uguale a ogni partita: biomi © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener" style="color:#9cc9ff">OpenStreetMap contributors</a>; abitanti delle città da <a href="https://www.naturalearthdata.com/" target="_blank" rel="noopener" style="color:#9cc9ff">Natural Earth</a>;
       confini storici: <a href="https://github.com/aourednik/historical-basemaps" target="_blank" rel="noopener" style="color:#9cc9ff">historical-basemaps</a> (GPL-3.0).</p>
       <h4>In breve</h4>
@@ -320,7 +320,7 @@
     <div class="ovbox">
       <h2>📖 Come si gioca</h2>
       <h4>🎯 Obiettivo</h4>
-      <p><b>Ogni paese della mappa è un impero</b>: il tuo e, uno per ciascun altro paese, gli imperi guidati dall'IA, ognuno con la sua capitale 🏛️ (bordo del suo colore), le sue truppe e la sua economia. Sono <b>tutti in guerra con tutti</b>: si espandono, si combattono fra loro e prima o poi vengono a cercare te.
+      <p><b>Ogni paese della mappa è un impero</b>: il tuo e, uno per ciascun altro paese, gli imperi guidati dall'IA, ognuno con la sua capitale 🏛️ (bordo del suo colore), le sue truppe e la sua economia. All'inizio sono <b>tutti in pace con tutti</b>: si espandono e, quando si sentono forti, dichiarano guerra ai vicini, fra loro e prima o poi anche a te.
       Quando un impero perde la capitale <b>cade</b>: chi l'ha presa la tiene, le sue altre città tornano villaggi liberi e il suo esercito si scioglie. <b>Vinci quando sono caduti tutti</b>; se cade la tua capitale, hai perso.
       <b>A inizio partita tocca sulla mappa il paese che vuoi guidare</b> (il menu 🌍 Elenco dei paesi aiuta a trovarlo) e poi toccalo ancora per <b>fondare la capitale</b>: ogni impero, il tuo e quelli dell'IA, comincia dalla <b>vera capitale</b> del suo paese (la Spagna a Madrid, la Francia a Parigi...) o dalla casella libera più vicina (evidenziata).
       Nella schermata iniziale puoi scegliere anche il <b>duello</b>: un solo nemico, l'Impero Cremisi, in un paese vicino al tuo.</p>
@@ -331,10 +331,10 @@
       <b>Ogni impero parte con tutte le città del suo paese</b>, le tue comprese: i villaggi neutrali restano solo dove non c'è un impero (nel duello, gli altri paesi) e quelli che tornano liberi quando un impero cade.
       Un paese con meno di 5 città (oltre alla capitale) parte con <b>5⭐ in più per ogni città mancante</b>.</p>
       <h4>🤝 Diplomazia: guerra, pace e alleanza</h4>
-      <p>All'inizio sei in guerra con tutti. <b>Tocca il territorio di un altro impero</b> (con niente di selezionato) e si apre la sua scheda: lì puoi <b>proporre la pace</b>, <b>proporre un'alleanza</b> o <b>dichiarare guerra</b>.
+      <p><b>All'inizio tutti sono in pace con tutti</b>: nessuno può attaccare un altro impero, né prendergli caselle, senza prima <b>dichiarargli guerra</b>. <b>Tocca il territorio di un altro impero</b> (con niente di selezionato) e si apre la sua scheda: lì puoi <b>proporre la pace</b>, <b>proporre un'alleanza</b> o <b>dichiarare guerra</b>.
       Con chi è in pace o alleato non vi attaccate e non entrate nelle città e nei porti dell'altro; l'alleanza dà anche <b>+1⭐ a turno</b> di commercio a testa.
       L'IA decide da sola: accetta più volentieri se sei forte rispetto a lei, se le tue truppe sono vicine alle sue città e se hai sempre rispettato i patti. Se rifiuta, puoi riprovare dopo 3 turni.
-      Chi <b>rompe un patto</b> perde la fiducia dell'impero tradito e un po' anche quella di tutti gli altri. Un impero in pace con te, se diventa molto più forte, prima o poi può tornare in guerra; le alleanze le rompi solo tu.
+      Chi <b>rompe un patto</b> perde la fiducia dell'impero tradito e un po' anche quella di tutti gli altri. Anche l'IA dichiara guerra, a te e agli altri imperi, quando si sente più forte di un vicino (a <b>Facile</b> tardi e di rado, a <b>Difficile</b> presto e più spesso); la guerra arriva sempre annunciata nella cronaca. Due imperi IA in guerra da tanto tempo, se nessuno dei due prevale, possono fare la pace. Le alleanze le rompi solo tu.
       Se tutti gli imperi rimasti sono tuoi alleati vinci con la <b>vittoria diplomatica</b>. Nel duello e nel tutorial la diplomazia non c'è.</p>
       <h4>🗺️ La mappa</h4>
       <ul>
@@ -601,8 +601,8 @@ function newGame(tut = false) {
   undoStack = [];
   players = { p: { stars: 7, color:'#4da3ff', dark:'#1f5fa8', name:'Tu', country: null, vivo: true } };
   ordineIA = []; aiStato = {}; caduti = []; conquistatoreP = null; aiMe = null;
-  nuovaDiplomazia(); chiudiDiplomazia();
   modoPartita = tut ? 'duello' : modoAvversari; // il tutorial è sempre un duello
+  nuovaDiplomazia(modoPartita === 'tutti' ? 'pace' : 'guerra'); chiudiDiplomazia(); // con tutti gli imperi si parte in pace
   genMap();
   if (tutorial) {
     // nel tutorial giochi l'Italia contro un vicino di terra; la capitale si fonda
@@ -2345,7 +2345,9 @@ function cadeImpero(o, chi, t) {
 }
 
 // ============ LA DIPLOMAZIA ============
-// Fra due imperi c'è guerra, pace o alleanza. All'inizio tutti sono in guerra con tutti;
+// Fra due imperi c'è guerra, pace o alleanza. Nelle partite nuove (dalla v75) all'inizio
+// tutti sono in pace con tutti e per attaccare bisogna dichiarare guerra (diplo.base = 'pace');
+// nei salvataggi di prima lo stato di partenza resta la guerra (base assente);
 // toccando il territorio di un altro impero si apre la finestra della diplomazia, dove
 // si dichiara guerra o si propone la pace o un'alleanza. Con chi è in pace o alleato non
 // ci si attacca e non si entra nelle sue città e nei suoi porti; un'alleanza porta anche
@@ -2356,16 +2358,19 @@ const ALLEANZA_RENDITA = 1;    // ⭐ a turno per ogni alleato
 const DIPLO_SOGLIA = 55;       // il punteggio (più il caso, fino a +20) che serve perché l'IA accetti
 let diplo = { rel: {}, fiducia: {}, rifiuto: {} };
 let diploCon = null;           // l'impero nella finestra aperta
-function nuovaDiplomazia() { diplo = { rel: {}, fiducia: {}, rifiuto: {} }; diploCon = null; }
+function nuovaDiplomazia(base) { diplo = { rel: {}, fiducia: {}, rifiuto: {} }; if (base === 'pace') diplo.base = 'pace'; diploCon = null; }
 function chiaveRel(a, b) { return a < b ? a + '|' + b : b + '|' + a; }
+function baseRel() { return diplo.base === 'pace' ? 'pace' : 'guerra'; }
 function relazione(a, b) {
   if (!a || !b || a === b) return 'sé';
   const r = diplo.rel[chiaveRel(a, b)];
-  return r ? r.stato : 'guerra';
+  return r ? r.stato : baseRel();
 }
+// da che turno dura la relazione fra a e b (quella di partenza: dal turno 1)
+function dalRel(a, b) { const r = diplo.rel[chiaveRel(a, b)]; return r ? r.dal : 1; }
 function setRelazione(a, b, stato) {
   const k = chiaveRel(a, b);
-  if (stato === 'guerra') delete diplo.rel[k];
+  if (stato === baseRel() && stato === 'guerra') delete diplo.rel[k];
   else diplo.rel[k] = { stato, dal: turn };
 }
 // due imperi possono combattersi (le città e i porti senza padrone sono di tutti)
@@ -2395,7 +2400,7 @@ function valutaProposta(o, tipo) {
   s += aiLivello === 'facile' ? 10 : aiLivello === 'difficile' ? -10 : 0;
   if (tipo === 'alleanza') {
     s -= 20;                                                      // un'alleanza vale più della pace
-    if (relazione('p', o) === 'pace') s += Math.min(15, turn - diplo.rel[chiaveRel('p', o)].dal); // la pace lunga crea fiducia
+    if (relazione('p', o) === 'pace') s += Math.min(15, turn - dalRel('p', o)); // la pace lunga crea fiducia
   }
   return s;
 }
@@ -2431,23 +2436,68 @@ function dichiaraGuerra(o) {
   const ora = relazione('p', o);
   if (ora === 'guerra') return false;
   setRelazione('p', o, 'guerra');
-  // rompere un patto costa la fiducia di chi lo subisce e, un po', di tutti gli altri
-  const tradito = ora === 'alleanza';
-  cambiaFiducia(o, tradito ? -60 : -40);
-  for (const x of imperiIA()) if (x !== o) cambiaFiducia(x, tradito ? -15 : -10);
+  // rompere un patto costa la fiducia di chi lo subisce e, un po', di tutti gli altri;
+  // la pace di inizio partita (mai firmata) costa meno di una pace firmata
+  const tradito = ora === 'alleanza', iniziale = ora === 'pace' && diplo.base === 'pace' && dalRel('p', o) === 1;
+  cambiaFiducia(o, tradito ? -60 : iniziale ? -25 : -40);
+  for (const x of imperiIA()) if (x !== o) cambiaFiducia(x, tradito ? -15 : iniziale ? -5 : -10);
   msg(`⚔️ Hai dichiarato guerra a ${bandiera(o)} ${nomePaese(o)}${tradito ? " rompendo l'alleanza" : ''}. Gli altri imperi si fideranno meno di te.`);
   refreshSets(); ui(); render();
   return true;
 }
-// l'IA in pace con te può tornare in guerra, se è molto più forte e la pace dura da tempo
+// L'IA dichiara guerra: a ogni suo turno, passata la tregua della difficoltà, con una certa
+// probabilità guarda gli imperi vicini con cui è in pace (non gli alleati) e dichiara guerra al più
+// debole, se il suo esercito è abbastanza più forte. Non fa più di maxGuerre guerre alla volta,
+// non rompe una pace appena fatta e non attacca chi si è guadagnato la sua fiducia (te).
+// Due imperi IA in guerra da tanto, se nessuno dei due prevale, ogni tanto fanno la pace.
 // (le alleanze invece le rompi solo tu)
+const AI_GUERRA = {
+  facile:    { inizio: 60, prob: 0.04, maxGuerre: 1 },
+  normale:   { inizio: 30, prob: 0.08, maxGuerre: 1 },
+  difficile: { inizio: 8,  prob: 0.15, maxGuerre: 2 }
+};
+const PACE_MIN_TURNI = 10;   // una pace fatta da meno turni non si rompe
+const GUERRA_STALLO_TURNI = 20; // dopo tanti turni di guerra pari, due IA possono fare la pace
+function aiGuerraDiff() { return AI_GUERRA[aiLivello] || AI_GUERRA.normale; }
+function guerreDi(o) { return imperiIA().concat('p').filter(x => x !== o && relazione(o, x) === 'guerra').length; }
+// gli imperi che hanno una città entro R esagoni da una città di o
+function viciniDi(o, R) {
+  const mie = cities(o), out = new Set();
+  if (!mie.length) return [];
+  for (const t of dallIndice(conCitta, x => x.city.owner && x.city.owner !== o)) {
+    const w = t.city.owner;
+    if (out.has(w) || !players[w] || !players[w].vivo) continue;
+    if (mie.some(c => dist(c, t) <= R)) out.add(w);
+  }
+  return [...out];
+}
 function aiDiplomazia() {
-  if (!diploAttiva() || relazione(aiMe, 'p') !== 'pace') return;
-  const r = diplo.rel[chiaveRel(aiMe, 'p')];
-  if (turn - r.dal < 15 || forzaImpero(aiMe) < 2 * forzaImpero('p') + 4 || fiduciaDi(aiMe) > 20) return;
-  if (Math.random() > 0.1) return;
-  setRelazione(aiMe, 'p', 'guerra');
-  aiLogAdd(`⚔️ ${bandiera(aiMe)} ${nomePaese(aiMe)} rompe la pace e ti dichiara guerra!`, true);
+  if (!diploAttiva() || !aiMe) return;
+  const G = aiGuerraDiff(), D = aiDiff();
+  // la pace fra IA dopo una lunga guerra senza vincitori
+  for (const x of imperiIA()) {
+    if (x === aiMe || relazione(aiMe, x) !== 'guerra' || turn - dalRel(aiMe, x) < GUERRA_STALLO_TURNI) continue;
+    const a = aiSoldati(aiMe), b = aiSoldati(x);
+    if (Math.max(a, b) > 1.5 * Math.min(a, b) + 2 || Math.random() > 0.05) continue;
+    setRelazione(aiMe, x, 'pace');
+    aiLogAdd(`🕊️ ${bandiera(aiMe)} ${nomePaese(aiMe)} e ${bandiera(x)} ${nomePaese(x)} fanno la pace.`, true);
+  }
+  if (turn < G.inizio || guerreDi(aiMe) >= G.maxGuerre || Math.random() > G.prob) return;
+  const forza = aiSoldati(aiMe);
+  let preda = null, pf = Infinity;
+  for (const x of viciniDi(aiMe, aiR(12))) {
+    if (relazione(aiMe, x) !== 'pace' || turn - dalRel(aiMe, x) < PACE_MIN_TURNI) continue;
+    if (x === 'p' && fiduciaDi(aiMe) > 20) continue;          // di te si fida: non ti attacca
+    const fx = aiSoldati(x);
+    if (forza < Math.max(D.soglia, Math.ceil(fx * D.rapporto))) continue; // non è abbastanza forte
+    if (fx < pf) { pf = fx; preda = x; }
+  }
+  if (!preda) return;
+  setRelazione(aiMe, preda, 'guerra');
+  aiLogAdd(preda === 'p'
+    ? `⚔️ ${bandiera(aiMe)} ${nomePaese(aiMe)} ti dichiara guerra!`
+    : `⚔️ ${bandiera(aiMe)} ${nomePaese(aiMe)} dichiara guerra a ${bandiera(preda)} ${nomePaese(preda)}.`, true);
+  if (preda === 'p') msg(`⚔️ ${bandiera(aiMe)} ${nomePaese(aiMe)} ti ha dichiarato guerra!`);
 }
 
 // la finestra della diplomazia: si apre toccando il territorio (o una città, un'unità)
@@ -2472,7 +2522,7 @@ function apriDiplomazia(o, esito = '') {
   const patti = imperiIA().filter(x => relazione('p', x) !== 'guerra');
   document.getElementById('diploBox').innerHTML = `
     <h2>${bandiera(o)} ${nomePaese(o)}</h2>
-    <p class="diplo-stato">Con te: <b>${nomeRel(ora)}</b>${ora !== 'guerra' ? ` dal turno ${diplo.rel[chiaveRel('p', o)].dal}` : ''}</p>
+    <p class="diplo-stato">Con te: <b>${nomeRel(ora)}</b>${ora !== 'guerra' || dalRel('p', o) > 1 ? ` dal turno ${dalRel('p', o)}` : ''}</p>
     <p>🏘️ ${cities(o).length} città · 💪 forza ${fo} (la tua: ${fp}) · ${fid >= 20 ? '😊 si fida di te' : fid <= -20 ? '😠 non si fida di te' : '😐 ti guarda con sospetto'}</p>
     <p style="font-size:13px;opacity:.85">In pace o alleati non vi attaccate e non entrate nelle città e nei porti dell'altro.
     L'alleanza dà +${ALLEANZA_RENDITA}⭐ a turno a testa. Chi rompe un patto perde la fiducia degli altri imperi.
@@ -3450,13 +3500,13 @@ function caricaSalvataggio(data) {
         && padroneNaturale(t) !== o) t.terra = o;
   }
   // la diplomazia (campo facoltativo): senza, tutti in guerra con tutti
-  nuovaDiplomazia();
   const dp = data.diplomazia; // c'è solo dalla v61: gli id sono già i codici dei paesi
+  nuovaDiplomazia(dp && dp.base === 'pace' ? 'pace' : 'guerra'); // dalla v75 si parte in pace
   if (dp && typeof dp === 'object') {
     const ok = o => Object.prototype.hasOwnProperty.call(players, o);
     for (const [k, r] of Object.entries(dp.rel || {})) {
       const [a, b] = k.split('|');
-      if (ok(a) && ok(b) && a !== b && r && (r.stato === 'pace' || r.stato === 'alleanza'))
+      if (ok(a) && ok(b) && a !== b && r && (r.stato === 'pace' || r.stato === 'alleanza' || (r.stato === 'guerra' && diplo.base === 'pace')))
         diplo.rel[chiaveRel(a, b)] = { stato: r.stato, dal: Math.max(1, Math.min(turn, r.dal | 0)) };
     }
     for (const campo of ['fiducia', 'rifiuto'])
@@ -4709,6 +4759,14 @@ function onTileClick(t) {
   if (t.hosp && !t.unit && (t.hosp.owner === 'p' || t.hosp.level === 0)) {
     selected = t; moveSet = []; attackSet = []; mergeSet = []; bridgeSet = []; embarkSet = []; disembarkSet = [];
     ui(); render(); return;
+  }
+  // un'unità tua selezionata e un tocco su un'unità o una città di un impero con cui non sei in guerra:
+  // per attaccarlo bisogna prima dichiarargli guerra (dalla sua scheda)
+  const amico = selected && selected.unit && selected.unit.owner === 'p' && (t.unit || t.city) && imperoDiCasella(t);
+  if (amico && diploAttiva() && !ostile('p', amico)) {
+    deselect();
+    apriDiplomazia(amico, `${relazione('p', amico) === 'alleanza' ? '🤝 Siete alleati' : '🕊️ Siete in pace'}: per attaccare ${bandiera(amico)} ${nomePaese(amico)} devi prima dichiarargli guerra.`);
+    return;
   }
   // tocco sul territorio di un altro impero (senza niente di selezionato): la diplomazia
   const altro = !selected && imperoDiCasella(t);

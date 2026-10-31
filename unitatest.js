@@ -118,10 +118,12 @@ prova('combattimento: un\'unità non attacca un impero con cui è in pace', () =
   const o = nemico();
   const a = pratoLibero(), b = neighbors(a)[0];
   a.unit = mkUnit('warrior', 'p'); b.unit = mkUnit('warrior', o);
+  const ora = relazione('p', o); // dalla v75 si parte in pace
+  setRelazione('p', o, 'guerra');
   const primaInGuerra = attacksFor(a).includes(b);
-  diplo.rel[chiaveRel('p', o)] = { stato: 'pace', dal: turn };
+  setRelazione('p', o, 'pace');
   const inPace = attacksFor(a).includes(b);
-  delete diplo.rel[chiaveRel('p', o)];
+  setRelazione('p', o, ora);
   a.unit = null; b.unit = null;
   return primaInGuerra && !inPace || `guerra=${primaInGuerra} pace=${inPace}`;
 });
