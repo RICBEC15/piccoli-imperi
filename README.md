@@ -32,6 +32,7 @@ cat stub.js game.js imperitest.js > _run.js && node _run.js   # tutti i paesi co
 cat stub.js game.js epochetest.js > _run.js && node _run.js   # epoche: circa 3 minuti (anche la mappa gigante)
 cat stub.js game.js aitest.js > _run.js && node _run.js   # IA: 150 turni, circa un minuto
 cat stub.js game.js difficoltatest.js > _run.js && node _run.js   # difficoltà IA: circa 40 secondi
+cat stub.js game.js ricchezzatest.js > _run.js && node _run.js   # l'IA punta alle città ricche: circa 30 secondi
 cat stub.js game.js mappatest.js > _run.js && node _run.js
 cat stub.js game.js diplotest.js > _run.js && node _run.js   # diplomazia: circa 15 secondi
 cat stub.js game.js conquistatest.js > _run.js && node _run.js   # conquista del territorio: circa 20 secondi
@@ -56,7 +57,7 @@ Ogni città ha i suoi **abitanti veri**: quelli dell'agglomerato urbano (campo `
 
 - Ogni città vera da un milione di abitanti in su ha il suo villaggio neutrale sulla mappa.
 - Ogni villaggio prende nome e abitanti della città vera più popolosa entro poco più di una casella (almeno 25 km).
-- Dalla v69 sulla mappa restano **solo le città da 100.000 abitanti in su e le capitali** (anche più piccole: Podgorica, La Valletta...). I villaggi sotto i 100.000 abitanti, e quelli senza una città vera vicina, non ci sono più; ogni capitale vera che non aveva un villaggio ne ha uno (Lubiana, Zagabria, Sarajevo, Tirana...). Quando la capitale di un impero sorge accanto al villaggio della sua città, il villaggio si fonde nella capitale.
+- Dalla v71 sulla mappa restano **solo le città da 100.000 abitanti in su e le capitali** (anche più piccole: Podgorica, La Valletta...). I villaggi sotto i 100.000 abitanti, e quelli senza una città vera vicina, non ci sono più; ogni capitale vera che non aveva un villaggio ne ha uno (Lubiana, Zagabria, Sarajevo, Tirana...). Quando la capitale di un impero sorge accanto al villaggio della sua città, il villaggio si fonde nella capitale.
 - La rendita cresce con gli abitanti, a scaglioni: sotto 5.000 abitanti 1⭐, da 5.000 2⭐, da 50.000 3⭐, da 200.000 4⭐, da 700.000 5⭐, da 2 milioni 6⭐, da 5 milioni 7⭐. La capitale rende 1⭐ in più (almeno 3⭐), e ogni livello di crescita portato dai cittadini aggiunge 1⭐.
 
 ## Le epoche
@@ -72,7 +73,11 @@ Ogni modifica alla mappa va verificata con `mappatest.js`, che controlla anche c
 
 ## Versione
 
-v69 (formato di salvataggio invariato, v17; i salvataggi vecchi si caricano con i loro villaggi): **solo città vere da 100.000 abitanti in su e capitali**. Sulla mappa piccola le città passano da 321 a 170 (167 sulla media, 163 sulla gigante), tutte con nome e abitanti veri; ogni capitale ha il suo villaggio.
+v71 (formato di salvataggio invariato, v17; i salvataggi vecchi si caricano con i loro villaggi): **solo città vere da 100.000 abitanti in su e capitali**. Sulla mappa piccola le città passano da 321 a 170 (167 sulla media, 163 sulla gigante), tutte con nome e abitanti veri; ogni capitale ha il suo villaggio.
+
+v70 (formato di salvataggio v17, invariato): **l'IA punta alle città più ricche**. Nella scelta degli obiettivi (villaggi da prendere e città nemiche da attaccare) una città che rende più stelle, cioè con più abitanti veri, "sembra più vicina": l'IA accetta una deviazione per arrivarci. Quanto pesa dipende dalla difficoltà (`ricchezza` in `AI_LIVELLI`): a Facile niente (va alla più vicina, come prima), a Normale 2 terzi di turno di strada per ogni stella in più, a Difficile 4 (Parigi contro un villaggio: circa 9 turni di deviazione). Fra i difensori da colpire l'IA preferisce quelli delle città ricche. Test: `ricchezzatest.js`.
+
+v69 (formato di salvataggio v17, invariato): il menu iniziale mostra le misure vere delle tre mappe (273×220, 549×440, 824×660, con Islanda e Capo Nord aggiunti nella v65) invece di quelle vecchie; le misure sono calcolate dal gioco, quindi restano giuste se la mappa cambia ancora.
 
 v68 (formato di salvataggio v17, con il campo facoltativo `epoca`): **si sceglie l'epoca storica** a inizio partita: oggi, 1938, 1914, 1800, 1500 o l'anno Mille (vedi «Le epoche»). Ogni stato storico è un impero IA, con la capitale nella sua città più popolosa; le epoche coprono anche i paesi aggiunti nella v65.
 

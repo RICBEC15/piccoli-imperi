@@ -59,7 +59,7 @@ const out = process.argv[3] || '.';
       const aspetta = () => (turn > t0 && current === 'p') ? res({ ms: Math.round(performance.now() - a), turno: turn, stelle: players.p.stars }) : setTimeout(aspetta, 100);
       aspetta();
     }));
-    const ok = dopoScelta.paese === 'FR' && dopoScelta.tutteMie && dopoScelta.citta >= 5 && !fondata.placing // dalla v69 la Francia ha solo le sue città da 100.000 abitanti in su
+    const ok = dopoScelta.paese === 'FR' && dopoScelta.tutteMie && dopoScelta.citta >= 5 && !fondata.placing // dalla v71 la Francia ha solo le sue città da 100.000 abitanti in su
       // la capitale sorge sul villaggio di Parigi (dalla v66), quindi le città restano tante quante
       && (fondata.citta === dopoScelta.citta || fondata.citta === dopoScelta.citta + 1) && !errori.length;
     tuttoOk = tuttoOk && ok;
