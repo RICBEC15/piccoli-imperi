@@ -12,7 +12,7 @@ In locale: apri `piccoli_imperi.html` nel browser con un doppio clic. Non serve 
 
 - `piccoli_imperi.html`: il gioco completo (HTML, CSS e JavaScript in un unico file).
 - `index.html`: pagina d'ingresso per GitHub Pages, rimanda subito a `piccoli_imperi.html`.
-- `stub.js`, `shiptest.js`, `savetest.js`, `playtest.js`, `aitest.js`, `paesitest.js`, `imperitest.js`, `difficoltatest.js`, `mappatest.js`, `diplotest.js`, `conquistatest.js`, `capitalitest.js`, `paesinuovitest.js`, `microstatitest.js`, `vaticanotest.js`, `popolazionetest.js`, `biomitest.js`, `epochetest.js`, `browser_check.js`, `mobile_check.js`, `pantest.js`, `conquista_check.js`, `citta_check.js`, `unitatest.js`, `stabilita_check.js`, `mappefissetest.js`, `caricamento_check.js`: test automatici (`mobile_check.js` prova il gioco su un iPhone emulato con Playwright, `pantest.js` lo spostamento nella mappa col mouse, le frecce e il dito).
+- `stub.js`, `shiptest.js`, `savetest.js`, `playtest.js`, `aitest.js`, `paesitest.js`, `imperitest.js`, `difficoltatest.js`, `mappatest.js`, `diplotest.js`, `conquistatest.js`, `capitalitest.js`, `paesinuovitest.js`, `microstatitest.js`, `vaticanotest.js`, `popolazionetest.js`, `biomitest.js`, `epochetest.js`, `browser_check.js`, `mobile_check.js`, `pantest.js`, `conquista_check.js`, `citta_check.js`, `unitatest.js`, `stabilita_check.js`, `mappefissetest.js`, `caricamento_check.js`, `cheattest.js`, `cheat_check.js`: test automatici (`mobile_check.js` prova il gioco su un iPhone emulato con Playwright, `pantest.js` lo spostamento nella mappa col mouse, le frecce e il dito).
 - `build_russia.js`: script che ha estratto il confine della Russia dal dataset Natural Earth.
 - `build_paesi_nord.py`: estrae da Natural Earth i confini dei paesi aggiunti nella v65 (`POLY_NORD`, `SEMI_NORD`).
 - `build_biomi.py`, `export_tiles.js`: costruiscono i biomi fissi dai dati di OpenStreetMap.
@@ -45,6 +45,8 @@ cat stub.js game.js vaticanotest.js > _run.js && node _run.js   # niente Vatican
 cat stub.js game.js popolazionetest.js > _run.js && node _run.js   # abitanti veri delle città
 cat stub.js game.js biomitest.js > _run.js && node _run.js   # i biomi OSM
 cat stub.js game.js mappefissetest.js > _run.js && node _run.js   # la mappa pronta = la mappa calcolata: circa 10 secondi
+cat stub.js game.js cheattest.js > _run.js && node _run.js   # i cheat (v77): circa 10 secondi
+node cheat_check.js   # il pannello dei cheat nel browser, computer e tablet col tocco (Playwright)
 ```
 
 ## La mappa
@@ -77,6 +79,8 @@ Nella schermata iniziale (e nella scelta del paese, prima di fondare la capitale
 Ogni modifica alla mappa va verificata con `mappatest.js`, che controlla anche che due partite abbiano la stessa mappa.
 
 ## Versione
+
+v77 (salvataggio sempre v18): **pulsante 🧪 Cheat**, solo per provare il gioco. Apre un pannello sopra la mappa per: conquistare di colpo un impero (città, territorio, porti e ospedali passano a te, il suo esercito si scioglie e l'impero cade; conquistarli tutti fa vincere); mettere una truppa su qualunque casella (qualunque tipo, armate fino a 50, carovane fino a 6, navi fino al livello 11; non sopra unità di altri né nelle città di chi è in pace con te); costruire porti e ponti gratis senza Costruttore. Si usa solo nel tuo turno e fuori dal tutorial; ogni azione si annulla con ↩️.
 
 v74 (formato di salvataggio v18; i salvataggi di prima si caricano ancora): **le mappe si caricano molto più in fretta**. Misure nel browser di prova (computer; fra parentesi con la CPU 4 volte più lenta, come un tablet): una partita nuova sulla gigante da 6,2 a 0,9 secondi (da 31 a 3,7), sulla media da 2,8 a 0,5 (da 14 a 2,3), sulla piccola da 1,0 a 0,5 (da 4,5 a 2,5); caricare una partita salvata sulla gigante da 3,4 a 0,7 secondi (da 16 a 2,7); aprire la pagina da 1,1 a 0,15 secondi (da 5,4 a 0,5).
 

@@ -88,6 +88,24 @@
     transition: opacity .4s;
   }
   #ailogbox.dim { opacity:.6; }
+  /* il pannello dei cheat: sopra la mappa, in alto a sinistra, senza coprire tutto */
+  .btn.cheatbtn { background:#7a3f8f; } .btn.cheatbtn:hover { background:#9550ad; }
+  #cheatbox {
+    position:absolute; left:12px; top:12px; z-index:7; width:min(330px, calc(100% - 24px));
+    max-height:calc(100% - 24px); overflow:auto;
+    background:rgba(40,24,52,.94); border:2px solid #b47fd0; border-radius:12px;
+    padding:10px 12px; font-size:13.5px; color:#f1e6f7; box-shadow:0 4px 18px rgba(0,0,0,.5);
+  }
+  .cheat-tit { font-size:16px; font-weight:bold; color:#e0b6f5; }
+  .cheat-x { float:right; background:none; border:1px solid #b47fd088; color:#e0b6f5; border-radius:6px;
+    padding:2px 10px; cursor:pointer; font-size:14px; }
+  .cheat-nota { font-size:12px; color:#cdb3dc; margin:2px 0 6px; }
+  .cheat-sez { border-top:1px solid #b47fd044; padding:7px 0; line-height:2.1; }
+  #cheatbox select, #cheatbox input { font-size:14px; padding:4px; border-radius:6px; max-width:100%; }
+  #cheatbox input { width:64px; }
+  #cheatbox .btn.small { font-size:13.5px; padding:7px 10px; }
+  #cheatbox .btn.attivo { background:#c0792e; box-shadow:0 0 0 2px #ffd76e; }
+  #cheatStato { font-size:12.5px; color:#ffd76e; }
   .ailogtitle { font-size:11.5px; color:#ffb3a8; letter-spacing:1px; text-transform:uppercase; margin-bottom:4px; }
   #ailog { font-size:13px; line-height:1.45; color:#ffe9e3; text-shadow:0 1px 3px rgba(0,0,0,.85); }
   #ailog div { margin:2px 0; }
@@ -194,6 +212,7 @@
       <button class="btn small" onclick="saveGame()" title="Tasto S">💾 Salva <kbd>S</kbd></button>
       <button class="btn small" onclick="document.getElementById('loadfile').click()" title="Tasto C">📂 Carica <kbd>C</kbd></button>
       <input type="file" id="loadfile" accept=".json,application/json" style="display:none" onchange="loadGameFile(event)">
+      <button class="btn small cheatbtn" onclick="apriCheat()" title="Aiuti per provare il gioco">🧪 Cheat</button>
       <label class="stat" title="Difficoltà dell'IA: puoi cambiarla quando vuoi, vale dal prossimo turno del nemico">🤖 IA
         <select id="iaSel" onchange="setDifficolta(this.value)">
           <option value="facile">Facile</option><option value="normale" selected>Normale</option><option value="difficile">Difficile</option>
@@ -215,6 +234,7 @@
       <button class="zbtn zsmall" onclick="zoomFit()" title="Tutta la mappa (9)">🗺️</button>
     </div>
     <div id="tutbar"><button class="skip" onclick="endTutorial()">Salta ✕</button><span id="tuttext"></span></div>
+    <div id="cheatbox" style="display:none"></div>
     <div id="ailogbox" style="display:none">
       <div class="ailogtitle">🗞️ Mosse dei nemici</div>
       <div id="ailog"></div>
@@ -593,6 +613,7 @@ function iaDopo(fn, ms) {
 }
 function newGame(tut = false) {
   partitaN++;
+  chiudiCheat();
   document.getElementById('overlay').style.display = 'none';
   tutorial = tut;
   turn = 1; current = 'p'; selected = null; moveSet = []; attackSet = []; mergeSet = []; bridgeSet = []; embarkSet = []; disembarkSet = []; gameOver = false;
@@ -3246,6 +3267,7 @@ function serialize() {
 }
 
 function applySave(data) {
+  chiudiCheat();
   const modo = mapMode, righe = ROWS, colonne = COLS;
   let ok = false;
   try { ok = caricaSalvataggio(data); }
@@ -3999,6 +4021,188 @@ function playerBuildPort() {
 }
 function ports(owner) { return dallIndice(conPorto, t => t.port.owner === owner); }
 
+// ============ I CHEAT (solo per provare il gioco) ============
+// Il pulsante 🧪 Cheat apre un pannello sopra la mappa con tre aiuti per chi prova il gioco:
+// conquistare di colpo un impero, mettere una truppa (di qualunque grandezza o livello)
+// su qualunque casella e costruire porti e ponti senza il Costruttore e senza spendere.
+// Si usano solo nel tuo turno, fuori dal tutorial; ogni azione si può annullare (↩️).
+// Non cambiano il salvataggio (usano gli stessi campi del gioco) né le regole di fine partita.
+let cheatModo = null; // null, 'truppa', 'porto' o 'ponte': cosa fa il prossimo tocco sulla mappa
+const CHEAT_TIPI = ['warrior', 'archer', 'knight', 'medic', 'citizen', 'builder', 'ship'];
+// quante unità può avere al massimo la truppa di quel tipo (medici, costruttori e navi non si uniscono)
+function cheatMaxNumero(tipo) {
+  const d = UNIT_TYPES[tipo];
+  return d.medic || d.builder || d.ship ? 1 : maxStackFor(tipo);
+}
+function cheatPronto() {
+  if (!players || !map || gameOver || placing) return '🧪 I cheat si usano durante la partita.';
+  if (tutorial) return '🧪 I cheat non si usano durante il tutorial.';
+  if (current !== 'p') return '🧪 Aspetta il tuo turno per usare i cheat.';
+  return '';
+}
+function cheatEl(id) { return document.getElementById(id); }
+function apriCheat() {
+  const box = cheatEl('cheatbox');
+  if (!box) return;
+  if (overlayVisible('cheatbox')) { chiudiCheat(); return; }
+  const no = cheatPronto();
+  if (no) { msg(no); return; }
+  const imperi = imperiIA();
+  const opzImperi = imperi.length
+    ? imperi.map(o => `<option value="${o}">${bandiera(players[o].country)} ${escHtml(nomeImpero(o))} · ${cities(o).length} città</option>`).join('')
+    : '<option value="">(nessun impero rimasto)</option>';
+  const opzTipi = CHEAT_TIPI.map(k => `<option value="${k}">${UNIT_TYPES[k].icon} ${UNIT_TYPES[k].name}</option>`).join('');
+  box.innerHTML = `
+    <div class="cheat-tit">🧪 Cheat <button class="cheat-x" onclick="chiudiCheat()" title="Chiudi">✕</button></div>
+    <div class="cheat-nota">Solo per provare il gioco: non è una regola della partita.</div>
+    <div class="cheat-sez"><b>👑 Conquista un paese</b><br>
+      <select id="cheatImpero"${imperi.length ? '' : ' disabled'}>${opzImperi}</select>
+      <button class="btn small" onclick="cheatConquistaScelto()"${imperi.length ? '' : ' disabled'}>Conquista</button></div>
+    <div class="cheat-sez"><b>⚔️ Truppa su una casella</b><br>
+      <select id="cheatTipo" onchange="cheatAggiornaTipo()">${opzTipi}</select>
+      <label id="cheatNumBox">unità <input id="cheatNum" type="number" min="1" value="1" inputmode="numeric"></label>
+      <label id="cheatLivBox">livello <select id="cheatLiv">${NAVE_CAPACITA.map((c, i) => `<option value="${i + 1}">${i + 1} (${c} soldati)</option>`).join('')}</select></label>
+      <button class="btn small" id="cheatBtnTruppa" onclick="cheatScegli('truppa')">📍 Metti sulla mappa</button></div>
+    <div class="cheat-sez"><b>🏗️ Senza Costruttore e gratis</b><br>
+      <button class="btn small" id="cheatBtnPorto" onclick="cheatScegli('porto')">⚓ Porto</button>
+      <button class="btn small" id="cheatBtnPonte" onclick="cheatScegli('ponte')">🌉 Ponte</button></div>
+    <div id="cheatStato"></div>`;
+  box.style.display = 'block';
+  cheatModo = null;
+  cheatAggiornaTipo();
+}
+function chiudiCheat() {
+  cheatModo = null;
+  const box = cheatEl('cheatbox');
+  if (box) box.style.display = 'none';
+}
+function cheatAggiornaTipo() {
+  const tipo = (cheatEl('cheatTipo') || {}).value || 'warrior';
+  const max = cheatMaxNumero(tipo), num = cheatEl('cheatNum');
+  if (num) { num.max = max; num.value = Math.min(max, Math.max(1, parseInt(num.value, 10) || 1)); }
+  const nb = cheatEl('cheatNumBox'), lb = cheatEl('cheatLivBox');
+  if (nb) nb.style.display = max > 1 ? '' : 'none';
+  if (lb) lb.style.display = UNIT_TYPES[tipo].ship ? '' : 'none';
+  if (nb && max > 1) nb.title = `da 1 a ${max}`;
+  cheatSegna();
+}
+// il pulsante della modalità attiva resta acceso; un secondo tocco la spegne
+function cheatScegli(modo) {
+  const no = cheatPronto();
+  if (no) { msg(no); return; }
+  cheatModo = cheatModo === modo ? null : modo;
+  if (cheatModo) deselect();
+  cheatSegna();
+}
+function cheatSegna() {
+  for (const m of ['truppa', 'porto', 'ponte']) {
+    const b = cheatEl('cheatBtn' + m[0].toUpperCase() + m.slice(1));
+    if (b) b.classList.toggle('attivo', cheatModo === m);
+  }
+  const st = cheatEl('cheatStato');
+  if (st) st.textContent = !cheatModo ? ''
+    : cheatModo === 'truppa' ? '👆 Tocca la casella dove mettere la truppa (puoi toccarne altre; ritocca il pulsante per smettere).'
+    : cheatModo === 'porto' ? '👆 Tocca una casella di terra sulla costa o su un fiume.'
+    : '👆 Tocca una casella di fiume o di mare.';
+}
+function cheatTruppa() { // la truppa scelta nel pannello
+  const tipo = (cheatEl('cheatTipo') || {}).value || 'warrior';
+  const n = Math.min(cheatMaxNumero(tipo), Math.max(1, parseInt((cheatEl('cheatNum') || {}).value, 10) || 1));
+  const liv = Math.min(NAVE_MAX_LIV, Math.max(1, parseInt((cheatEl('cheatLiv') || {}).value, 10) || 1));
+  return { tipo, n, liv };
+}
+function cheatClick(t) {
+  const no = cheatPronto();
+  if (no) { msg(no); return; }
+  if (cheatModo === 'truppa') { const x = cheatTruppa(); cheatMettiTruppa(t, x.tipo, x.n, x.liv); }
+  else if (cheatModo === 'porto') cheatPorto(t);
+  else if (cheatModo === 'ponte') cheatPonte(t);
+  refreshSets(); ui(); render();
+}
+// mette una truppa del giocatore sulla casella (sostituisce una tua unità che c'era già).
+// Restituisce true se l'ha messa.
+function cheatMettiTruppa(t, tipo, n = 1, liv = 1, owner = 'p') {
+  const d = UNIT_TYPES[tipo];
+  if (!d) return false;
+  const acqua = t.terrain === 'water' || t.terrain === 'river';
+  if (d.ship && !acqua) { msg('🧪 Una nave va messa sul mare o su un fiume.'); return false; }
+  if (!d.ship && acqua && !t.bridge) { msg('🧪 Una truppa di terra va messa sulla terraferma (o su un ponte).'); return false; }
+  if (t.unit && t.unit.owner !== owner) { msg(`🧪 Lì c'è già un'unità di ${nomeImpero(t.unit.owner)}: scegli un'altra casella.`); return false; }
+  const altro = (t.city && t.city.owner && t.city.owner !== owner && t.city.owner)
+             || (t.port && t.port.owner && t.port.owner !== owner && t.port.owner)
+             || (t.hosp && t.hosp.level > 0 && t.hosp.owner && t.hosp.owner !== owner && t.hosp.owner);
+  if (altro && !ostile(owner, altro)) { msg(`🧪 Con ${nomeImpero(altro)} non sei in guerra: qui non puoi mettere truppe.`); return false; }
+  if (altro && d.civil && t.city) { msg('🧪 I civili non entrano nelle città degli altri: metti una truppa armata.'); return false; }
+  pushUndo();
+  n = Math.min(cheatMaxNumero(tipo), Math.max(1, n | 0));
+  const u = mkUnit(tipo, owner);
+  u.count = n; u.hp = d.hp * n; u.maxHp = d.hp * n;
+  if (d.ship) u.lvl = Math.min(NAVE_MAX_LIV, Math.max(1, liv | 0));
+  t.unit = u;
+  msg(`🧪 ${d.ship ? `Nave di livello ${u.lvl}` : uName(u)} messa sulla mappa: può muovere subito.`);
+  if (!d.ship) arrivalEffects(t); // come se ci fosse arrivata: conquista, città, porti, ospedali...
+  return true;
+}
+function cheatPorto(t, owner = 'p') {
+  if (t.terrain === 'water' || t.terrain === 'river' || t.terrain === 'mountain') { msg('🧪 Il porto va costruito su una casella di terra (non sulla montagna).'); return false; }
+  if (t.city || t.hosp || t.port) { msg('🧪 Su questa casella c\'è già una città, un ospedale o un porto.'); return false; }
+  if (!neighbors(t).some(n => n.terrain === 'water' || n.terrain === 'river')) { msg('🧪 Il porto deve toccare il mare o un fiume.'); return false; }
+  pushUndo();
+  t.port = { owner };
+  t.terrain = 'grass';
+  terrainDirty = true;
+  msg(`🧪 ⚓ Porto costruito gratis: +${PORT_INCOME}⭐/turno!`);
+  return true;
+}
+function cheatPonte(t) {
+  if (t.terrain !== 'water' && t.terrain !== 'river') { msg('🧪 Il ponte va costruito su una casella di fiume o di mare.'); return false; }
+  if (t.bridge) { msg('🧪 Qui c\'è già un ponte.'); return false; }
+  pushUndo();
+  pontiCache = null;
+  t.bridge = true;
+  terrainDirty = true;
+  msg(`🧪 🌉 ${t.terrain === 'water' ? 'Ponte sullo stretto' : 'Ponte'} costruito gratis!`);
+  return true;
+}
+function cheatConquistaScelto() {
+  const sel = cheatEl('cheatImpero');
+  if (sel && sel.value) cheatConquista(sel.value);
+}
+// tutto l'impero o passa a te: territorio, città (la sua capitale diventa una tua città), porti
+// e ospedali; il suo esercito si scioglie e l'impero cade, come quando se ne prende la capitale
+function cheatConquista(o) {
+  const no = cheatPronto();
+  if (no) { msg(no); return false; }
+  if (!o || o === 'p' || !players[o] || !players[o].vivo) return false;
+  pushUndo();
+  const nome = `${bandiera(players[o].country)} ${nomeImpero(o)}`;
+  let caselle = 0;
+  for (const t of map.flat()) {
+    if (!terraConquistabile(t) || padroneTerra(t) !== o) continue;
+    t.terra = padroneNaturale(t) === 'p' ? null : 'p';
+    caselle++;
+  }
+  const citta = cities(o);
+  for (const x of citta) { x.city.owner = 'p'; x.city.capital = false; }
+  for (const x of unitsOf(o)) x.unit = null;
+  for (const x of ports(o)) x.port.owner = 'p';
+  for (const x of dallIndice(conOsp, x => x.hosp.owner === o)) x.hosp.owner = 'p';
+  players[o].vivo = false;
+  caduti.push(o);
+  for (const k of Object.keys(diplo.rel)) if (k.split('|').includes(o)) delete diplo.rel[k];
+  if (diploCon === o) chiudiDiplomazia();
+  terrainDirty = true;
+  const resto = imperiIA().length;
+  msg(`🧪 👑 ${nome} passa a te: ${citta.length} città e ${caselle} caselle di territorio. ${resto ? `Restano ${resto} imperi.` : ''}`);
+  aiLogAdd(`🏳️ ${nome} è caduto (cheat).`, true);
+  deselect();
+  checkEnd();
+  if (gameOver) chiudiCheat();
+  else if (overlayVisible('cheatbox')) { cheatEl('cheatbox').style.display = 'none'; apriCheat(); } // l'elenco degli imperi è cambiato
+  ui(); render();
+  return true;
+}
+
 // raggio IA scalato sulla taglia della mappa (FIX: su media/gigante l'IA "vedeva" troppo corto)
 function aiR(x) { return Math.max(x, Math.round(x * tileScale())); }
 
@@ -4638,6 +4842,8 @@ function onTileClick(t) {
     else msg(`⚠️ Tocca il tuo paese per fondare la capitale a ${nomeCapitale(players.p.country) || 'casa'}, oppure un altro paese per cambiarlo.`);
     return;
   }
+  // con un cheat scelto nel pannello 🧪, il tocco mette la truppa, il porto o il ponte
+  if (cheatModo) { cheatClick(t); return; }
   // clic su mossa evidenziata
   if (selected && moveSet.includes(t)) {
     pushUndo();
@@ -4791,6 +4997,7 @@ if (typeof document.addEventListener === 'function') {
       if (overlayVisible('intro')) { closeIntro(); return; }
       if (overlayVisible('paesi')) { chiudiSceltaPaese(); return; }
       if (overlayVisible('diplo')) { chiudiDiplomazia(); return; }
+      if (overlayVisible('cheatbox')) { chiudiCheat(); return; }
       deselect(); return;
     }
     if (k === 'r') { overlayVisible('rules') ? hideRules() : showRules(); return; }
