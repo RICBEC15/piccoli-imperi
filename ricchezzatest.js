@@ -11,9 +11,10 @@ aiPreparaGiro();
 aiCosti = aiCostiBase.slice();
 const villaggi = map.flat().filter(t => t.city && t.city.owner === null);
 const ricca = villaggi.slice().sort((a, b) => renditaCitta(b.city) - renditaCitta(a.city))[0];
-const povere = villaggi.filter(t => renditaCitta(t.city) <= 2);
+// (dalla v71 sulla mappa ci sono solo città da 100.000 abitanti in su: le più povere rendono 3⭐)
+const povere = villaggi.filter(t => renditaCitta(t.city) <= 3);
 check(renditaCitta(ricca.city) >= 6 && povere.length > 10,
-  `c'è una città ricca (${nomeCitta(ricca.city)}, ${renditaCitta(ricca.city)}⭐) e tanti villaggi poveri`);
+  `c'è una città ricca (${nomeCitta(ricca.city)}, ${renditaCitta(ricca.city)}⭐) e tanti villaggi più poveri`);
 
 // 1. la "partenza" (strada regalata) secondo la difficoltà
 const P = {};

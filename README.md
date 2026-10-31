@@ -57,7 +57,8 @@ C'è **una sola mappa per ogni grandezza** (piccola, media, gigante), uguale a o
 Ogni città ha i suoi **abitanti veri**: quelli dell'agglomerato urbano (campo `POP_MAX`) del dataset Natural Earth *populated places* 1:10m, di pubblico dominio (naturalearthdata.com). Roma ha 3.339.000 abitanti, Parigi 9.904.000, Milano 2.945.000. Le 1366 città che cadono sulle terre del gioco sono nella lista `CITTA_REALI` dentro `piccoli_imperi.html`, scritta da `build_popolazione.js` (istruzioni in testa al file).
 
 - Ogni città vera da un milione di abitanti in su ha il suo villaggio neutrale sulla mappa.
-- Ogni villaggio prende nome e abitanti della città vera più popolosa entro poco più di una casella (almeno 25 km); quelli lontani da città note hanno abitanti **stimati** (da 2.000 a 30.000, nel deserto da 500 a 8.000), fissi per casella.
+- Ogni villaggio prende nome e abitanti della città vera più popolosa entro poco più di una casella (almeno 25 km).
+- Dalla v71 sulla mappa restano **solo le città da 100.000 abitanti in su e le capitali** (anche più piccole: Podgorica, La Valletta...). I villaggi sotto i 100.000 abitanti, e quelli senza una città vera vicina, non ci sono più; ogni capitale vera che non aveva un villaggio ne ha uno (Lubiana, Zagabria, Sarajevo, Tirana...). Quando la capitale di un impero sorge accanto al villaggio della sua città, il villaggio si fonde nella capitale.
 - La rendita cresce con gli abitanti, a scaglioni: sotto 5.000 abitanti 1⭐, da 5.000 2⭐, da 50.000 3⭐, da 200.000 4⭐, da 700.000 5⭐, da 2 milioni 6⭐, da 5 milioni 7⭐. La capitale rende 1⭐ in più (almeno 3⭐), e ogni livello di crescita portato dai cittadini aggiunge 1⭐.
 
 ## Le epoche
@@ -73,7 +74,7 @@ Ogni modifica alla mappa va verificata con `mappatest.js`, che controlla anche c
 
 ## Versione
 
-v71 (formato di salvataggio v17, con il campo facoltativo `f` per unità): **stabilità e mappa più veloce**, dopo un debug completo (rapporto e misure nel thread del progetto).
+v72 (formato di salvataggio v17, con il campo facoltativo `f` per unità): **stabilità e mappa più veloce**, dopo un debug completo (rapporto e misure nel thread del progetto).
 
 - Spostarsi nella mappa è molto più fluido. La memoria delle tessere del terreno ora è grande quanto serve allo schermo (prima 120 tessere fisse: su uno schermo grande o retina ogni passo del trascinamento le ridisegnava tutte, 100-370 ms a fotogramma; ora 7-45 ms). I veli e i contorni dei territori si calcolano a pezzi di 32×32 caselle e si tengono in memoria finché non cambiano, invece di ricalcolarli a ogni fotogramma. Da lontano (casella sotto gli 8 pixel) le tessere disegnano solo i colori, senza icone e segni dei biomi.
 - Caricare una partita, iniziarne una nuova o avviare il tutorial mentre gli imperi stanno muovendo ora ferma davvero il loro turno: prima la partita caricata andava avanti da sola di un turno.
@@ -82,6 +83,7 @@ v71 (formato di salvataggio v17, con il campo facoltativo `f` per unità): **sta
 - Un errore imprevisto nel turno di un impero non blocca il gioco: si salta quell'unità (o si passa al prossimo impero) e in alto compare un avviso.
 - Addestrare non è possibile fuori dal tuo turno; il congedo su una casella vuota mostra il messaggio invece di un errore.
 - Test nuovi: `unitatest.js` (28 unit test) e `stabilita_check.js` (18 scenari nel browser, circa 10 minuti). `stub.js` ha un `Path2D` finto.
+v71 (formato di salvataggio invariato, v17; i salvataggi vecchi si caricano con i loro villaggi): **solo città vere da 100.000 abitanti in su e capitali**. Sulla mappa piccola le città passano da 321 a 170 (167 sulla media, 163 sulla gigante), tutte con nome e abitanti veri; ogni capitale ha il suo villaggio.
 
 v70 (formato di salvataggio v17, invariato): **l'IA punta alle città più ricche**. Nella scelta degli obiettivi (villaggi da prendere e città nemiche da attaccare) una città che rende più stelle, cioè con più abitanti veri, "sembra più vicina": l'IA accetta una deviazione per arrivarci. Quanto pesa dipende dalla difficoltà (`ricchezza` in `AI_LIVELLI`): a Facile niente (va alla più vicina, come prima), a Normale 2 terzi di turno di strada per ogni stella in più, a Difficile 4 (Parigi contro un villaggio: circa 9 turni di deviazione). Fra i difensori da colpire l'IA preferisce quelli delle città ricche. Test: `ricchezzatest.js`.
 

@@ -17,6 +17,13 @@ for (const taglia of ['piccola', 'media', 'gigante']) {
   }
   const roma = tutte.find(x => x.city.n === 'Roma');
   check(roma && roma.country === 'IT' && renditaAbitanti(roma.city.ab) === 6, `${taglia}: Roma è in Italia e i suoi abitanti rendono 6⭐`);
+  // v71: solo città da 100.000 abitanti in su e capitali vere (anche più piccole)
+  const capitaliVere = new Set(Object.keys(CAPITALI_REALI).flatMap(cc => [CAPITALI_REALI[cc][0], nomeCittaCapitale(cc)]));
+  const piccole = tutte.filter(t => !t.city.capital && t.city.ab < ABITANTI_MINIMI && !capitaliVere.has(t.city.n));
+  check(!piccole.length, `${taglia}: nessun villaggio sotto i 100.000 abitanti (${piccole.slice(0, 5).map(t => t.city.n).join(', ')})`);
+  check(tutte.every(t => t.city.n), `${taglia}: ogni città ha il suo nome vero`);
+  for (const n of ['Lubiana', 'Podgorica', 'Zagabria', 'Sarajevo'])
+    check(tutte.some(t => t.city.n === n), `${taglia}: c'è la capitale ${n}`);
   const a = firma();
   Math.random = mulberry32(77); newGame();
   check(firma() === a, `${taglia}: nomi e abitanti dei villaggi uguali a ogni partita`);

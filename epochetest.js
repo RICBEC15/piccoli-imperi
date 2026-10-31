@@ -5,7 +5,10 @@ function assert(cond, msg) { if (!cond) { console.error('ASSERT FAIL:', msg); pr
 let seme = 11;
 Math.random = () => { seme = (seme * 1103515245 + 12345) & 0x7fffffff; return seme / 0x7fffffff; };
 // i villaggi contano anche quando ci sorge sopra la capitale di uno stato
-const firma = () => map.flat().map(t => t.terrain[0] + (t.city && (!t.city.capital || t.city.exVillaggio) ? 'v' : '')).join('');
+// (dalla v71 il villaggio di una capitale di oggi fondata lì accanto sparisce dentro la capitale:
+// i villaggi delle capitali di oggi non contano)
+const nomiCapOggi = new Set(Object.keys(CAPITALI_REALI).flatMap(cc => [CAPITALI_REALI[cc][0], nomeCittaCapitale(cc)]));
+const firma = () => map.flat().map(t => t.terrain[0] + (t.city && (!t.city.capital || t.city.exVillaggio) && !nomiCapOggi.has(t.city.n) ? 'v' : '')).join('');
 
 for (const taglia of ['piccola', 'media', 'gigante']) {
   setMapSize(taglia);
