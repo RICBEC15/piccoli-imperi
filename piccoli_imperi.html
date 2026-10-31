@@ -88,6 +88,24 @@
     transition: opacity .4s;
   }
   #ailogbox.dim { opacity:.6; }
+  /* il pannello dei cheat: sopra la mappa, in alto a sinistra, senza coprire tutto */
+  .btn.cheatbtn { background:#7a3f8f; } .btn.cheatbtn:hover { background:#9550ad; }
+  #cheatbox {
+    position:absolute; left:12px; top:12px; z-index:7; width:min(330px, calc(100% - 24px));
+    max-height:calc(100% - 24px); overflow:auto;
+    background:rgba(40,24,52,.94); border:2px solid #b47fd0; border-radius:12px;
+    padding:10px 12px; font-size:13.5px; color:#f1e6f7; box-shadow:0 4px 18px rgba(0,0,0,.5);
+  }
+  .cheat-tit { font-size:16px; font-weight:bold; color:#e0b6f5; }
+  .cheat-x { float:right; background:none; border:1px solid #b47fd088; color:#e0b6f5; border-radius:6px;
+    padding:2px 10px; cursor:pointer; font-size:14px; }
+  .cheat-nota { font-size:12px; color:#cdb3dc; margin:2px 0 6px; }
+  .cheat-sez { border-top:1px solid #b47fd044; padding:7px 0; line-height:2.1; }
+  #cheatbox select, #cheatbox input { font-size:14px; padding:4px; border-radius:6px; max-width:100%; }
+  #cheatbox input { width:64px; }
+  #cheatbox .btn.small { font-size:13.5px; padding:7px 10px; }
+  #cheatbox .btn.attivo { background:#c0792e; box-shadow:0 0 0 2px #ffd76e; }
+  #cheatStato { font-size:12.5px; color:#ffd76e; }
   .ailogtitle { font-size:11.5px; color:#ffb3a8; letter-spacing:1px; text-transform:uppercase; margin-bottom:4px; }
   #ailog { font-size:13px; line-height:1.45; color:#ffe9e3; text-shadow:0 1px 3px rgba(0,0,0,.85); }
   #ailog div { margin:2px 0; }
@@ -194,6 +212,7 @@
       <button class="btn small" onclick="saveGame()" title="Tasto S">💾 Salva <kbd>S</kbd></button>
       <button class="btn small" onclick="document.getElementById('loadfile').click()" title="Tasto C">📂 Carica <kbd>C</kbd></button>
       <input type="file" id="loadfile" accept=".json,application/json" style="display:none" onchange="loadGameFile(event)">
+      <button class="btn small cheatbtn" onclick="apriCheat()" title="Aiuti per provare il gioco">🧪 Cheat</button>
       <label class="stat" title="Difficoltà dell'IA: puoi cambiarla quando vuoi, vale dal prossimo turno del nemico">🤖 IA
         <select id="iaSel" onchange="setDifficolta(this.value)">
           <option value="facile">Facile</option><option value="normale" selected>Normale</option><option value="difficile">Difficile</option>
@@ -215,6 +234,7 @@
       <button class="zbtn zsmall" onclick="zoomFit()" title="Tutta la mappa (9)">🗺️</button>
     </div>
     <div id="tutbar"><button class="skip" onclick="endTutorial()">Salta ✕</button><span id="tuttext"></span></div>
+    <div id="cheatbox" style="display:none"></div>
     <div id="ailogbox" style="display:none">
       <div class="ailogtitle">🗞️ Mosse dei nemici</div>
       <div id="ailog"></div>
@@ -267,7 +287,7 @@
       <h2>⚔️ Piccoli Imperi</h2>
       <p>Un piccolo gioco di strategia a turni ispirato a Civilization e Polytopia.
       Guidi l'<b style="color:#4da3ff">Impero Azzurro</b>: <b>tocca sulla mappa il paese</b> che vuoi guidare, fonda la capitale (tutte le città del tuo paese sono già tue), espanditi, conquista altre città
-      e addestra un esercito. <b>Ogni altro paese è un impero guidato dall'IA</b>, in guerra con tutti: prendi le loro capitali e tienile per 7 turni (una settimana) per prenderti tutto il paese, prima che lo facciano con te.</p>
+      e addestra un esercito. <b>Ogni altro paese è un impero guidato dall'IA</b>. All'inizio tutti sono <b>in pace</b>: per attaccare qualcuno bisogna prima <b>dichiarargli guerra</b>. Prendi le loro capitali e tienile per 7 turni (una settimana) per prenderti tutto il paese, prima che lo facciano con te.</p>
       <p style="font-size:12px;opacity:.75">Mappa reale, uguale a ogni partita: biomi © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener" style="color:#9cc9ff">OpenStreetMap contributors</a>; abitanti delle città da <a href="https://www.naturalearthdata.com/" target="_blank" rel="noopener" style="color:#9cc9ff">Natural Earth</a>;
       confini storici: <a href="https://github.com/aourednik/historical-basemaps" target="_blank" rel="noopener" style="color:#9cc9ff">historical-basemaps</a> (GPL-3.0).</p>
       <h4>In breve</h4>
@@ -320,7 +340,7 @@
     <div class="ovbox">
       <h2>📖 Come si gioca</h2>
       <h4>🎯 Obiettivo</h4>
-      <p><b>Ogni paese della mappa è un impero</b>: il tuo e, uno per ciascun altro paese, gli imperi guidati dall'IA, ognuno con la sua capitale 🏛️ (bordo del suo colore), le sue truppe e la sua economia. Sono <b>tutti in guerra con tutti</b>: si espandono, si combattono fra loro e prima o poi vengono a cercare te.
+      <p><b>Ogni paese della mappa è un impero</b>: il tuo e, uno per ciascun altro paese, gli imperi guidati dall'IA, ognuno con la sua capitale 🏛️ (bordo del suo colore), le sue truppe e la sua economia. All'inizio sono <b>tutti in pace con tutti</b>: si espandono e, quando si sentono forti, dichiarano guerra ai vicini, fra loro e prima o poi anche a te.
       <b>Chi prende la capitale di un impero e la tiene per 7 turni (una settimana) si prende tutto il paese</b>: le sue città, i porti, gli ospedali e tutto il territorio passano al vincitore e il suo esercito si scioglie. Sulla capitale occupata un tondo arancione mostra i turni che mancano; se lo sconfitto la riprende prima il conto si annulla, se la prende un terzo impero riparte da zero. Il conto avanza solo in guerra, e finché uno tiene la capitale dell'altro i due non fanno la pace. <b>Vinci quando sono caduti tutti</b>; se il nemico tiene la tua capitale per 7 turni, hai perso.
       <b>A inizio partita tocca sulla mappa il paese che vuoi guidare</b> (il menu 🌍 Elenco dei paesi aiuta a trovarlo) e poi toccalo ancora per <b>fondare la capitale</b>: ogni impero, il tuo e quelli dell'IA, comincia dalla <b>vera capitale</b> del suo paese (la Spagna a Madrid, la Francia a Parigi...) o dalla casella libera più vicina (evidenziata).
       Nella schermata iniziale puoi scegliere anche il <b>duello</b>: un solo nemico, l'Impero Cremisi, in un paese vicino al tuo.</p>
@@ -331,10 +351,10 @@
       <b>Ogni impero parte con tutte le città del suo paese</b>, le tue comprese: i villaggi neutrali restano solo dove non c'è un impero (nel duello, gli altri paesi) e quelli che tornano liberi quando un impero cade.
       Un paese con meno di 5 città (oltre alla capitale) parte con <b>5⭐ in più per ogni città mancante</b>.</p>
       <h4>🤝 Diplomazia: guerra, pace e alleanza</h4>
-      <p>All'inizio sei in guerra con tutti. <b>Tocca il territorio di un altro impero</b> (con niente di selezionato) e si apre la sua scheda: lì puoi <b>proporre la pace</b>, <b>proporre un'alleanza</b> o <b>dichiarare guerra</b>.
+      <p><b>All'inizio tutti sono in pace con tutti</b>: nessuno può attaccare un altro impero, né prendergli caselle, senza prima <b>dichiarargli guerra</b>. <b>Tocca il territorio di un altro impero</b> (con niente di selezionato) e si apre la sua scheda: lì puoi <b>proporre la pace</b>, <b>proporre un'alleanza</b> o <b>dichiarare guerra</b>.
       Con chi è in pace o alleato non vi attaccate e non entrate nelle città e nei porti dell'altro; l'alleanza dà anche <b>+1⭐ a turno</b> di commercio a testa.
       L'IA decide da sola: accetta più volentieri se sei forte rispetto a lei, se le tue truppe sono vicine alle sue città e se hai sempre rispettato i patti. Se rifiuta, puoi riprovare dopo 3 turni.
-      Chi <b>rompe un patto</b> perde la fiducia dell'impero tradito e un po' anche quella di tutti gli altri. Un impero in pace con te, se diventa molto più forte, prima o poi può tornare in guerra; le alleanze le rompi solo tu.
+      Chi <b>rompe un patto</b> perde la fiducia dell'impero tradito e un po' anche quella di tutti gli altri. Anche l'IA dichiara guerra, a te e agli altri imperi, quando si sente più forte di un vicino (a <b>Facile</b> tardi e di rado, a <b>Difficile</b> presto e più spesso); la guerra arriva sempre annunciata nella cronaca. Due imperi IA in guerra da tanto tempo, se nessuno dei due prevale, possono fare la pace. Le alleanze le rompi solo tu.
       Se tutti gli imperi rimasti sono tuoi alleati vinci con la <b>vittoria diplomatica</b>. Nel duello e nel tutorial la diplomazia non c'è.</p>
       <h4>🗺️ La mappa</h4>
       <ul>
@@ -593,6 +613,7 @@ function iaDopo(fn, ms) {
 }
 function newGame(tut = false) {
   partitaN++;
+  chiudiCheat();
   document.getElementById('overlay').style.display = 'none';
   tutorial = tut;
   turn = 1; current = 'p'; selected = null; moveSet = []; attackSet = []; mergeSet = []; bridgeSet = []; embarkSet = []; disembarkSet = []; gameOver = false;
@@ -601,8 +622,8 @@ function newGame(tut = false) {
   undoStack = [];
   players = { p: { stars: 7, color:'#4da3ff', dark:'#1f5fa8', name:'Tu', country: null, vivo: true } };
   ordineIA = []; aiStato = {}; caduti = []; conquistatoreP = null; aiMe = null;
-  nuovaDiplomazia(); chiudiDiplomazia();
   modoPartita = tut ? 'duello' : modoAvversari; // il tutorial è sempre un duello
+  nuovaDiplomazia(modoPartita === 'tutti' ? 'pace' : 'guerra'); chiudiDiplomazia(); // con tutti gli imperi si parte in pace
   genMap();
   if (tutorial) {
     // nel tutorial giochi l'Italia contro un vicino di terra; la capitale si fonda
@@ -2432,7 +2453,9 @@ function annettePaese(o, chi, t) {
 }
 
 // ============ LA DIPLOMAZIA ============
-// Fra due imperi c'è guerra, pace o alleanza. All'inizio tutti sono in guerra con tutti;
+// Fra due imperi c'è guerra, pace o alleanza. Nelle partite nuove (dalla v75) all'inizio
+// tutti sono in pace con tutti e per attaccare bisogna dichiarare guerra (diplo.base = 'pace');
+// nei salvataggi di prima lo stato di partenza resta la guerra (base assente);
 // toccando il territorio di un altro impero si apre la finestra della diplomazia, dove
 // si dichiara guerra o si propone la pace o un'alleanza. Con chi è in pace o alleato non
 // ci si attacca e non si entra nelle sue città e nei suoi porti; un'alleanza porta anche
@@ -2443,16 +2466,19 @@ const ALLEANZA_RENDITA = 1;    // ⭐ a turno per ogni alleato
 const DIPLO_SOGLIA = 55;       // il punteggio (più il caso, fino a +20) che serve perché l'IA accetti
 let diplo = { rel: {}, fiducia: {}, rifiuto: {} };
 let diploCon = null;           // l'impero nella finestra aperta
-function nuovaDiplomazia() { diplo = { rel: {}, fiducia: {}, rifiuto: {} }; diploCon = null; }
+function nuovaDiplomazia(base) { diplo = { rel: {}, fiducia: {}, rifiuto: {} }; if (base === 'pace') diplo.base = 'pace'; diploCon = null; }
 function chiaveRel(a, b) { return a < b ? a + '|' + b : b + '|' + a; }
+function baseRel() { return diplo.base === 'pace' ? 'pace' : 'guerra'; }
 function relazione(a, b) {
   if (!a || !b || a === b) return 'sé';
   const r = diplo.rel[chiaveRel(a, b)];
-  return r ? r.stato : 'guerra';
+  return r ? r.stato : baseRel();
 }
+// da che turno dura la relazione fra a e b (quella di partenza: dal turno 1)
+function dalRel(a, b) { const r = diplo.rel[chiaveRel(a, b)]; return r ? r.dal : 1; }
 function setRelazione(a, b, stato) {
   const k = chiaveRel(a, b);
-  if (stato === 'guerra') delete diplo.rel[k];
+  if (stato === baseRel() && stato === 'guerra') delete diplo.rel[k];
   else diplo.rel[k] = { stato, dal: turn };
 }
 // due imperi possono combattersi (le città e i porti senza padrone sono di tutti)
@@ -2482,7 +2508,7 @@ function valutaProposta(o, tipo) {
   s += aiLivello === 'facile' ? 10 : aiLivello === 'difficile' ? -10 : 0;
   if (tipo === 'alleanza') {
     s -= 20;                                                      // un'alleanza vale più della pace
-    if (relazione('p', o) === 'pace') s += Math.min(15, turn - diplo.rel[chiaveRel('p', o)].dal); // la pace lunga crea fiducia
+    if (relazione('p', o) === 'pace') s += Math.min(15, turn - dalRel('p', o)); // la pace lunga crea fiducia
   }
   return s;
 }
@@ -2527,23 +2553,68 @@ function dichiaraGuerra(o) {
   const ora = relazione('p', o);
   if (ora === 'guerra') return false;
   setRelazione('p', o, 'guerra');
-  // rompere un patto costa la fiducia di chi lo subisce e, un po', di tutti gli altri
-  const tradito = ora === 'alleanza';
-  cambiaFiducia(o, tradito ? -60 : -40);
-  for (const x of imperiIA()) if (x !== o) cambiaFiducia(x, tradito ? -15 : -10);
+  // rompere un patto costa la fiducia di chi lo subisce e, un po', di tutti gli altri;
+  // la pace di inizio partita (mai firmata) costa meno di una pace firmata
+  const tradito = ora === 'alleanza', iniziale = ora === 'pace' && diplo.base === 'pace' && dalRel('p', o) === 1;
+  cambiaFiducia(o, tradito ? -60 : iniziale ? -25 : -40);
+  for (const x of imperiIA()) if (x !== o) cambiaFiducia(x, tradito ? -15 : iniziale ? -5 : -10);
   msg(`⚔️ Hai dichiarato guerra a ${bandiera(o)} ${nomePaese(o)}${tradito ? " rompendo l'alleanza" : ''}. Gli altri imperi si fideranno meno di te.`);
   refreshSets(); ui(); render();
   return true;
 }
-// l'IA in pace con te può tornare in guerra, se è molto più forte e la pace dura da tempo
+// L'IA dichiara guerra: a ogni suo turno, passata la tregua della difficoltà, con una certa
+// probabilità guarda gli imperi vicini con cui è in pace (non gli alleati) e dichiara guerra al più
+// debole, se il suo esercito è abbastanza più forte. Non fa più di maxGuerre guerre alla volta,
+// non rompe una pace appena fatta e non attacca chi si è guadagnato la sua fiducia (te).
+// Due imperi IA in guerra da tanto, se nessuno dei due prevale, ogni tanto fanno la pace.
 // (le alleanze invece le rompi solo tu)
+const AI_GUERRA = {
+  facile:    { inizio: 60, prob: 0.04, maxGuerre: 1 },
+  normale:   { inizio: 30, prob: 0.08, maxGuerre: 1 },
+  difficile: { inizio: 8,  prob: 0.15, maxGuerre: 2 }
+};
+const PACE_MIN_TURNI = 10;   // una pace fatta da meno turni non si rompe
+const GUERRA_STALLO_TURNI = 20; // dopo tanti turni di guerra pari, due IA possono fare la pace
+function aiGuerraDiff() { return AI_GUERRA[aiLivello] || AI_GUERRA.normale; }
+function guerreDi(o) { return imperiIA().concat('p').filter(x => x !== o && relazione(o, x) === 'guerra').length; }
+// gli imperi che hanno una città entro R esagoni da una città di o
+function viciniDi(o, R) {
+  const mie = cities(o), out = new Set();
+  if (!mie.length) return [];
+  for (const t of dallIndice(conCitta, x => x.city.owner && x.city.owner !== o)) {
+    const w = t.city.owner;
+    if (out.has(w) || !players[w] || !players[w].vivo) continue;
+    if (mie.some(c => dist(c, t) <= R)) out.add(w);
+  }
+  return [...out];
+}
 function aiDiplomazia() {
-  if (!diploAttiva() || relazione(aiMe, 'p') !== 'pace') return;
-  const r = diplo.rel[chiaveRel(aiMe, 'p')];
-  if (turn - r.dal < 15 || forzaImpero(aiMe) < 2 * forzaImpero('p') + 4 || fiduciaDi(aiMe) > 20) return;
-  if (Math.random() > 0.1) return;
-  setRelazione(aiMe, 'p', 'guerra');
-  aiLogAdd(`⚔️ ${bandiera(aiMe)} ${nomePaese(aiMe)} rompe la pace e ti dichiara guerra!`, true);
+  if (!diploAttiva() || !aiMe) return;
+  const G = aiGuerraDiff(), D = aiDiff();
+  // la pace fra IA dopo una lunga guerra senza vincitori
+  for (const x of imperiIA()) {
+    if (x === aiMe || relazione(aiMe, x) !== 'guerra' || turn - dalRel(aiMe, x) < GUERRA_STALLO_TURNI || occupazioneFra(aiMe, x)) continue;
+    const a = aiSoldati(aiMe), b = aiSoldati(x);
+    if (Math.max(a, b) > 1.5 * Math.min(a, b) + 2 || Math.random() > 0.05) continue;
+    setRelazione(aiMe, x, 'pace');
+    aiLogAdd(`🕊️ ${bandiera(aiMe)} ${nomePaese(aiMe)} e ${bandiera(x)} ${nomePaese(x)} fanno la pace.`, true);
+  }
+  if (turn < G.inizio || guerreDi(aiMe) >= G.maxGuerre || Math.random() > G.prob) return;
+  const forza = aiSoldati(aiMe);
+  let preda = null, pf = Infinity;
+  for (const x of viciniDi(aiMe, aiR(12))) {
+    if (relazione(aiMe, x) !== 'pace' || turn - dalRel(aiMe, x) < PACE_MIN_TURNI) continue;
+    if (x === 'p' && fiduciaDi(aiMe) > 20) continue;          // di te si fida: non ti attacca
+    const fx = aiSoldati(x);
+    if (forza < Math.max(D.soglia, Math.ceil(fx * D.rapporto))) continue; // non è abbastanza forte
+    if (fx < pf) { pf = fx; preda = x; }
+  }
+  if (!preda) return;
+  setRelazione(aiMe, preda, 'guerra');
+  aiLogAdd(preda === 'p'
+    ? `⚔️ ${bandiera(aiMe)} ${nomePaese(aiMe)} ti dichiara guerra!`
+    : `⚔️ ${bandiera(aiMe)} ${nomePaese(aiMe)} dichiara guerra a ${bandiera(preda)} ${nomePaese(preda)}.`, true);
+  if (preda === 'p') msg(`⚔️ ${bandiera(aiMe)} ${nomePaese(aiMe)} ti ha dichiarato guerra!`);
 }
 
 // la finestra della diplomazia: si apre toccando il territorio (o una città, un'unità)
@@ -2569,7 +2640,7 @@ function apriDiplomazia(o, esito = '') {
   const patti = imperiIA().filter(x => relazione('p', x) !== 'guerra');
   document.getElementById('diploBox').innerHTML = `
     <h2>${bandiera(o)} ${nomePaese(o)}</h2>
-    <p class="diplo-stato">Con te: <b>${nomeRel(ora)}</b>${ora !== 'guerra' ? ` dal turno ${diplo.rel[chiaveRel('p', o)].dal}` : ''}</p>
+    <p class="diplo-stato">Con te: <b>${nomeRel(ora)}</b>${ora !== 'guerra' || dalRel('p', o) > 1 ? ` dal turno ${dalRel('p', o)}` : ''}</p>
     <p>🏘️ ${cities(o).length} città · 💪 forza ${fo} (la tua: ${fp}) · ${fid >= 20 ? '😊 si fida di te' : fid <= -20 ? '😠 non si fida di te' : '😐 ti guarda con sospetto'}</p>
     <p style="font-size:13px;opacity:.85">In pace o alleati non vi attaccate e non entrate nelle città e nei porti dell'altro.
     L'alleanza dà +${ALLEANZA_RENDITA}⭐ a turno a testa. Chi rompe un patto perde la fiducia degli altri imperi.
@@ -3356,6 +3427,7 @@ function serialize() {
 }
 
 function applySave(data) {
+  chiudiCheat();
   const modo = mapMode, righe = ROWS, colonne = COLS;
   let ok = false;
   try { ok = caricaSalvataggio(data); }
@@ -3565,13 +3637,13 @@ function caricaSalvataggio(data) {
         && padroneNaturale(t) !== o) t.terra = o;
   }
   // la diplomazia (campo facoltativo): senza, tutti in guerra con tutti
-  nuovaDiplomazia();
   const dp = data.diplomazia; // c'è solo dalla v61: gli id sono già i codici dei paesi
+  nuovaDiplomazia(dp && dp.base === 'pace' ? 'pace' : 'guerra'); // dalla v75 si parte in pace
   if (dp && typeof dp === 'object') {
     const ok = o => Object.prototype.hasOwnProperty.call(players, o);
     for (const [k, r] of Object.entries(dp.rel || {})) {
       const [a, b] = k.split('|');
-      if (ok(a) && ok(b) && a !== b && r && (r.stato === 'pace' || r.stato === 'alleanza'))
+      if (ok(a) && ok(b) && a !== b && r && (r.stato === 'pace' || r.stato === 'alleanza' || (r.stato === 'guerra' && diplo.base === 'pace')))
         diplo.rel[chiaveRel(a, b)] = { stato: r.stato, dal: Math.max(1, Math.min(turn, r.dal | 0)) };
     }
     for (const campo of ['fiducia', 'rifiuto'])
@@ -4123,6 +4195,193 @@ function playerBuildPort() {
   refreshSets(); ui(); render();
 }
 function ports(owner) { return dallIndice(conPorto, t => t.port.owner === owner); }
+
+// ============ I CHEAT (solo per provare il gioco) ============
+// Il pulsante 🧪 Cheat apre un pannello sopra la mappa con tre aiuti per chi prova il gioco:
+// conquistare di colpo un impero, mettere una truppa (di qualunque grandezza o livello)
+// su qualunque casella e costruire porti e ponti senza il Costruttore e senza spendere.
+// Si usano solo nel tuo turno, fuori dal tutorial; ogni azione si può annullare (↩️).
+// Non cambiano il salvataggio (usano gli stessi campi del gioco) né le regole di fine partita.
+let cheatModo = null; // null, 'truppa', 'porto' o 'ponte': cosa fa il prossimo tocco sulla mappa
+const CHEAT_TIPI = ['warrior', 'archer', 'knight', 'medic', 'citizen', 'builder', 'ship'];
+// quante unità può avere al massimo la truppa di quel tipo (medici, costruttori e navi non si uniscono)
+function cheatMaxNumero(tipo) {
+  const d = UNIT_TYPES[tipo];
+  return d.medic || d.builder || d.ship ? 1 : maxStackFor(tipo);
+}
+function cheatPronto() {
+  if (!players || !map || gameOver || placing) return '🧪 I cheat si usano durante la partita.';
+  if (tutorial) return '🧪 I cheat non si usano durante il tutorial.';
+  if (current !== 'p') return '🧪 Aspetta il tuo turno per usare i cheat.';
+  return '';
+}
+function cheatEl(id) { return document.getElementById(id); }
+function apriCheat() {
+  const box = cheatEl('cheatbox');
+  if (!box) return;
+  if (overlayVisible('cheatbox')) { chiudiCheat(); return; }
+  const no = cheatPronto();
+  if (no) { msg(no); return; }
+  const imperi = imperiIA();
+  const opzImperi = imperi.length
+    ? imperi.map(o => `<option value="${o}">${bandiera(players[o].country)} ${escHtml(nomeImpero(o))} · ${cities(o).length} città</option>`).join('')
+    : '<option value="">(nessun impero rimasto)</option>';
+  const opzTipi = CHEAT_TIPI.map(k => `<option value="${k}">${UNIT_TYPES[k].icon} ${UNIT_TYPES[k].name}</option>`).join('');
+  box.innerHTML = `
+    <div class="cheat-tit">🧪 Cheat <button class="cheat-x" onclick="chiudiCheat()" title="Chiudi">✕</button></div>
+    <div class="cheat-nota">Solo per provare il gioco: non è una regola della partita.</div>
+    <div class="cheat-sez"><b>👑 Conquista un paese</b><br>
+      <select id="cheatImpero"${imperi.length ? '' : ' disabled'}>${opzImperi}</select>
+      <button class="btn small" onclick="cheatConquistaScelto()"${imperi.length ? '' : ' disabled'}>Conquista</button></div>
+    <div class="cheat-sez"><b>⚔️ Truppa su una casella</b><br>
+      <select id="cheatTipo" onchange="cheatAggiornaTipo()">${opzTipi}</select>
+      <label id="cheatNumBox">unità <input id="cheatNum" type="number" min="1" value="1" inputmode="numeric"></label>
+      <label id="cheatLivBox">livello <select id="cheatLiv">${NAVE_CAPACITA.map((c, i) => `<option value="${i + 1}">${i + 1} (${c} soldati)</option>`).join('')}</select></label>
+      <button class="btn small" id="cheatBtnTruppa" onclick="cheatScegli('truppa')">📍 Metti sulla mappa</button></div>
+    <div class="cheat-sez"><b>🏗️ Senza Costruttore e gratis</b><br>
+      <button class="btn small" id="cheatBtnPorto" onclick="cheatScegli('porto')">⚓ Porto</button>
+      <button class="btn small" id="cheatBtnPonte" onclick="cheatScegli('ponte')">🌉 Ponte</button></div>
+    <div id="cheatStato"></div>`;
+  box.style.display = 'block';
+  cheatModo = null;
+  cheatAggiornaTipo();
+}
+function chiudiCheat() {
+  cheatModo = null;
+  const box = cheatEl('cheatbox');
+  if (box) box.style.display = 'none';
+}
+function cheatAggiornaTipo() {
+  const tipo = (cheatEl('cheatTipo') || {}).value || 'warrior';
+  const max = cheatMaxNumero(tipo), num = cheatEl('cheatNum');
+  if (num) { num.max = max; num.value = Math.min(max, Math.max(1, parseInt(num.value, 10) || 1)); }
+  const nb = cheatEl('cheatNumBox'), lb = cheatEl('cheatLivBox');
+  if (nb) nb.style.display = max > 1 ? '' : 'none';
+  if (lb) lb.style.display = UNIT_TYPES[tipo].ship ? '' : 'none';
+  if (nb && max > 1) nb.title = `da 1 a ${max}`;
+  cheatSegna();
+}
+// il pulsante della modalità attiva resta acceso; un secondo tocco la spegne
+function cheatScegli(modo) {
+  const no = cheatPronto();
+  if (no) { msg(no); return; }
+  cheatModo = cheatModo === modo ? null : modo;
+  if (cheatModo) deselect();
+  cheatSegna();
+}
+function cheatSegna() {
+  for (const m of ['truppa', 'porto', 'ponte']) {
+    const b = cheatEl('cheatBtn' + m[0].toUpperCase() + m.slice(1));
+    if (b) b.classList.toggle('attivo', cheatModo === m);
+  }
+  const st = cheatEl('cheatStato');
+  if (st) st.textContent = !cheatModo ? ''
+    : cheatModo === 'truppa' ? '👆 Tocca la casella dove mettere la truppa (puoi toccarne altre; ritocca il pulsante per smettere).'
+    : cheatModo === 'porto' ? '👆 Tocca una casella di terra sulla costa o su un fiume.'
+    : '👆 Tocca una casella di fiume o di mare.';
+}
+function cheatTruppa() { // la truppa scelta nel pannello
+  const tipo = (cheatEl('cheatTipo') || {}).value || 'warrior';
+  const n = Math.min(cheatMaxNumero(tipo), Math.max(1, parseInt((cheatEl('cheatNum') || {}).value, 10) || 1));
+  const liv = Math.min(NAVE_MAX_LIV, Math.max(1, parseInt((cheatEl('cheatLiv') || {}).value, 10) || 1));
+  return { tipo, n, liv };
+}
+function cheatClick(t) {
+  const no = cheatPronto();
+  if (no) { msg(no); return; }
+  if (cheatModo === 'truppa') { const x = cheatTruppa(); cheatMettiTruppa(t, x.tipo, x.n, x.liv); }
+  else if (cheatModo === 'porto') cheatPorto(t);
+  else if (cheatModo === 'ponte') cheatPonte(t);
+  refreshSets(); ui(); render();
+}
+// mette una truppa del giocatore sulla casella, ovunque: un'unità che c'era già (anche nemica)
+// sparisce, e nelle città e nei porti degli altri entra anche se sei in pace con loro.
+// Restituisce true se l'ha messa.
+function cheatMettiTruppa(t, tipo, n = 1, liv = 1, owner = 'p') {
+  const d = UNIT_TYPES[tipo];
+  if (!d) return false;
+  const acqua = t.terrain === 'water' || t.terrain === 'river';
+  if (d.ship && !acqua) { msg('🧪 Una nave va messa sul mare o su un fiume.'); return false; }
+  if (!d.ship && acqua && !t.bridge) { msg('🧪 Una truppa di terra va messa sulla terraferma (o su un ponte).'); return false; }
+  pushUndo();
+  n = Math.min(cheatMaxNumero(tipo), Math.max(1, n | 0));
+  const u = mkUnit(tipo, owner);
+  u.count = n; u.hp = d.hp * n; u.maxHp = d.hp * n;
+  if (d.ship) u.lvl = Math.min(NAVE_MAX_LIV, Math.max(1, liv | 0));
+  const via = t.unit && t.unit.owner !== owner ? ` (tolta l'unità di ${nomeImpero(t.unit.owner)})` : '';
+  t.unit = u;
+  msg(`🧪 ${d.ship ? `Nave di livello ${u.lvl}` : uName(u)} messa sulla mappa: può muovere subito.${via}`);
+  if (!d.ship) arrivalEffects(t); // come se ci fosse arrivata: conquista, città, porti, ospedali...
+  return true;
+}
+function cheatPorto(t, owner = 'p') {
+  if (t.terrain === 'water' || t.terrain === 'river' || t.terrain === 'mountain') { msg('🧪 Il porto va costruito su una casella di terra (non sulla montagna).'); return false; }
+  if (t.city || t.hosp || t.port) { msg('🧪 Su questa casella c\'è già una città, un ospedale o un porto.'); return false; }
+  if (!neighbors(t).some(n => n.terrain === 'water' || n.terrain === 'river')) { msg('🧪 Il porto deve toccare il mare o un fiume.'); return false; }
+  pushUndo();
+  t.port = { owner };
+  t.terrain = 'grass';
+  terrainDirty = true;
+  msg(`🧪 ⚓ Porto costruito gratis: +${PORT_INCOME}⭐/turno!`);
+  return true;
+}
+function cheatPonte(t) {
+  if (t.terrain !== 'water' && t.terrain !== 'river') { msg('🧪 Il ponte va costruito su una casella di fiume o di mare.'); return false; }
+  if (t.bridge) { msg('🧪 Qui c\'è già un ponte.'); return false; }
+  pushUndo();
+  pontiCache = null;
+  t.bridge = true;
+  terrainDirty = true;
+  msg(`🧪 🌉 ${t.terrain === 'water' ? 'Ponte sullo stretto' : 'Ponte'} costruito gratis!`);
+  return true;
+}
+function cheatConquistaScelto() {
+  const sel = cheatEl('cheatImpero');
+  if (sel && sel.value) cheatConquista(sel.value);
+}
+// tutto l'impero o passa a te: territorio, città (la sua capitale diventa una tua città), porti
+// e ospedali; il suo esercito si scioglie e l'impero cade, come quando se ne prende la capitale
+function cheatConquista(o) {
+  const no = cheatPronto();
+  if (no) { msg(no); return false; }
+  if (!o || o === 'p' || !players[o] || !players[o].vivo) return false;
+  pushUndo();
+  const nome = `${bandiera(players[o].country)} ${nomeImpero(o)}`;
+  let caselle = 0;
+  for (const t of map.flat()) {
+    if (!terraConquistabile(t) || padroneTerra(t) !== o) continue;
+    t.terra = padroneNaturale(t) === 'p' ? null : 'p';
+    caselle++;
+  }
+  const citta = cities(o);
+  for (const x of citta) { x.city.owner = 'p'; x.city.capital = false; }
+  // v76: le capitali occupate che teneva: la tua torna tua capitale, le altre ricominciano il conto
+  for (const x of citta) {
+    if (!x.city.occ) continue;
+    if (x.city.occ.o === 'p') { x.city.capital = true; delete x.city.occ; }
+    else x.city.occ.n = 0;
+  }
+  // ...e la sua capitale, se un altro impero la teneva, resta a lui come città qualunque
+  const suaPresa = capitaleOccupata(o);
+  if (suaPresa) delete suaPresa.city.occ;
+  for (const x of unitsOf(o)) x.unit = null;
+  for (const x of ports(o)) x.port.owner = 'p';
+  for (const x of dallIndice(conOsp, x => x.hosp.owner === o)) x.hosp.owner = 'p';
+  players[o].vivo = false;
+  caduti.push(o);
+  for (const k of Object.keys(diplo.rel)) if (k.split('|').includes(o)) delete diplo.rel[k];
+  if (diploCon === o) chiudiDiplomazia();
+  terrainDirty = true;
+  const resto = imperiIA().length;
+  msg(`🧪 👑 ${nome} passa a te: ${citta.length} città e ${caselle} caselle di territorio. ${resto ? `Restano ${resto} imperi.` : ''}`);
+  aiLogAdd(`🏳️ ${nome} è caduto (cheat).`, true);
+  deselect();
+  checkEnd();
+  if (gameOver) chiudiCheat();
+  else if (overlayVisible('cheatbox')) { cheatEl('cheatbox').style.display = 'none'; apriCheat(); } // l'elenco degli imperi è cambiato
+  ui(); render();
+  return true;
+}
 
 // raggio IA scalato sulla taglia della mappa (FIX: su media/gigante l'IA "vedeva" troppo corto)
 function aiR(x) { return Math.max(x, Math.round(x * tileScale())); }
@@ -4784,6 +5043,8 @@ function onTileClick(t) {
     else msg(`⚠️ Tocca il tuo paese per fondare la capitale a ${nomeCapitale(players.p.country) || 'casa'}, oppure un altro paese per cambiarlo.`);
     return;
   }
+  // con un cheat scelto nel pannello 🧪, il tocco mette la truppa, il porto o il ponte
+  if (cheatModo) { cheatClick(t); return; }
   // clic su mossa evidenziata
   if (selected && moveSet.includes(t)) {
     pushUndo();
@@ -4855,6 +5116,14 @@ function onTileClick(t) {
   if (t.hosp && !t.unit && (t.hosp.owner === 'p' || t.hosp.level === 0)) {
     selected = t; moveSet = []; attackSet = []; mergeSet = []; bridgeSet = []; embarkSet = []; disembarkSet = [];
     ui(); render(); return;
+  }
+  // un'unità tua selezionata e un tocco su un'unità o una città di un impero con cui non sei in guerra:
+  // per attaccarlo bisogna prima dichiarargli guerra (dalla sua scheda)
+  const amico = selected && selected.unit && selected.unit.owner === 'p' && (t.unit || t.city) && imperoDiCasella(t);
+  if (amico && diploAttiva() && !ostile('p', amico)) {
+    deselect();
+    apriDiplomazia(amico, `${relazione('p', amico) === 'alleanza' ? '🤝 Siete alleati' : '🕊️ Siete in pace'}: per attaccare ${bandiera(amico)} ${nomePaese(amico)} devi prima dichiarargli guerra.`);
+    return;
   }
   // tocco sul territorio di un altro impero (senza niente di selezionato): la diplomazia
   const altro = !selected && imperoDiCasella(t);
@@ -4937,6 +5206,7 @@ if (typeof document.addEventListener === 'function') {
       if (overlayVisible('intro')) { closeIntro(); return; }
       if (overlayVisible('paesi')) { chiudiSceltaPaese(); return; }
       if (overlayVisible('diplo')) { chiudiDiplomazia(); return; }
+      if (overlayVisible('cheatbox')) { chiudiCheat(); return; }
       deselect(); return;
     }
     if (k === 'r') { overlayVisible('rules') ? hideRules() : showRules(); return; }

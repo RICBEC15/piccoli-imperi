@@ -42,6 +42,7 @@ soldato.unit = mkUnit('warrior', vittima);
 capF.unit = null;
 const vicino = neighbors(capF).find(n => passable(n) && !n.unit && !n.city);
 vicino.unit = mkUnit('knight', 'p');
+setRelazione('p', vittima, 'guerra'); // dalla v75 si parte in pace: il conto avanza solo in guerra
 pushUndo();
 doMove(vicino, capF);
 assert(players.FR.vivo && capF.city.owner === 'p' && capF.city.occ && capF.city.occ.o === 'FR', 'presa la capitale, la Francia non cade subito: parte il conto');
@@ -109,7 +110,7 @@ try { endTurn(); } catch (e) { console.error('CRASH', e.stack); process.exit(1);
 assert(current === 'p' || gameOver, 'dopo il caricamento i turni proseguono');
 
 // 6. vittoria: quando cadono tutti gli imperi
-for (const o of imperiIA()) { const c = capitaleDi(o) || capitaleOccupata(o); c.unit = null; captureIfCity(c, 'p'); }
+for (const o of imperiIA()) { setRelazione('p', o, 'guerra'); const c = capitaleDi(o) || capitaleOccupata(o); c.unit = null; captureIfCity(c, 'p'); }
 for (let i = 0; i < CAPITALE_TURNI; i++) avanzaOccupazioni();
 checkEnd();
 assert(gameOver && !imperiIA().length, 'caduti tutti gli imperi, hai vinto');

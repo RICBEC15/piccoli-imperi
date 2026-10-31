@@ -21,6 +21,7 @@ function partita(liv = 'normale') {
   cambiaPaese('IT');
   tutorial = false;
   if (placing && placeSet.length) placePlayerCapital(placeSet[0]);
+  nuovaDiplomazia(); // (dalla v75 si parte in pace: qui tutti in guerra con tutti, come prima)
   assert(!placing && pCapital(), `partita nuova (${aiDiff().nome})`);
 }
 // una casella libera accanto a t (non città, non montagna)

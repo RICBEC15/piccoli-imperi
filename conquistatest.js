@@ -23,7 +23,15 @@ assert(cap && imperiIA().length > 3, `partita con ${imperiIA().length} imperi IA
 assert(map.flat().every(t => !t.terra), 'all\'inizio nessuna casella è conquistata');
 const vicino = imperiIA().includes('FR') ? 'FR' : imperiIA().slice().sort((a, b) => dist(capitaleDi(a), cap) - dist(capitaleDi(b), cap))[0];
 const ccV = players[vicino].country;
-assert(relazione('p', vicino) === 'guerra', `sei in guerra con ${ccV}`);
+assert(relazione('p', vicino) === 'pace', `all'inizio sei in pace con ${ccV} (v75)`);
+{ // in pace il territorio non si prende
+  const libera0 = t => passable(t) && !t.unit && !t.city && !t.port && !t.hosp && t.terrain !== 'mountain' && t.terrain !== 'forest';
+  const a = map.flat().find(t => t.country === ccV && libera0(t) && neighbors(t).some(libera0)), da = neighbors(a).find(libera0);
+  da.unit = mkUnit('warrior', 'p'); doMove(da, a);
+  assert(!a.terra, 'in pace la casella dell\'altro impero non si conquista');
+  a.unit = null; da.unit = null;
+}
+assert(dichiaraGuerra(vicino) && relazione('p', vicino) === 'guerra', `dichiari guerra a ${ccV}: ora sei in guerra`);
 
 // caselle libere del vicino, ciascuna con accanto una casella libera da cui partire
 const libera = t => passable(t) && !t.unit && !t.city && !t.port && !t.hosp && t.terrain !== 'mountain' && t.terrain !== 'forest';
@@ -160,8 +168,9 @@ assert(applySave(salvato), 'ricarico la partita con le conquiste');
 render();
 assert(true, 'la mappa si disegna con le caselle conquistate');
 
-// --- 5. nei turni dell'IA gli imperi si tolgono caselle (fra loro sono sempre in guerra) ---
+// --- 5. nei turni dell'IA gli imperi in guerra fra loro si tolgono caselle ---
 Math.random = casuale;
+{ const ia = imperiIA(); for (let i = 0; i < ia.length; i++) for (let j = i + 1; j < ia.length; j++) setRelazione(ia[i], ia[j], 'guerra'); }
 for (let i = 0; i < 6 && !gameOver; i++) endTurn();
 const fraIA = map.flat().filter(t => t.terra && t.terra !== 'p' && padroneTerra(t) === t.terra);
 assert(fraIA.length > 0, `in 6 turni gli imperi IA hanno conquistato ${fraIA.length} caselle`);

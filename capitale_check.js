@@ -24,6 +24,7 @@ const out = process.argv[3] || '.';
       if (typeof chiudiSceltaPaese === 'function') chiudiSceltaPaese();
       cambiaPaese('IT');
       if (placing && placeSet.length) placePlayerCapital(placeSet[0]);
+      setRelazione('p', 'FR', 'guerra'); // dalla v75 si parte in pace
       const cap = capitaleDi('FR');
       cap.unit = null;
       const da = neighbors(cap).find(n => passable(n) && !n.unit && !n.city && n.terrain !== 'mountain');

@@ -12,7 +12,7 @@ In locale: apri `piccoli_imperi.html` nel browser con un doppio clic. Non serve 
 
 - `piccoli_imperi.html`: il gioco completo (HTML, CSS e JavaScript in un unico file).
 - `index.html`: pagina d'ingresso per GitHub Pages, rimanda subito a `piccoli_imperi.html`.
-- `stub.js`, `shiptest.js`, `savetest.js`, `playtest.js`, `aitest.js`, `paesitest.js`, `imperitest.js`, `difficoltatest.js`, `mappatest.js`, `diplotest.js`, `conquistatest.js`, `capitalitest.js`, `paesinuovitest.js`, `microstatitest.js`, `vaticanotest.js`, `popolazionetest.js`, `biomitest.js`, `epochetest.js`, `browser_check.js`, `mobile_check.js`, `pantest.js`, `conquista_check.js`, `citta_check.js`, `unitatest.js`, `stabilita_check.js`, `mappefissetest.js`, `caricamento_check.js`, `capitaletest.js`, `capitale_check.js`: test automatici (`mobile_check.js` prova il gioco su un iPhone emulato con Playwright, `pantest.js` lo spostamento nella mappa col mouse, le frecce e il dito).
+- `stub.js`, `shiptest.js`, `savetest.js`, `playtest.js`, `aitest.js`, `paesitest.js`, `imperitest.js`, `difficoltatest.js`, `mappatest.js`, `diplotest.js`, `conquistatest.js`, `capitalitest.js`, `paesinuovitest.js`, `microstatitest.js`, `vaticanotest.js`, `popolazionetest.js`, `biomitest.js`, `epochetest.js`, `browser_check.js`, `mobile_check.js`, `pantest.js`, `conquista_check.js`, `citta_check.js`, `unitatest.js`, `stabilita_check.js`, `mappefissetest.js`, `caricamento_check.js`, `cheattest.js`, `cheat_check.js`, `capitaletest.js`, `capitale_check.js`: test automatici (`mobile_check.js` prova il gioco su un iPhone emulato con Playwright, `pantest.js` lo spostamento nella mappa col mouse, le frecce e il dito).
 - `build_russia.js`: script che ha estratto il confine della Russia dal dataset Natural Earth.
 - `build_paesi_nord.py`: estrae da Natural Earth i confini dei paesi aggiunti nella v65 (`POLY_NORD`, `SEMI_NORD`).
 - `build_biomi.py`, `export_tiles.js`: costruiscono i biomi fissi dai dati di OpenStreetMap.
@@ -37,6 +37,7 @@ cat stub.js game.js ricchezzatest.js > _run.js && node _run.js   # l'IA punta al
 cat stub.js game.js unitatest.js > _run.js && node _run.js   # unit test delle funzioni principali: circa 10 secondi
 cat stub.js game.js mappatest.js > _run.js && node _run.js
 cat stub.js game.js diplotest.js > _run.js && node _run.js   # diplomazia: circa 15 secondi
+cat stub.js game.js guerratest.js > _run.js && node _run.js   # pace iniziale e dichiarazioni di guerra (v75): circa 45 secondi
 cat stub.js game.js conquistatest.js > _run.js && node _run.js   # conquista del territorio: circa 20 secondi
 cat stub.js game.js capitaletest.js > _run.js && node _run.js   # capitale tenuta 7 turni = paese conquistato (v76): circa un minuto
 cat stub.js game.js capitalitest.js > _run.js && node _run.js   # capitali reali: pochi secondi
@@ -46,6 +47,8 @@ cat stub.js game.js vaticanotest.js > _run.js && node _run.js   # niente Vatican
 cat stub.js game.js popolazionetest.js > _run.js && node _run.js   # abitanti veri delle città
 cat stub.js game.js biomitest.js > _run.js && node _run.js   # i biomi OSM
 cat stub.js game.js mappefissetest.js > _run.js && node _run.js   # la mappa pronta = la mappa calcolata: circa 10 secondi
+cat stub.js game.js cheattest.js > _run.js && node _run.js   # i cheat (v77): circa 10 secondi
+node cheat_check.js   # il pannello dei cheat nel browser, computer e tablet col tocco (Playwright)
 ```
 
 ## La mappa
@@ -88,6 +91,10 @@ v76 (formato di salvataggio v18, con un campo facoltativo in più; i salvataggi 
 - L'IA: senza capitale manda le sue unità a riprenderla (a Facile solo quelle entro 12 esagoni, a Normale entro 30, a Difficile tutte), anche durante la tregua, e arruola soldati invece di coloni nelle città più vicine; sulla capitale che ha preso lascia sempre un presidio (a Facile solo con nemici vicini) e, se è minacciata, arruola lì e richiama le truppe come per la sua; a Normale e Difficile le capitali (anche occupate) attirano i suoi eserciti come le città più ricche.
 - Salvataggio: una capitale occupata ha il campo `x: [impero a cui è stata presa, turni tenuti]` nella città. I file di prima, dove la capitale presa era già una città qualunque, si caricano come prima (l'impero senza capitale è già caduto).
 - Test nuovi: `capitaletest.js` e `capitale_check.js` (nel browser, computer e telefono); aggiornati `imperitest.js` e `conquistatest.js`.
+
+v77 (salvataggio sempre v18): **pulsante 🧪 Cheat**, solo per provare il gioco. Apre un pannello sopra la mappa per: conquistare di colpo un impero (città, territorio, porti e ospedali passano a te, il suo esercito si scioglie e l'impero cade; conquistarli tutti fa vincere); mettere una truppa su qualunque casella (qualunque tipo, armate fino a 50, carovane fino a 6, navi fino al livello 11, anche al posto di un'unità nemica e nelle città di chi è in pace con te); costruire porti e ponti gratis senza Costruttore. Si usa solo nel tuo turno e fuori dal tutorial; ogni azione si annulla con ↩️.
+
+v75 (formato di salvataggio invariato, v18): **all'inizio della partita tutti sono in pace con tutti** (tu con gli imperi IA e gli imperi IA fra loro) e **per attaccare bisogna dichiarare guerra**. In pace non si attacca, non si entra nelle città e nei porti dell'altro e non gli si prendono caselle; se tocchi un impero in pace con un'unità selezionata si apre la sua scheda, che ricorda di dichiarare guerra. L'IA dichiara guerra da sola al vicino più debole quando il suo esercito è abbastanza più forte, dopo una tregua che dipende dalla difficoltà (Facile dal turno 60, una guerra alla volta e di rado; Normale dal turno 30, una alla volta; Difficile dal turno 8, fino a due guerre e più spesso): `AI_GUERRA` nel codice. Non rompe una pace firmata da meno di 10 turni, non attacca te se si fida di te e non rompe le alleanze. Due imperi IA in guerra da almeno 20 turni senza che nessuno prevalga possono fare la pace. Dichiarare guerra a chi è nella pace di inizio partita costa meno fiducia che rompere una pace firmata. Nel duello e nel tutorial si resta in guerra dal primo turno. Le partite salvate prima della v75 ripartono come erano (in guerra con tutti, tranne i patti fatti).
 
 v74 (formato di salvataggio v18; i salvataggi di prima si caricano ancora): **le mappe si caricano molto più in fretta**. Misure nel browser di prova (computer; fra parentesi con la CPU 4 volte più lenta, come un tablet): una partita nuova sulla gigante da 6,2 a 0,9 secondi (da 31 a 3,7), sulla media da 2,8 a 0,5 (da 14 a 2,3), sulla piccola da 1,0 a 0,5 (da 4,5 a 2,5); caricare una partita salvata sulla gigante da 3,4 a 0,7 secondi (da 16 a 2,7); aprire la pagina da 1,1 a 0,15 secondi (da 5,4 a 0,5).
 
