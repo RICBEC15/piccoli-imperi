@@ -788,18 +788,23 @@ function paintCanarie(g) {
 
 const NUOVI_PAESI = { PT:1, BE:1, LU:1, AD:1, GR:1, TR:1, CY:1, BG:1, MK:1, XK:1, RS:1, RO:1, HU:1, MD:1, UA:1, RU:1, GE:1, UK:1, IE:1, NL:1, DE:1,
                       // v65: il resto d'Europa
-                      PL:1, CZ:1, SK:1, DK:1, SE:1, NO:1, FI:1, EE:1, LV:1, LT:1, BY:1, IS:1, MT:1, AM:1, AZ:1, KZ:1, SM:1, VA:1 };
-const PAESI_V65 = { PL:1, CZ:1, SK:1, DK:1, SE:1, NO:1, FI:1, EE:1, LV:1, LT:1, BY:1, IS:1, MT:1, AM:1, AZ:1, KZ:1, SM:1, VA:1 };
+                      PL:1, CZ:1, SK:1, DK:1, SE:1, NO:1, FI:1, EE:1, LV:1, LT:1, BY:1, IS:1, MT:1, AM:1, AZ:1, KZ:1, SM:1 };
+const PAESI_V65 = { PL:1, CZ:1, SK:1, DK:1, SE:1, NO:1, FI:1, EE:1, LV:1, LT:1, BY:1, IS:1, MT:1, AM:1, AZ:1, KZ:1, SM:1 };
 // i microstati, piu' piccoli di una casella: una casella sola, quella del loro punto vero
-// (o la terra accanto, se il punto cade in mare). Il Vaticano sta dentro Roma: se cade nella
-// casella di Roma prende quella accanto, a ovest. Il Liechtenstein e Andorra hanno un
+// (o la terra accanto, se il punto cade in mare). Dalla v73 il Vaticano non c'e' piu': la sua
+// casella e' Italia. Resta solo nelle partite salvate prima in cui era un impero (vaticanoVecchio):
+// li' sta dentro Roma, e se cade nella casella di Roma prende quella accanto, a ovest. Il Liechtenstein e Andorra hanno un
 // confine vero: la casella di riserva serve solo se sulle mappe piu' grosse non ne hanno
-const MICROSTATI = { MC: [7.425, 43.74], SM: [12.45, 43.94], VA: [12.453, 41.903], LI: [9.53, 47.13], AD: [1.55, 42.53] };
+const MICROSTATI = { MC: [7.425, 43.74], SM: [12.45, 43.94], LI: [9.53, 47.13], AD: [1.55, 42.53] };
+const VATICANO = { nome: 'Città del Vaticano', punto: [12.453, 41.903] };
+let vaticanoVecchio = false; // true solo caricando una partita di prima della v73 con il Vaticano in gioco
 const MICRO_RISERVA = { LI: 1, AD: 1 };
 function caselleMicrostati(g) {
   const out = new Map();
   const terra = x => x.terrain !== 'water' && x.terrain !== 'river';
-  for (const [cc, [lon, lat]] of Object.entries(MICROSTATI)) {
+  const elenco = Object.entries(MICROSTATI);
+  if (vaticanoVecchio) elenco.push(['VA', VATICANO.punto]);
+  for (const [cc, [lon, lat]] of elenco) {
     if (MICRO_RISERVA[cc] && map.some(row => row.some(x => x.country === cc))) continue;
     let t = tileAtGeo(lon, lat, g);
     if (!t) continue;
@@ -1336,7 +1341,7 @@ const COUNTRY_NAMES = { IT:'Italia', CH:'Svizzera', AT:'Austria', LI:'Liechtenst
                         UK:'Regno Unito', IE:'Irlanda', NL:'Paesi Bassi', DE:'Germania',
                         PL:'Polonia', CZ:'Cechia', SK:'Slovacchia', DK:'Danimarca', SE:'Svezia', NO:'Norvegia',
                         FI:'Finlandia', EE:'Estonia', LV:'Lettonia', LT:'Lituania', BY:'Bielorussia', IS:'Islanda',
-                        MT:'Malta', AM:'Armenia', AZ:'Azerbaigian', KZ:'Kazakistan', SM:'San Marino', VA:'Città del Vaticano' };
+                        MT:'Malta', AM:'Armenia', AZ:'Azerbaigian', KZ:'Kazakistan', SM:'San Marino' };
 // i grandi fiumi, dalla sorgente alla foce
 const FIUMI_ITALIA = [
   { pts: [[7.2,44.7],[7.7,45.0],[8.6,45.1],[9.6,45.05],[10.6,45.0],[11.6,44.95],[12.5,44.9]], toSea: true },  // Po
@@ -1505,6 +1510,7 @@ function mulberry32(a) {
 const MAP_SEED = 1861; // l'anno dell'Unità d'Italia
 
 function genMap() {
+  vaticanoVecchio = false; delete COUNTRY_NAMES.VA; // dalla v73 una partita nuova non ha il Vaticano
   const g = geoSetup();
   const rng = mulberry32(MAP_SEED); // deterministico: stessa Italia ogni partita
   map = [];
@@ -1576,8 +1582,7 @@ function genMap() {
   paintCanarie(g);
   // i grandi fiumi nei loro percorsi reali (i ponti si costruiscono)
   for (const f of FIUMI_ITALIA) carveRiver(f.pts, g, f.toSea);
-  // Monaco, San Marino e il Vaticano: troppo piccoli per un poligono, ma la loro casella è loro
-  // (dopo i fiumi: il Tevere non passa nel Vaticano)
+  // Monaco e San Marino: troppo piccoli per un poligono, ma la loro casella è loro (dopo i fiumi)
   const micro = caselleMicrostati(g);
   for (const [t2, cc] of micro) { t2.country = cc; t2.terrain = 'grass'; if (NUOVI_PAESI[cc]) t2.hashland = true; }
   // i biomi reali, uguali a ogni partita: boschi, montagne, colline e deserti da OpenStreetMap
@@ -1649,7 +1654,7 @@ function genMap() {
   }
   // le capitali degli imperi IA le fonda assegnaPaesi, ciascuna nel suo paese
   // le grandi città reali, poi nomi e abitanti veri a tutti i villaggi
-  villaggiGrandiCitta(g, vills, micro); // non sulla casella di un microstato (il Vaticano accanto a Roma)
+  villaggiGrandiCitta(g, vills, micro); // non sulla casella di un microstato
   villaggiCapitali(g, micro);
   assegnaAbitanti();
   togliVillaggiPiccoli(); // v71: restano le città da 100.000 abitanti in su e le capitali
@@ -1678,7 +1683,7 @@ function assignCountries() {
     }
     t.country = cc || 'IT';
   }
-  for (const [t, cc] of caselleMicrostati(g)) t.country = cc; // Monaco, San Marino, il Vaticano
+  for (const [t, cc] of caselleMicrostati(g)) t.country = cc; // Monaco, San Marino (e il Vaticano dei salvataggi vecchi)
 }
 
 // la componente di terraferma più estesa (la penisola)
@@ -1969,7 +1974,7 @@ const CAPITALI_REALI = {
   LT: ['Vilnius', 25.28, 54.69],     BY: ['Minsk', 27.56, 53.90],        IS: ['Reykjavík', -21.94, 64.15],
   MT: ['La Valletta', 14.51, 35.90], AM: ['Erevan', 44.51, 40.18],       AZ: ['Baku', 49.87, 40.41],
   // Astana è fuori dalla mappa (oltre gli Urali): il Kazakistan comincia da Aqtöbe
-  KZ: ['Aqtöbe', 57.21, 50.28],      SM: ['San Marino', 12.45, 43.94],   VA: ['Città del Vaticano', 12.45, 41.90]
+  KZ: ['Aqtöbe', 57.21, 50.28],      SM: ['San Marino', 12.45, 43.94]
 };
 let capRealiCache = null;
 function nomeCapitale(cc) {
@@ -2027,7 +2032,7 @@ function cittaRealeCapitale(cc) {
   for (const x of CITTA_REALI) {
     const d = kmGeo(x[1], x[2], cap[1], cap[2]);
     if (x[0] === cap[0] && d <= 60) return x;
-    if (d <= bd && !nomiCapitali.has(x[0])) { bd = d; best = x; } // il Vaticano non si prende Roma
+    if (d <= bd && !nomiCapitali.has(x[0])) { bd = d; best = x; } // una capitale non si prende quella di un altro
   }
   return best;
 }
@@ -2042,7 +2047,7 @@ function nomeCittaCapitale(cc) {
 function battezzaCapitale(t, cc) {
   if (!t.city || t.city.n) return;
   const vera = cittaRealeCapitale(cc);
-  // (v71) senza una città vera nella lista la capitale prende almeno il suo nome (Città del Vaticano)
+  // (v71) senza una città vera nella lista la capitale prende almeno il suo nome
   if (!vera) { t.city.ab = t.city.ab || stimaAbitanti(t); if (CAPITALI_REALI[cc] && !dallIndice(conCitta, x => x.city.n === CAPITALI_REALI[cc][0]).length) t.city.n = CAPITALI_REALI[cc][0]; return; }
   const altri = dallIndice(conCitta, x => x !== t && x.city.n === vera[0]);
   if (altri.some(x => x.city.capital)) { t.city.ab = t.city.ab || stimaAbitanti(t); return; }
@@ -2081,7 +2086,7 @@ function assegnaPaesi(pCc, aCc) {
       let ordine;
       if (aCc && aCc !== pCc && info[aCc]) ordine = [aCc];
       else {
-        // i microstati (San Marino, il Vaticano...) non si pescano come avversario a caso:
+        // i microstati (San Marino, Monaco...) non si pescano come avversario a caso:
         // con le città già assegnate un duello contro una casella sola finirebbe subito
         const tutti = paesiVicini(pCc), grandi = tutti.filter(cc => !MICROSTATI[cc]);
         const vicini = grandi.length ? grandi : tutti, primi = vicini.slice(0, PAESI_VICINI);
@@ -3244,6 +3249,10 @@ function caricaSalvataggio(data) {
     paintCanarie(g2);
     for (const t of map.flat()) if (t.canaria && t.terrain === 'grass') t.terrain = BIOMA_TERRENO[biomaDi(t)] || 'grass';
   }
+  // il Vaticano (fino alla v71): se la partita salvata lo aveva come impero, tuo o dell'IA,
+  // la sua casella accanto a Roma resta sua e la partita va avanti com'era
+  vaticanoVecchio = data.v >= 17 && (imperi.includes('VA') || (data.paesi && data.paesi.p === 'VA'));
+  if (vaticanoVecchio) COUNTRY_NAMES.VA = VATICANO.nome; else delete COUNTRY_NAMES.VA;
   assignCountries();
   // l'epoca (campo facoltativo): i salvataggi che non ce l'hanno sono ai giorni nostri
   epocaPartita = EPOCHE[data.epoca] ? data.epoca : 'oggi';

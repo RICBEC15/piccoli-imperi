@@ -1,5 +1,5 @@
 // Test dei paesi europei aggiunti nella v65: Polonia, Cechia, Slovacchia, la Scandinavia,
-// i Baltici, la Bielorussia, l'Islanda, Malta, il Caucaso, il Kazakistan, San Marino e il Vaticano.
+// i Baltici, la Bielorussia, l'Islanda, Malta, il Caucaso, il Kazakistan, San Marino (il Vaticano, tolto nella v73, lo prova vaticanotest.js).
 // uso: cat stub.js game.js paesinuovitest.js > _run.js && node _run.js   (circa 30 secondi)
 function assert(cond, msg) { if (!cond) { console.error('ASSERT FAIL:', msg); process.exit(1); } else console.log('OK:', msg); }
 let seme = 64;
@@ -9,7 +9,7 @@ Math.random = () => { seme = (seme * 1103515245 + 12345) & 0x7fffffff; return se
 // Turchia c'erano gia'. Il Regno Unito nel gioco e' UK
 const EUROPA = ['AL','AD','AM','AT','AZ','BY','BE','BA','BG','HR','CY','CZ','DK','EE','FI','FR','GE','DE','GR',
   'HU','IS','IE','IT','KZ','XK','LV','LI','LT','LU','MT','MD','MC','ME','NL','MK','NO','PL','PT','RO','RU',
-  'SM','RS','SK','SI','ES','SE','CH','TR','UA','UK','VA'];
+  'SM','RS','SK','SI','ES','SE','CH','TR','UA','UK'];
 const NUOVI = Object.keys(PAESI_V65);
 assert(EUROPA.every(cc => COUNTRY_NAMES[cc] && CAPITALI_REALI[cc]), `tutti i ${EUROPA.length} paesi europei hanno nome e capitale`);
 
@@ -32,9 +32,9 @@ for (const taglia of ['piccola', 'media']) {
   // l'Øresund e il Grande Belt restano mare: la Selandia (Copenaghen) non e' saldata alla Svezia
   assert(at(12.7, 55.85).terrain === 'water' && at(10.95, 55.35).terrain === 'water', `${taglia}: l'Øresund e il Grande Belt sono mare`);
   assert(at(13.0, 58.95).terrain === 'water' && at(27.5, 58.6).terrain === 'water', `${taglia}: il Vänern e il Peipus sono laghi`);
-  // i microstati: una casella sola, libera per la capitale; il Vaticano non ruba Roma all'Italia
-  for (const cc of ['SM', 'VA', 'MC']) assert(info[cc].caselle === 1 && capitaleDi(cc), `${taglia}: ${nomePaese(cc)} ha la sua casella e la sua capitale`);
-  assert(at(12.50, 41.90).country === 'IT' && capitaleDi('VA') !== at(12.50, 41.90), `${taglia}: Roma resta italiana, il Vaticano e' accanto`);
+  // i microstati: una casella sola, libera per la capitale; dalla v73 niente Vaticano: Roma e dintorni sono Italia
+  for (const cc of ['SM', 'MC']) assert(info[cc].caselle === 1 && capitaleDi(cc), `${taglia}: ${nomePaese(cc)} ha la sua casella e la sua capitale`);
+  assert(at(12.50, 41.90).country === 'IT' && at(12.453, 41.903).country === 'IT' && !info.VA, `${taglia}: Roma e il Vaticano sono Italia`);
 }
 
 // la tua partita in un paese nuovo: la Polonia, a Varsavia

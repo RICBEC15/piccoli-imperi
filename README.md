@@ -12,7 +12,7 @@ In locale: apri `piccoli_imperi.html` nel browser con un doppio clic. Non serve 
 
 - `piccoli_imperi.html`: il gioco completo (HTML, CSS e JavaScript in un unico file).
 - `index.html`: pagina d'ingresso per GitHub Pages, rimanda subito a `piccoli_imperi.html`.
-- `stub.js`, `shiptest.js`, `savetest.js`, `playtest.js`, `aitest.js`, `paesitest.js`, `imperitest.js`, `difficoltatest.js`, `mappatest.js`, `diplotest.js`, `conquistatest.js`, `capitalitest.js`, `paesinuovitest.js`, `microstatitest.js`, `popolazionetest.js`, `biomitest.js`, `epochetest.js`, `browser_check.js`, `mobile_check.js`, `pantest.js`, `conquista_check.js`, `citta_check.js`, `unitatest.js`, `stabilita_check.js`: test automatici (`mobile_check.js` prova il gioco su un iPhone emulato con Playwright, `pantest.js` lo spostamento nella mappa col mouse, le frecce e il dito).
+- `stub.js`, `shiptest.js`, `savetest.js`, `playtest.js`, `aitest.js`, `paesitest.js`, `imperitest.js`, `difficoltatest.js`, `mappatest.js`, `diplotest.js`, `conquistatest.js`, `capitalitest.js`, `paesinuovitest.js`, `microstatitest.js`, `vaticanotest.js`, `popolazionetest.js`, `biomitest.js`, `epochetest.js`, `browser_check.js`, `mobile_check.js`, `pantest.js`, `conquista_check.js`, `citta_check.js`, `unitatest.js`, `stabilita_check.js`: test automatici (`mobile_check.js` prova il gioco su un iPhone emulato con Playwright, `pantest.js` lo spostamento nella mappa col mouse, le frecce e il dito).
 - `build_russia.js`: script che ha estratto il confine della Russia dal dataset Natural Earth.
 - `build_paesi_nord.py`: estrae da Natural Earth i confini dei paesi aggiunti nella v65 (`POLY_NORD`, `SEMI_NORD`).
 - `build_biomi.py`, `export_tiles.js`: costruiscono i biomi fissi dai dati di OpenStreetMap.
@@ -40,6 +40,7 @@ cat stub.js game.js conquistatest.js > _run.js && node _run.js   # conquista del
 cat stub.js game.js capitalitest.js > _run.js && node _run.js   # capitali reali: pochi secondi
 cat stub.js game.js paesinuovitest.js > _run.js && node _run.js   # i paesi della v65: circa 20 secondi
 cat stub.js game.js microstatitest.js > _run.js && node _run.js   # i microstati: circa 20 secondi
+cat stub.js game.js vaticanotest.js > _run.js && node _run.js   # niente Vaticano fra gli stati di oggi (v73): circa 20 secondi
 cat stub.js game.js popolazionetest.js > _run.js && node _run.js   # abitanti veri delle città
 cat stub.js game.js biomitest.js > _run.js && node _run.js   # i biomi OSM
 ```
@@ -73,6 +74,8 @@ Nella schermata iniziale (e nella scelta del paese, prima di fondare la capitale
 Ogni modifica alla mappa va verificata con `mappatest.js`, che controlla anche che due partite abbiano la stessa mappa.
 
 ## Versione
+
+v73 (formato di salvataggio invariato, v17): **la Città del Vaticano non c'è più fra gli stati di oggi**. Non si sceglie, non è un impero IA e non è nella diplomazia; la sua casella accanto a Roma è Italia (con il Tevere al suo posto). Nelle epoche storiche lo Stato della Chiesa resta com'era. Le partite salvate prima con il Vaticano in gioco (tuo o dell'IA) si caricano ancora com'erano, con il Vaticano; quelle senza lo lasciano all'Italia.
 
 v72 (formato di salvataggio v17, con il campo facoltativo `f` per unità): **stabilità e mappa più veloce**, dopo un debug completo (rapporto e misure nel thread del progetto).
 
