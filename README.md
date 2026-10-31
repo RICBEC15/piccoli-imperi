@@ -12,7 +12,7 @@ In locale: apri `piccoli_imperi.html` nel browser con un doppio clic. Non serve 
 
 - `piccoli_imperi.html`: il gioco completo (HTML, CSS e JavaScript in un unico file).
 - `index.html`: pagina d'ingresso per GitHub Pages, rimanda subito a `piccoli_imperi.html`.
-- `stub.js`, `shiptest.js`, `savetest.js`, `playtest.js`, `aitest.js`, `paesitest.js`, `imperitest.js`, `difficoltatest.js`, `mappatest.js`, `diplotest.js`, `conquistatest.js`, `capitalitest.js`, `paesinuovitest.js`, `microstatitest.js`, `vaticanotest.js`, `popolazionetest.js`, `biomitest.js`, `epochetest.js`, `browser_check.js`, `mobile_check.js`, `pantest.js`, `conquista_check.js`, `citta_check.js`, `unitatest.js`, `stabilita_check.js`, `mappefissetest.js`, `caricamento_check.js`: test automatici (`mobile_check.js` prova il gioco su un iPhone emulato con Playwright, `pantest.js` lo spostamento nella mappa col mouse, le frecce e il dito).
+- `stub.js`, `shiptest.js`, `savetest.js`, `playtest.js`, `aitest.js`, `paesitest.js`, `imperitest.js`, `difficoltatest.js`, `mappatest.js`, `diplotest.js`, `conquistatest.js`, `capitalitest.js`, `paesinuovitest.js`, `microstatitest.js`, `vaticanotest.js`, `popolazionetest.js`, `biomitest.js`, `epochetest.js`, `browser_check.js`, `mobile_check.js`, `pantest.js`, `conquista_check.js`, `citta_check.js`, `unitatest.js`, `stabilita_check.js`, `mappefissetest.js`, `caricamento_check.js`, `capitaletest.js`, `capitale_check.js`: test automatici (`mobile_check.js` prova il gioco su un iPhone emulato con Playwright, `pantest.js` lo spostamento nella mappa col mouse, le frecce e il dito).
 - `build_russia.js`: script che ha estratto il confine della Russia dal dataset Natural Earth.
 - `build_paesi_nord.py`: estrae da Natural Earth i confini dei paesi aggiunti nella v65 (`POLY_NORD`, `SEMI_NORD`).
 - `build_biomi.py`, `export_tiles.js`: costruiscono i biomi fissi dai dati di OpenStreetMap.
@@ -38,6 +38,7 @@ cat stub.js game.js unitatest.js > _run.js && node _run.js   # unit test delle f
 cat stub.js game.js mappatest.js > _run.js && node _run.js
 cat stub.js game.js diplotest.js > _run.js && node _run.js   # diplomazia: circa 15 secondi
 cat stub.js game.js conquistatest.js > _run.js && node _run.js   # conquista del territorio: circa 20 secondi
+cat stub.js game.js capitaletest.js > _run.js && node _run.js   # capitale tenuta 7 turni = paese conquistato (v76): circa un minuto
 cat stub.js game.js capitalitest.js > _run.js && node _run.js   # capitali reali: pochi secondi
 cat stub.js game.js paesinuovitest.js > _run.js && node _run.js   # i paesi della v65: circa 20 secondi
 cat stub.js game.js microstatitest.js > _run.js && node _run.js   # i microstati: circa 20 secondi
@@ -77,6 +78,16 @@ Nella schermata iniziale (e nella scelta del paese, prima di fondare la capitale
 Ogni modifica alla mappa va verificata con `mappatest.js`, che controlla anche che due partite abbiano la stessa mappa.
 
 ## Versione
+
+v76 (formato di salvataggio v18, con un campo facoltativo in più; i salvataggi di prima si caricano ancora): **chi tiene la capitale di un paese per 7 turni (una settimana: nel gioco un turno vale un giorno) si prende tutto il paese**.
+
+- Prendere la capitale di un impero in guerra non lo fa più cadere subito: parte un conto alla rovescia. Sulla capitale occupata c'è un anello tratteggiato del colore di chi l'ha persa e un tondo arancione con i turni che mancano; il pannello della città (o dell'unità che ci sta sopra) dice `⏳ 3/7` e cosa succede, e a inizio turno un promemoria ricorda le capitali che tieni e la tua, se è occupata.
+- Dopo 7 turni il paese sconfitto passa al vincitore: tutte le città (non tornano più villaggi liberi), i porti, gli ospedali e tutto il territorio, comprese le caselle che lo sconfitto aveva conquistato altrove (quelle prese a te tornano tue). L'esercito sconfitto si scioglie e i suoi patti finiscono. Se lo sconfitto teneva a sua volta la capitale del vincitore, gliela restituisce.
+- Se lo sconfitto riprende la capitale prima, torna capitale e il conto si annulla; se la prende un terzo impero, il conto riparte da zero per lui. Il conto avanza solo finché i due sono in guerra (in pace resta fermo), e finché uno tiene la capitale dell'altro i due non fanno la pace né l'alleanza.
+- Vale anche per te: se il nemico prende la tua capitale non hai ancora perso, hai 7 turni per riprenderla (perdi subito solo se non ti restano né città né truppe). Le condizioni di vittoria restano le stesse: vinci quando sono caduti tutti o quando tutti quelli rimasti sono tuoi alleati.
+- L'IA: senza capitale manda le sue unità a riprenderla (a Facile solo quelle entro 12 esagoni, a Normale entro 30, a Difficile tutte), anche durante la tregua, e arruola soldati invece di coloni nelle città più vicine; sulla capitale che ha preso lascia sempre un presidio (a Facile solo con nemici vicini) e, se è minacciata, arruola lì e richiama le truppe come per la sua; a Normale e Difficile le capitali (anche occupate) attirano i suoi eserciti come le città più ricche.
+- Salvataggio: una capitale occupata ha il campo `x: [impero a cui è stata presa, turni tenuti]` nella città. I file di prima, dove la capitale presa era già una città qualunque, si caricano come prima (l'impero senza capitale è già caduto).
+- Test nuovi: `capitaletest.js` e `capitale_check.js` (nel browser, computer e telefono); aggiornati `imperitest.js` e `conquistatest.js`.
 
 v74 (formato di salvataggio v18; i salvataggi di prima si caricano ancora): **le mappe si caricano molto più in fretta**. Misure nel browser di prova (computer; fra parentesi con la CPU 4 volte più lenta, come un tablet): una partita nuova sulla gigante da 6,2 a 0,9 secondi (da 31 a 3,7), sulla media da 2,8 a 0,5 (da 14 a 2,3), sulla piccola da 1,0 a 0,5 (da 4,5 a 2,5); caricare una partita salvata sulla gigante da 3,4 a 0,7 secondi (da 16 a 2,7); aprire la pagina da 1,1 a 0,15 secondi (da 5,4 a 0,5).
 
