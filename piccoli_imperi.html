@@ -152,6 +152,7 @@
   .paese-btn small { display:block; font-size:11px; color:#aeb9cb; margin-top:2px; }
   #iaSel, #iaSelIntro, #avvSelIntro { padding:3px 6px; font-size:12px; border-radius:6px; background:#1c2738; color:#fff; border:1px solid #3a4a63; }
   #iaSelIntro, #avvSelIntro { font-size:14px; padding:6px; max-width:100%; }
+  #vitSelIntro, #limSelIntro { padding:6px; font-size:14px; border-radius:6px; background:#1c2738; color:#fff; border:1px solid #3a4a63; max-width:100%; }
   #paeseNemico { width:100%; padding:8px; font-size:14px; border-radius:8px; background:#1c2738; color:#fff; border:1px solid #3a4a63; }
   .ov-play { background:#3a5a8c; } .ov-play:hover { background:#4a6fa8; }
   .ov-rules { background:#2c3a52; } .ov-rules:hover { background:#3a4a66; }
@@ -188,6 +189,7 @@
       <span class="stat">📈 <b id="income">+3</b></span>
       <span class="stat">🏛️ <b id="cityCount">1</b></span>
       <span class="stat" title="Imperi IA ancora in piedi">🏳️ <b id="imperi">0</b></span>
+      <span class="stat" id="obiettivoBox" style="display:none">🏆 <b id="obiettivo"></b></span>
       <button class="btn small" onclick="showRules()" title="Tasto R">📖 Regole <kbd>R</kbd></button>
       <button class="btn small" onclick="showGuide('free')" title="Tasto E">📚 Enciclopedia <kbd>E</kbd></button>
       <button class="btn small" onclick="startTutorial()" title="Tasto T">🎓 Tutorial <kbd>T</kbd></button>
@@ -275,7 +277,7 @@
         <li>🏛️ Le tue <b>città</b> producono <b>stelle ⭐</b> a ogni turno: sono la tua moneta.</li>
         <li>⚔️ Con le stelle <b>addestri unità</b> cliccando su una tua città libera.</li>
         <li>⛺ Porta un'unità su un <b>villaggio neutrale</b> per conquistarlo e aumentare le entrate.</li>
-        <li>🏆 Vinci conquistando la <b>capitale nemica</b>.</li>
+        <li>🏆 Vinci conquistando la <b>capitale nemica</b>; nel menu qui sotto puoi aggiungere il <b>dominio</b> (60% delle città) e la <b>vittoria ai punti</b> a un turno limite.</li>
         <li>🤝 Tocca il territorio di un altro impero per <b>dichiarargli guerra</b> o proporgli <b>pace</b> o <b>alleanza</b>.</li>
       </ul>
       <h4>Difficoltà dell'IA
@@ -291,6 +293,18 @@
           <option value="duello">⚔️ Duello: un solo paese vicino, come prima</option>
         </select></h4>
       <p style="margin:4px 0 0"><small>Con tutti i paesi vedi muovere solo i nemici vicino a te: gli altri muovono di colpo. Sulla mappa gigante il turno degli imperi dura qualche secondo.</small></p>
+      <h4>Come si vince
+        <select id="vitSelIntro" onchange="setVittoria(this.value)">
+          <option value="classica" selected>🏛️ Solo capitali — vinci facendo cadere gli imperi</option>
+          <option value="dominio">🏙️ Dominio — vince anche chi ha il 60% delle città</option>
+          <option value="punti">🏁 Punti — al turno limite vince chi ha più punti</option>
+          <option value="tutte">🏆 Dominio e punti — tutti e due</option>
+        </select>
+        <select id="limSelIntro" onchange="setLimite(this.value)" title="Il turno limite (vale con i punti)">
+          <option value="60">60 turni</option><option value="100" selected>100 turni</option>
+          <option value="150">150 turni</option><option value="200">200 turni</option>
+        </select></h4>
+      <p style="margin:4px 0 0"><small>Prendere le capitali e la vittoria diplomatica valgono sempre. Punti: 10 per città (20 la capitale), 1 per ⭐ di rendita, 1 per soldato, 1 per ogni millesimo delle terre della mappa.</small></p>
       <h4>Epoca
         <select id="epocaSelIntro" onchange="setEpoca(this.value)">
           <option value="oggi">Oggi — gli stati di adesso</option>
@@ -336,6 +350,11 @@
       L'IA decide da sola: accetta più volentieri se sei forte rispetto a lei, se le tue truppe sono vicine alle sue città e se hai sempre rispettato i patti. Se rifiuta, puoi riprovare dopo 3 turni.
       Chi <b>rompe un patto</b> perde la fiducia dell'impero tradito e un po' anche quella di tutti gli altri. Un impero in pace con te, se diventa molto più forte, prima o poi può tornare in guerra; le alleanze le rompi solo tu.
       Se tutti gli imperi rimasti sono tuoi alleati vinci con la <b>vittoria diplomatica</b>. Nel duello e nel tutorial la diplomazia non c'è.</p>
+      <h4>🏆 Altri modi di vincere</h4>
+      <p>Nella schermata iniziale, alla voce <b>Come si vince</b>, puoi aggiungere:
+      <b>🏙️ Dominio</b>: chi possiede il <b>60% di tutte le città</b> della mappa (villaggi neutrali compresi) vince subito. Vale anche per l'IA: se ci arriva un impero nemico, hai perso.
+      <b>🏁 Punti</b>: finito il <b>turno limite</b> (60, 100, 150 o 200) vince chi ha più punti; a pari punti vinci tu. Punti: <b>10 per città</b> (20 la capitale), <b>1 per ogni ⭐</b> di rendita, <b>1 per soldato</b>, <b>1 per ogni millesimo</b> delle terre della mappa che è tuo.
+      In alto, accanto a 🏆, vedi le città che hai e quelle che servono, i turni che restano e il tuo posto in classifica (tieni il dito o il mouse sopra per i dettagli). Conquistare le capitali vale sempre; nel tutorial vale solo quello.</p>
       <h4>🗺️ La mappa</h4>
       <ul>
         <li><b>Prato</b> (verde chiaro): terreno normale. Anche <b>prateria</b> 🌱, <b>macchia</b> 🌿 e <b>brughiera</b> 🪻 (viola) si giocano come il prato.</li>
@@ -586,6 +605,7 @@ function newGame(tut = false) {
   ordineIA = []; aiStato = {}; caduti = []; conquistatoreP = null; aiMe = null;
   nuovaDiplomazia(); chiudiDiplomazia();
   modoPartita = tut ? 'duello' : modoAvversari; // il tutorial è sempre un duello
+  vittoriaPartita = tut ? 'classica' : vittoriaScelta; limitePartita = limiteScelto; classificaCache = null;
   genMap();
   if (tutorial) {
     // nel tutorial giochi l'Italia contro un vicino di terra; la capitale si fonda
@@ -2868,6 +2888,118 @@ function congedaClick(t) {
   refreshSets(); ui(); render();
 }
 
+// ============ LE CONDIZIONI DI VITTORIA ============
+// Si vince sempre facendo cadere le capitali (e con la vittoria diplomatica). Nel menu
+// iniziale si possono aggiungere altri due modi di finire la partita:
+// - DOMINIO: chi possiede il 60% di tutte le città della mappa (villaggi neutrali
+//   compresi) vince subito. Vale anche per l'IA: se ci arriva un impero IA, hai perso;
+// - PUNTI: finito il turno limite vince chi ha più punti (a pari punti vinci tu).
+// Nel tutorial vale solo la capitale.
+const VITTORIE = {
+  classica: 'Solo capitali — vinci facendo cadere gli imperi',
+  dominio:  'Dominio — anche chi ha il 60% delle città vince',
+  punti:    'Punti — al turno limite vince chi ha più punti',
+  tutte:    'Dominio e punti — tutti e due',
+};
+const LIMITI_TURNI = [60, 100, 150, 200];
+const DOMINIO_QUOTA = 0.6;
+let vittoriaScelta = 'classica', limiteScelto = 100; // il menu, ricordato fra una partita e l'altra
+try {
+  const v = localStorage.getItem('piccoliImperi.vittoria'); if (VITTORIE[v]) vittoriaScelta = v;
+  const l = +localStorage.getItem('piccoliImperi.limite'); if (LIMITI_TURNI.includes(l)) limiteScelto = l;
+} catch (e) {}
+let vittoriaPartita = 'classica', limitePartita = 100; // quelle della partita in corso
+let classificaCache = null; // i punti, ricalcolati a ogni tuo turno (contarli scorre tutta la mappa)
+function setVittoria(v) {
+  if (!VITTORIE[v]) return;
+  vittoriaScelta = v;
+  try { localStorage.setItem('piccoliImperi.vittoria', v); } catch (e) {}
+}
+function setLimite(l) {
+  l = +l;
+  if (!LIMITI_TURNI.includes(l)) return;
+  limiteScelto = l;
+  try { localStorage.setItem('piccoliImperi.limite', String(l)); } catch (e) {}
+}
+function aggiornaSelVittoria() {
+  const a = document.getElementById('vitSelIntro'); if (a) a.value = vittoriaScelta;
+  const b = document.getElementById('limSelIntro'); if (b) b.value = String(limiteScelto);
+}
+function conDominio() { return !tutorial && (vittoriaPartita === 'dominio' || vittoriaPartita === 'tutte'); }
+function conPunti() { return !tutorial && (vittoriaPartita === 'punti' || vittoriaPartita === 'tutte'); }
+// le città della mappa (villaggi neutrali compresi) e quante ne ha ciascuno
+function quoteCitta() {
+  const per = {};
+  let tot = 0;
+  for (const t of conCitta) {
+    if (!map[t.r] || map[t.r][t.c] !== t) continue;
+    tot++;
+    const o = t.city.owner;
+    if (o) per[o] = (per[o] || 0) + 1;
+  }
+  return { tot, per, serve: Math.max(1, Math.ceil(tot * DOMINIO_QUOTA)) };
+}
+function dominatore() {
+  const q = quoteCitta();
+  for (const o of ['p', ...imperiIA()]) if ((q.per[o] || 0) >= q.serve) return o;
+  return null;
+}
+// i punti: 10 per città (20 la capitale), 1 per ogni ⭐ di rendita, 1 per soldato,
+// 1 per ogni millesimo delle terre della mappa che è suo (le caselle conquistate in guerra
+// comprese: così vale uguale su tutte le taglie e la Russia non stravince per la sola steppa)
+function punteggi() {
+  const chi = ['p', ...imperiIA()], pt = {}, terra = {};
+  for (const o of chi) {
+    pt[o] = cities(o).reduce((s, t) => s + (t.city.capital ? 20 : 10), 0) + income(o)
+          + unitsOf(o).reduce((s, t) => s + (UNIT_TYPES[t.unit.type].atk > 0 ? t.unit.count : 0)
+                                          + (t.unit.cargo && UNIT_TYPES[t.unit.cargo.type].atk > 0 ? t.unit.cargo.count : 0), 0);
+    terra[o] = 0;
+  }
+  let terre = 0;
+  for (const riga of map) for (const t of riga) {
+    if (!terraConquistabile(t)) continue;
+    terre++;
+    const o = padroneTerra(t);
+    if (o in terra) terra[o]++;
+  }
+  for (const o of chi) pt[o] += Math.floor(terra[o] * 1000 / Math.max(1, terre));
+  // la classifica: a pari punti tu stai davanti
+  return chi.map(o => ({ o, punti: pt[o] })).sort((a, b) => b.punti - a.punti || (a.o === 'p' ? -1 : b.o === 'p' ? 1 : 0));
+}
+function aggiornaClassifica() { classificaCache = conPunti() && map && !placing ? punteggi() : null; }
+function nomeVincitore(o) { return modoPartita === 'duello' ? 'L\'Impero Cremisi' : `${bandiera(o)} ${players[o].name}`; }
+// finito il turno limite: vince chi ha più punti
+function finePerPunti() {
+  const cl = punteggi();
+  classificaCache = cl;
+  const mio = cl.find(x => x.o === 'p'), primo = cl[0];
+  const podio = cl.slice(0, 3).map((x, i) => `${i + 1}° ${x.o === 'p' ? 'Tu' : (modoPartita === 'duello' ? 'Impero Cremisi' : `${bandiera(x.o)} ${players[x.o].name}`)} ${x.punti}`).join(' · ');
+  if (primo.o === 'p')
+    endGame(true, `Vittoria ai punti: allo scadere del turno ${limitePartita} sei primo con ${mio.punti} punti. Classifica: ${podio}.`);
+  else
+    endGame(false, `Turno ${limitePartita} finito: ${nomeVincitore(primo.o)} vince ai punti con ${primo.punti}, tu ne hai ${mio.punti} (${cl.indexOf(mio) + 1}° posto). Classifica: ${podio}.`);
+}
+// in alto, l'obiettivo: quante città mancano al dominio e quanti turni alla fine
+function testoObiettivo() {
+  if (!map || placing) return null;
+  const parti = [], titolo = [];
+  if (conDominio()) {
+    const q = quoteCitta(), mie = q.per.p || 0;
+    parti.push(`🏙️ ${mie}/${q.serve}`);
+    titolo.push(`Dominio: hai ${mie} città su ${q.tot}; con ${q.serve} (il ${Math.round(DOMINIO_QUOTA * 100)}%) vinci. Anche un impero IA che ci arriva vince.`);
+  }
+  if (conPunti()) {
+    const resta = limitePartita - turn;
+    parti.push(`🏁 ${resta > 0 ? `${resta} turni` : 'ultimo turno'}`);
+    const cl = classificaCache || (classificaCache = punteggi()), i = cl.findIndex(x => x.o === 'p');
+    titolo.push(`Punti: finito il turno ${limitePartita} vince chi ne ha di più.`
+      + (i >= 0 ? ` Ora hai ${cl[i].punti} punti, ${i + 1}° su ${cl.length}${i > 0 ? ` (primo ${cl[0].o === 'p' ? 'tu' : nomePaese(players[cl[0].o].country)} con ${cl[0].punti})` : ''}.` : '')
+      + ' Punti: 10 per città (20 la capitale), 1 per ⭐ di rendita, 1 per soldato, 1 per ogni millesimo delle terre della mappa.');
+    if (i >= 0) parti.push(`${i + 1}°`);
+  }
+  return parti.length ? { testo: parti.join(' · '), titolo: titolo.join('\n') } : null;
+}
+
 // si perde quando cade la propria capitale, si vince quando non resta nessun impero IA
 function checkEnd() {
   if (gameOver || placing) return;
@@ -2875,14 +3007,22 @@ function checkEnd() {
   else if (!imperiIA().length) endGame(true);
   // vittoria diplomatica: tutti gli imperi rimasti sono tuoi alleati
   else if (modoPartita === 'tutti' && imperiIA().every(o => relazione('p', o) === 'alleanza')) endGame(true);
+  // vittoria per dominio: il 60% delle città della mappa
+  else if (conDominio()) {
+    const d = dominatore();
+    if (!d) return;
+    const q = quoteCitta();
+    if (d === 'p') endGame(true, `Vittoria per dominio: hai ${q.per.p} città su ${q.tot} (almeno il ${Math.round(DOMINIO_QUOTA * 100)}%) al turno ${turn}. L'Europa riconosce il tuo impero!`);
+    else endGame(false, `${nomeVincitore(d)} domina l'Europa: ha ${q.per[d]} città su ${q.tot} al turno ${turn}. Andrà meglio la prossima volta!`);
+  }
 }
 
-function endGame(win) {
+function endGame(win, testo) {
   gameOver = true;
   const ov = document.getElementById('overlay');
   const chi = conquistatoreP && players[conquistatoreP];
   document.getElementById('ovTitle').textContent = win ? '🏆 VITTORIA!' : '💀 SCONFITTA';
-  document.getElementById('ovText').textContent = win
+  document.getElementById('ovText').textContent = testo ? testo : win
     ? (modoPartita === 'tutti' && imperiIA().length
       ? `Vittoria diplomatica: tutti gli imperi rimasti (${imperiIA().length}) sono tuoi alleati, al turno ${turn}. L'Europa è in pace sotto la tua guida!`
       : modoPartita === 'tutti'
@@ -2940,6 +3080,7 @@ function healIdle(owner) {
 
 function startPlayerTurn() {
   if (gameOver) return;
+  if (conPunti() && turn >= limitePartita) { finePerPunti(); return; } // finito il turno limite
   turn++;
   current = 'p'; aiMe = null;
   players.p.stars += income('p');           // prima incassi...
@@ -2953,6 +3094,8 @@ function startPlayerTurn() {
     msg(`Turno ${turn}: +${income('p')} ⭐ − ${upk} di mantenimento. Tocca a te!`);
   }
   updateAiLog(); // la cronaca resta visibile in trasparenza sulla mappa
+  aggiornaClassifica();
+  checkEnd(); // il dominio si può raggiungere anche nel giro degli imperi
   ui(); render();
 }
 
@@ -3041,6 +3184,8 @@ function serialize() {
            stars: Object.fromEntries(['p', ...imperi].map(o => [o, players[o].stars])),
            paesi: Object.fromEntries(['p', ...imperi].map(o => [o, players[o].country || null])),
            ia: aiLivello, epoca: epocaPartita, diplomazia: diplo, tiles,
+           // v69 (campo facoltativo): come si vince e il turno limite
+           vittoria: { modo: vittoriaPartita, limite: limitePartita },
            // v62 (campo facoltativo): le caselle conquistate in guerra, [riga, colonna, impero]
            conquiste: map.flat().filter(t => t.terra && players[t.terra]).map(t => [t.r, t.c, t.terra]) };
 }
@@ -3225,6 +3370,10 @@ function applySave(data) {
   }
   // la difficoltà dell'IA (campo facoltativo): i salvataggi che non ce l'hanno giocano a Normale
   setDifficolta(AI_LIVELLI[data.ia] ? data.ia : 'normale');
+  // come si vince (campo facoltativo, dalla v69): senza, solo le capitali
+  const vit = data.vittoria && typeof data.vittoria === 'object' ? data.vittoria : {};
+  vittoriaPartita = VITTORIE[vit.modo] ? vit.modo : 'classica';
+  limitePartita = LIMITI_TURNI.includes(vit.limite) ? vit.limite : 100;
   document.getElementById('paesi').style.display = 'none';
   chiudiDiplomazia();
   current = 'p'; gameOver = false; tutorial = false; tutStep = -1;
@@ -3236,6 +3385,7 @@ function applySave(data) {
   document.getElementById('overlay').style.display = 'none';
   document.getElementById('tutbar').style.display = 'none';
   document.getElementById('endBtn').classList.remove('pulse');
+  aggiornaClassifica();
   ui(); render();
   scrollToTile(pCapital(), false);
   return true;
@@ -5051,6 +5201,8 @@ function ui() {
   const panel = document.getElementById('panel');
   panel.innerHTML = '';
 
+  { const ob = testoObiettivo(), box = document.getElementById('obiettivoBox');
+    if (box) { box.style.display = ob ? '' : 'none'; if (ob) { document.getElementById('obiettivo').textContent = ob.testo; box.title = ob.titolo; } } }
   const nImp = imperiIA().length;
   const ie = document.getElementById('imperi');
   if (ie) { ie.textContent = nImp; ie.title = `Imperi IA ancora in piedi: ${nImp}${caduti.length ? ` (caduti: ${caduti.map(bandiera).join(' ')})` : ''}`; }
@@ -5135,6 +5287,7 @@ function ui() {
 setMapSize('piccola');
 aggiornaSelIA(); // la difficoltà scelta l'ultima volta
 { const el = document.getElementById('avvSelIntro'); if (el) el.value = modoAvversari; } // e gli avversari
+aggiornaSelVittoria(); // e come si vince
 aggiornaSelEpoca(); // e l'epoca
 newGame(); // la partita parte sotto la schermata di benvenuto
 </script>

@@ -38,6 +38,7 @@ cat stub.js game.js conquistatest.js > _run.js && node _run.js   # conquista del
 cat stub.js game.js capitalitest.js > _run.js && node _run.js   # capitali reali: pochi secondi
 cat stub.js game.js paesinuovitest.js > _run.js && node _run.js   # i paesi della v65: circa 20 secondi
 cat stub.js game.js microstatitest.js > _run.js && node _run.js   # i microstati: circa 20 secondi
+cat stub.js game.js vittoriatest.js > _run.js && node _run.js   # condizioni di vittoria: circa 15 secondi
 cat stub.js game.js popolazionetest.js > _run.js && node _run.js   # abitanti veri delle città
 cat stub.js game.js biomitest.js > _run.js && node _run.js   # i biomi OSM
 ```
@@ -70,6 +71,12 @@ Nella schermata iniziale (e nella scelta del paese, prima di fondare la capitale
 Ogni modifica alla mappa va verificata con `mappatest.js`, che controlla anche che due partite abbiano la stessa mappa.
 
 ## Versione
+
+v69 (formato di salvataggio v17, con il campo facoltativo `vittoria`): **nuove condizioni di vittoria**, da scegliere nella schermata iniziale alla voce «Come si vince». Oltre alle capitali (e alla vittoria diplomatica), che valgono sempre:
+
+- **Dominio**: chi possiede il 60% di tutte le città della mappa (villaggi neutrali compresi) vince subito; vale anche per gli imperi IA.
+- **Punti**: finito il turno limite (60, 100, 150 o 200) vince chi ha più punti: 10 per città (20 la capitale), 1 per ⭐ di rendita, 1 per soldato, 1 per ogni millesimo delle terre della mappa. A pari punti vince il giocatore.
+- In alto, accanto a 🏆, le città che hai e quelle che servono, i turni che restano e il posto in classifica. Default «Solo capitali» (come prima); i salvataggi senza il campo giocano così; nel tutorial valgono solo le capitali. Test: `vittoriatest.js`.
 
 v68 (formato di salvataggio v17, con il campo facoltativo `epoca`): **si sceglie l'epoca storica** a inizio partita: oggi, 1938, 1914, 1800, 1500 o l'anno Mille (vedi «Le epoche»). Ogni stato storico è un impero IA, con la capitale nella sua città più popolosa; le epoche coprono anche i paesi aggiunti nella v65.
 
