@@ -12,7 +12,7 @@ In locale: apri `piccoli_imperi.html` nel browser con un doppio clic. Non serve 
 
 - `piccoli_imperi.html`: il gioco completo (HTML, CSS e JavaScript in un unico file).
 - `index.html`: pagina d'ingresso per GitHub Pages, rimanda subito a `piccoli_imperi.html`.
-- `stub.js`, `shiptest.js`, `savetest.js`, `playtest.js`, `aitest.js`, `paesitest.js`, `imperitest.js`, `difficoltatest.js`, `mappatest.js`, `diplotest.js`, `conquistatest.js`, `capitalitest.js`, `paesinuovitest.js`, `microstatitest.js`, `popolazionetest.js`, `biomitest.js`, `epochetest.js`, `browser_check.js`, `mobile_check.js`, `pantest.js`, `conquista_check.js`, `citta_check.js`: test automatici (`mobile_check.js` prova il gioco su un iPhone emulato con Playwright, `pantest.js` lo spostamento nella mappa col mouse, le frecce e il dito).
+- `stub.js`, `shiptest.js`, `savetest.js`, `playtest.js`, `aitest.js`, `paesitest.js`, `imperitest.js`, `difficoltatest.js`, `mappatest.js`, `diplotest.js`, `conquistatest.js`, `capitalitest.js`, `paesinuovitest.js`, `microstatitest.js`, `popolazionetest.js`, `biomitest.js`, `epochetest.js`, `browser_check.js`, `mobile_check.js`, `pantest.js`, `conquista_check.js`, `citta_check.js`, `unitatest.js`, `stabilita_check.js`: test automatici (`mobile_check.js` prova il gioco su un iPhone emulato con Playwright, `pantest.js` lo spostamento nella mappa col mouse, le frecce e il dito).
 - `build_russia.js`: script che ha estratto il confine della Russia dal dataset Natural Earth.
 - `build_paesi_nord.py`: estrae da Natural Earth i confini dei paesi aggiunti nella v65 (`POLY_NORD`, `SEMI_NORD`).
 - `build_biomi.py`, `export_tiles.js`: costruiscono i biomi fissi dai dati di OpenStreetMap.
@@ -33,6 +33,7 @@ cat stub.js game.js epochetest.js > _run.js && node _run.js   # epoche: circa 3 
 cat stub.js game.js aitest.js > _run.js && node _run.js   # IA: 150 turni, circa un minuto
 cat stub.js game.js difficoltatest.js > _run.js && node _run.js   # difficoltà IA: circa 40 secondi
 cat stub.js game.js ricchezzatest.js > _run.js && node _run.js   # l'IA punta alle città ricche: circa 30 secondi
+cat stub.js game.js unitatest.js > _run.js && node _run.js   # unit test delle funzioni principali: circa 10 secondi
 cat stub.js game.js mappatest.js > _run.js && node _run.js
 cat stub.js game.js diplotest.js > _run.js && node _run.js   # diplomazia: circa 15 secondi
 cat stub.js game.js conquistatest.js > _run.js && node _run.js   # conquista del territorio: circa 20 secondi
@@ -73,6 +74,15 @@ Ogni modifica alla mappa va verificata con `mappatest.js`, che controlla anche c
 
 ## Versione
 
+v72 (formato di salvataggio v17, con il campo facoltativo `f` per unità): **stabilità e mappa più veloce**, dopo un debug completo (rapporto e misure nel thread del progetto).
+
+- Spostarsi nella mappa è molto più fluido. La memoria delle tessere del terreno ora è grande quanto serve allo schermo (prima 120 tessere fisse: su uno schermo grande o retina ogni passo del trascinamento le ridisegnava tutte, 100-370 ms a fotogramma; ora 7-45 ms). I veli e i contorni dei territori si calcolano a pezzi di 32×32 caselle e si tengono in memoria finché non cambiano, invece di ricalcolarli a ogni fotogramma. Da lontano (casella sotto gli 8 pixel) le tessere disegnano solo i colori, senza icone e segni dei biomi.
+- Caricare una partita, iniziarne una nuova o avviare il tutorial mentre gli imperi stanno muovendo ora ferma davvero il loro turno: prima la partita caricata andava avanti da sola di un turno.
+- Il salvataggio ricorda chi ha già mosso o attaccato nel turno (campo `f`): salvare e ricaricare non ridà le mosse. I salvataggi di prima si caricano come sempre.
+- Un file di salvataggio non valido di un'altra grandezza di mappa non rompe più la partita in corso.
+- Un errore imprevisto nel turno di un impero non blocca il gioco: si salta quell'unità (o si passa al prossimo impero) e in alto compare un avviso.
+- Addestrare non è possibile fuori dal tuo turno; il congedo su una casella vuota mostra il messaggio invece di un errore.
+- Test nuovi: `unitatest.js` (28 unit test) e `stabilita_check.js` (18 scenari nel browser, circa 10 minuti). `stub.js` ha un `Path2D` finto.
 v71 (formato di salvataggio invariato, v17; i salvataggi vecchi si caricano con i loro villaggi): **solo città vere da 100.000 abitanti in su e capitali**. Sulla mappa piccola le città passano da 321 a 170 (167 sulla media, 163 sulla gigante), tutte con nome e abitanti veri; ogni capitale ha il suo villaggio.
 
 v70 (formato di salvataggio v17, invariato): **l'IA punta alle città più ricche**. Nella scelta degli obiettivi (villaggi da prendere e città nemiche da attaccare) una città che rende più stelle, cioè con più abitanti veri, "sembra più vicina": l'IA accetta una deviazione per arrivarci. Quanto pesa dipende dalla difficoltà (`ricchezza` in `AI_LIVELLI`): a Facile niente (va alla più vicina, come prima), a Normale 2 terzi di turno di strada per ogni stella in più, a Difficile 4 (Parigi contro un villaggio: circa 9 turni di deviazione). Fra i difensori da colpire l'IA preferisce quelli delle città ricche. Test: `ricchezzatest.js`.

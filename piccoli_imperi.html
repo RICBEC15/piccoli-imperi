@@ -555,9 +555,11 @@ function svuotaIndici() { conUnita.clear(); conCitta.clear(); conPorto.clear(); 
 class Casella {
   constructor(r, c) {
     this.r = r; this.c = c; this.terrain = 'water'; this.country = null;
-    this.terra = null; // l'impero che ha conquistato la casella in guerra (null = del suo paese)
+    this._t = null; // l'impero che ha conquistato la casella in guerra (null = del suo paese)
     this._u = null; this._y = null; this._q = null; this._h = null;
   }
+  get terra() { return this._t; }
+  set terra(v) { v = v || null; if (v !== this._t) { this._t = v; territorioCambiato(this); } }
   get hosp() { return this._h; }
   set hosp(v) { this._h = v || null; if (v) conOsp.add(this); else conOsp.delete(this); }
   get unit() { return this._u; }
@@ -575,7 +577,22 @@ function dallIndice(ind, f) {
   return out.sort((a, b) => a.r - b.r || a.c - b.c);
 }
 
+// ogni partita nuova o caricata ha il suo numero: i passi del turno IA ancora in coda
+// (setTimeout) della partita di prima, quando arrivano, vedono che non e' piu' la loro e si fermano
+let partitaN = 0;
+function iaDopo(fn, ms) {
+  const n = partitaN;
+  setTimeout(() => {
+    if (n !== partitaN) return;
+    try { fn(); }
+    catch (e) { // un errore nel turno di un impero: lo si segnala e tocca al prossimo, il gioco non resta fermo
+      erroreGioco(e);
+      if (!gameOver && current !== 'p' && n === partitaN) iaDopo(() => aiTurn(aiGiroIdx + 1), 0);
+    }
+  }, ms);
+}
 function newGame(tut = false) {
+  partitaN++;
   document.getElementById('overlay').style.display = 'none';
   tutorial = tut;
   turn = 1; current = 'p'; selected = null; moveSet = []; attackSet = []; mergeSet = []; bridgeSet = []; embarkSet = []; disembarkSet = []; gameOver = false;
@@ -2900,7 +2917,7 @@ function congedaUno(t) { // toglie un soldato dall'armata scelta (o l'intera nav
   } else t.unit = null;
 }
 function congedaClick(t) {
-  const u = t.unit, d = UNIT_TYPES[u.type];
+  const u = t.unit, d = u && UNIT_TYPES[u.type];
   if (!u || u.owner !== 'p' || (!d.ship && d.atk <= 0)) { congedoMsg(); return; }
   // dall'armata scelta si tolgono soldati finché basta (o finché si esaurisce)
   while (t.unit && upkeep('p') > players.p.stars) congedaUno(t);
@@ -2956,7 +2973,7 @@ function endTurn() {
     ? '🔴 Gli imperi stanno muovendo… (cronaca in basso a sinistra sulla mappa)'
     : '🔴 L\'Impero Cremisi sta muovendo… (cronaca in basso a sinistra sulla mappa)';
   ui(); render();
-  setTimeout(() => aiTurn(0), 350);
+  iaDopo(() => aiTurn(0), 350);
 }
 
 function healIdle(owner) {
@@ -3064,6 +3081,9 @@ function undoMove() {
 }
 
 // ============ SALVATAGGIO ============
+// quello che un'unità ha già fatto nel turno (dalla v72): 1 = ha mosso, 2 = ha attaccato.
+// Senza, salvando e ricaricando ogni unità poteva muovere e attaccare di nuovo
+function fattoDi(u) { return (u.moved ? 1 : 0) | (u.attacked ? 2 : 0); }
 function serialize() {
   const tiles = [];
   for (let r = 0; r < ROWS; r++) for (let c = 0; c < COLS; c++) {
@@ -3072,9 +3092,9 @@ function serialize() {
       r, c, g: t.terrain, b: t.bridge ? 1 : 0,
       y: t.city ? { o: t.city.owner, k: !!t.city.capital, p: t.city.pop || 1, n: t.city.n || null, a: t.city.ab } : 0,
       u: t.unit ? { t: t.unit.type, o: t.unit.owner, n: t.unit.count, h: t.unit.hp, m: t.unit.maxHp, cl: t.unit.climb || 0,
-                    lv: UNIT_TYPES[t.unit.type].ship ? (t.unit.lvl || 1) : 0,
+                    lv: UNIT_TYPES[t.unit.type].ship ? (t.unit.lvl || 1) : 0, f: fattoDi(t.unit),
                     k: t.unit.cargo ? { t: t.unit.cargo.type, o: t.unit.cargo.owner, n: t.unit.cargo.count,
-                                        h: t.unit.cargo.hp, m: t.unit.cargo.maxHp } : 0 } : 0,
+                                        h: t.unit.cargo.hp, m: t.unit.cargo.maxHp, f: fattoDi(t.unit.cargo) } : 0 } : 0,
       s: t.hosp ? { o: t.hosp.owner, l: t.hosp.level, p: t.hosp.hp } : 0,
       q: t.port ? { o: t.port.owner } : 0
     });
@@ -3090,6 +3110,21 @@ function serialize() {
 }
 
 function applySave(data) {
+  const modo = mapMode, righe = ROWS, colonne = COLS;
+  let ok = false;
+  try { ok = caricaSalvataggio(data); }
+  finally {
+    if (!ok) {
+      // il controllo del file puo' aver gia' cambiato la grandezza della mappa: si torna a quella di prima
+      if (mapMode !== modo || ROWS !== righe || COLS !== colonne) setMapSize(modo);
+      // via dagli indici le caselle del file scartato
+      for (const ind of [conUnita, conCitta, conPorto, conOsp])
+        for (const t of ind) if (!map[t.r] || map[t.r][t.c] !== t) ind.delete(t);
+    }
+  }
+  return ok;
+}
+function caricaSalvataggio(data) {
   const TERR = ['grass','forest','mountain','water','river','desert','hill'];
   if (!data || ![6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17].includes(data.v) || !Array.isArray(data.tiles) || !data.stars) return false;
   // chi può possedere qualcosa: tu ('p') e gli imperi IA. Fino alla v16 c'era un solo
@@ -3144,7 +3179,7 @@ function applySave(data) {
       const n = Math.min(maxStackFor(s.u.t), Math.max(1, s.u.n | 0));
       const mh = UNIT_TYPES[s.u.t].hp * n;
       t.unit = { type: s.u.t, owner: s.u.o, count: n, maxHp: mh,
-                 hp: Math.min(mh, Math.max(1, s.u.h | 0)), moved:false, attacked:false,
+                 hp: Math.min(mh, Math.max(1, s.u.h | 0)), moved: !!(s.u.f & 1), attacked: !!(s.u.f & 2),
                  climb: Math.max(0, Math.min(2, s.u.cl | 0)) };
       if (UNIT_TYPES[s.u.t].ship) {
         t.unit.lvl = Math.min(NAVE_MAX_LIV, Math.max(1, s.u.lv | 0 || 1));
@@ -3154,7 +3189,7 @@ function applySave(data) {
           const kn = Math.min(maxStackFor(s.u.k.t), Math.max(1, s.u.k.n | 0));
           const kmh = UNIT_TYPES[s.u.k.t].hp * kn;
           t.unit.cargo = { type: s.u.k.t, owner: s.u.k.o, count: kn, maxHp: kmh,
-                           hp: Math.min(kmh, Math.max(1, s.u.k.h | 0)), moved:false, attacked:false };
+                           hp: Math.min(kmh, Math.max(1, s.u.k.h | 0)), moved: !!(s.u.k.f & 1), attacked: !!(s.u.k.f & 2) };
           // condono: se il carico salvato è più grande della capacità del livello registrato
           // (salvataggi pre-livelli-nave, o edge case), la nave viene promossa al livello minimo che basta
           const need = aliveCount(t.unit.cargo);
@@ -3271,6 +3306,7 @@ function applySave(data) {
   setDifficolta(AI_LIVELLI[data.ia] ? data.ia : 'normale');
   document.getElementById('paesi').style.display = 'none';
   chiudiDiplomazia();
+  partitaN++; // il turno IA della partita di prima, se era in corso, si ferma
   current = 'p'; gameOver = false; tutorial = false; tutStep = -1;
   placing = false; placeSet = [];
   congedo = false;
@@ -3623,21 +3659,22 @@ function runAiQueue(queue, i) {
     if (!t.unit || t.unit.owner !== aiMe) continue;
     aiVisibile = aiMostra(t);
     const before = aiLog.length;
-    const dove = aiActUnit(t) || t;
+    let dove = t;
+    try { dove = aiActUnit(t) || t; } catch (e) { erroreGioco(e); } // un'unità sola che sbaglia non ferma il turno
     aiLiberaCitta(t);
     if (aiVisibile && aiLog.length > before) { // una mossa vicino a te: si mostra, poi una pausa
       aiMostrate++;
       aiActive = dove;   // evidenzia la casella dove l'unità ha agito
       scrollToTile(aiActive);
       render();
-      setTimeout(() => runAiQueue(queue, i + 1), AI_DELAY);
+      iaDopo(() => runAiQueue(queue, i + 1), AI_DELAY);
       return;
     }
-    if (Date.now() - t0 > AI_BLOCCO_MS) { setTimeout(() => runAiQueue(queue, i + 1), 0); return; }
+    if (Date.now() - t0 > AI_BLOCCO_MS) { iaDopo(() => runAiQueue(queue, i + 1), 0); return; }
   }
   aiActive = null; aiVisibile = false;
   if (aiMostrate) render();
-  setTimeout(aiTrainPhase, aiMostrate ? AI_DELAY : 0);
+  iaDopo(aiTrainPhase, aiMostrate ? AI_DELAY : 0);
 }
 
 function aiTrainPhase() {
@@ -3699,7 +3736,7 @@ function aiTrainPhase() {
   // tocca al prossimo impero (la pausa solo se questo ha mosso vicino a te)
   if (aiMostrate) render();
   const i = aiGiroIdx + 1;
-  setTimeout(() => aiTurn(i), aiMostrate ? AI_DELAY : 0);
+  iaDopo(() => aiTurn(i), aiMostrate ? AI_DELAY : 0);
 }
 
 // direzione approssimativa di un movimento, per la cronaca
@@ -4534,6 +4571,7 @@ function refreshSets() {
 function deselect() { selected = null; moveSet = []; attackSet = []; mergeSet = []; bridgeSet = []; embarkSet = []; disembarkSet = []; ui(); render(); }
 
 function train(type, n = 1) {
+  if (current !== 'p' || gameOver || placing) return;
   if (!selected || !selected.city || selected.city.owner !== 'p' || selected.unit) return;
   const d = UNIT_TYPES[type];
   if (!d || !d.trainable) return;
@@ -4639,7 +4677,10 @@ function hexPathOn(g, x, y) {
 // TESSERE, come le mappe online: quadrati di TILE_PX pixel dello schermo, per
 // livelli di zoom a potenze di 2. Si preparano solo le tessere visibili e se ne
 // tiene in memoria un numero limitato: nessuna superficie gigante.
-const TILE_PX = 256, TILE_CACHE_MAX = 120;
+const TILE_PX = 256, TILE_CACHE_MIN = 120;
+// la memoria deve contenere piu' tessere di quelle sullo schermo: su uno schermo grande o retina
+// se ne vedono anche 220, e con un limite fisso a 120 ogni passo del trascinamento le rifaceva tutte
+let tileCacheMax = TILE_CACHE_MIN;
 const tileCache = new Map(); // "livello|tx|ty" -> canvas (ordine = uso recente)
 function terrainLevel(scale) { // scala disegno (pixel schermo per pixel mappa) -> livello
   return Math.max(-7, Math.min(2, Math.round(Math.log2(scale))));
@@ -4654,13 +4695,14 @@ function terrainTile(lv, tx, ty) {
   const x0 = tx * span, y0 = ty * span;
   const b = tc.getContext('2d');
   b.setTransform(s, 0, 0, s, -x0 * s, -y0 * s);
-  drawTerrain(b, tileRange(x0, y0, x0 + span, y0 + span, 2));
+  // casella piu' piccola di 8 pixel: icone e segni non si leggono e costano molto (le emoji soprattutto)
+  drawTerrain(b, tileRange(x0, y0, x0 + span, y0 + span, 2), S * s >= 8);
   tileCache.set(id, tc);
-  while (tileCache.size > TILE_CACHE_MAX) tileCache.delete(tileCache.keys().next().value);
+  while (tileCache.size > tileCacheMax) tileCache.delete(tileCache.keys().next().value);
   return tc;
 }
 // la cache va svuotata quando cambia il terreno (ponti, nuova mappa...)
-function renderBase() { tileCache.clear(); terrainDirty = false; }
+function renderBase() { tileCache.clear(); territorioCache.clear(); terrainDirty = false; }
 // i piccoli segni dei biomi del prato (solco dei campi, filari, case, canne...)
 function disegnaBioma(b, bio, p, k) {
   const pallini = (col, pts) => {
@@ -4702,24 +4744,32 @@ function disegnaBioma(b, bio, p, k) {
   }
 }
 // disegna il terreno delle caselle comprese in tr (righe r0..r1, colonne c0..c1)
-function drawTerrain(b, tr) {
+function drawTerrain(b, tr, dettagli = true) {
   const k = S / 42;
   b.textAlign = 'center'; b.textBaseline = 'middle';
+  // il colore di ogni casella (il "deserto glaciale" della tundra artica e' l'unica
+  // variante con un colore diverso: bianco neve, non la sabbia degli altri deserti)
+  const colore = t => {
+    const bio = (t.terrain === 'grass' || t.terrain === 'mountain') ? bioma(t) : '';
+    return (t.terrain === 'desert' && t.dvar === 'ice') ? '#e9edf4'
+      : (BIOMA_INFO[bio] && BIOMA_INFO[bio].col) || TERRAIN_COLORS[t.terrain];
+  };
   // tutti i deserti hanno lo stesso colore di sabbia: cambiano solo i piccoli
   // segni (creste di dune, pietre, crepe di sale)
   for (let r = tr.r0; r <= tr.r1; r++) for (let c = tr.c0; c <= tr.c1; c++) {
     const t = map[r][c];
     const p = center(t);
     hexPathOn(b, p.x, p.y);
-    // il "deserto glaciale" della tundra artica e' l'unica variante con un colore
-    // diverso: bianco neve, non la sabbia degli altri deserti
     const bio = (t.terrain === 'grass' || t.terrain === 'mountain') ? bioma(t) : '';
-    b.fillStyle = (t.terrain === 'desert' && t.dvar === 'ice') ? '#e9edf4'
-      : (BIOMA_INFO[bio] && BIOMA_INFO[bio].col) || TERRAIN_COLORS[t.terrain];
+    b.fillStyle = colore(t);
     b.fill();
     b.lineWidth = Math.max(0.35, 1 * k);
     b.strokeStyle = 'rgba(0,0,0,.35)';
     b.stroke();
+    if (!dettagli) { // da lontano solo il colore (e il ponte, come una macchia di legno)
+      if (t.bridge && (t.terrain === 'river' || t.terrain === 'water')) { hexPathOn(b, p.x, p.y); b.fillStyle = '#9a6b3f'; b.fill(); }
+      continue;
+    }
     if (t.terrain === 'desert' && t.dvar && k > 0.15) {
       if (t.dvar === 'erg') {            // creste di dune
         b.strokeStyle = 'rgba(150,105,25,.5)'; b.lineWidth = Math.max(0.5, 2*k);
@@ -4813,6 +4863,65 @@ function scheduleRender() {
   if (typeof window.addEventListener === 'function') window.addEventListener('resize', () => { sizeWorld(); scheduleRender(); });
 })();
 
+// ---- territori a pezzi di TERR_PEZZO x TERR_PEZZO caselle, ciascuno con le sue forme (Path2D)
+// per impero: velo, caselle conquistate e contorno. Un pezzo si rifa' quando cambia una sua
+// casella conquistata (anche ai bordi: il contorno dipende dai vicini), quando cade un impero
+// o cambia il tuo paese (la chiave), o quando si rifa' il terreno (renderBase)
+const TERR_PEZZO = 32;
+const territorioCache = new Map(); // "riga|colonna" del pezzo -> { chiave, n, o: { impero: forme } }
+function territorioCambiato(t) {
+  if (!territorioCache.size) return;
+  for (let r = Math.floor((t.r - 1) / TERR_PEZZO); r <= Math.floor((t.r + 1) / TERR_PEZZO); r++)
+    for (let c = Math.floor((t.c - 1) / TERR_PEZZO); c <= Math.floor((t.c + 1) / TERR_PEZZO); c++)
+      territorioCache.delete(r + '|' + c);
+}
+function territorioPezzo(pr, pc) {
+  const vivi = ['p', ...imperiIA()];
+  const chiave = (players.p.country || '') + '|' + vivi.join(',');
+  const id = pr + '|' + pc;
+  const z0 = territorioCache.get(id);
+  if (z0 && z0.chiave === chiave) return z0;
+  const terr = {}; // paese -> impero che lo guida (il tuo vince, se un vecchio salvataggio li sovrappone)
+  for (const o of vivi) if (o !== 'p' && players[o].country) terr[players[o].country] = o;
+  if (players.p.country) terr[players.p.country] = 'p';
+  // le caselle conquistate in guerra passano al colore di chi le ha prese
+  const vivo = new Set(vivi);
+  const padrone = t => (t.terra && vivo.has(t.terra) ? t.terra : t.country ? terr[t.country] : undefined);
+  const z = { chiave, n: 0, o: {} };
+  const esagono = (path, p) => {
+    for (let j = 0; j < 6; j++) {
+      const ang = Math.PI / 180 * (60 * j - 30), px = p.x + S * Math.cos(ang), py = p.y + S * Math.sin(ang);
+      j === 0 ? path.moveTo(px, py) : path.lineTo(px, py);
+    }
+    path.closePath();
+  };
+  const r1 = Math.min(ROWS - 1, (pr + 1) * TERR_PEZZO - 1), c1 = Math.min(COLS - 1, (pc + 1) * TERR_PEZZO - 1);
+  for (let r = pr * TERR_PEZZO; r <= r1; r++) for (let c = pc * TERR_PEZZO; c <= c1; c++) {
+    const t = map[r][c];
+    const o = padrone(t);
+    if (!o) continue;
+    const f = z.o[o] || (z.o[o] = { centri: [], dentro: null, presi: new Path2D(), lati: new Path2D(), nPresi: 0, nLati: 0 });
+    const p = center(t);
+    f.centri.push(p); z.n++; // il velo si prepara solo quando serve (da vicino): da lontano non si disegna
+    if (t.terra === o) { esagono(f.presi, p); f.nPresi++; }
+    for (const n of neighbors(t)) {
+      if (padrone(n) === o) continue;
+      const q = center(n), ang = Math.atan2(q.y - p.y, q.x - p.x);
+      // il lato appena dentro il paese, cosi' non copre il tratteggio dei confini
+      const a1 = ang - Math.PI / 6, a2 = ang + Math.PI / 6, rr = S * 0.9;
+      f.lati.moveTo(p.x + rr * Math.cos(a1), p.y + rr * Math.sin(a1));
+      f.lati.lineTo(p.x + rr * Math.cos(a2), p.y + rr * Math.sin(a2));
+      f.nLati++;
+    }
+  }
+  z.velo = f => { // la forma del velo di un impero nel pezzo, preparata la prima volta che serve
+    if (!f.dentro) { f.dentro = new Path2D(); for (const p of f.centri) esagono(f.dentro, p); }
+    return f.dentro;
+  };
+  territorioCache.set(id, z);
+  return z;
+}
+
 function render() {
   if (terrainDirty) renderBase();
   const { wrap, dpr, w, h } = fitCanvas();
@@ -4825,6 +4934,7 @@ function render() {
   const tx0 = Math.max(0, Math.floor(vx0 / span)), tx1 = Math.floor(Math.min(vx1, WORLD_W) / span);
   const ty0 = Math.max(0, Math.floor(vy0 / span)), ty1 = Math.floor(Math.min(vy1, WORLD_H) / span);
   ctx.imageSmoothingEnabled = true;
+  tileCacheMax = Math.max(TILE_CACHE_MIN, 3 * (tx1 - tx0 + 1) * (ty1 - ty0 + 1));
   for (let ty = ty0; ty <= ty1; ty++) for (let tx = tx0; tx <= tx1; tx++) {
     // bordi arrotondati al pixel: niente fessure sottili fra una tessera e l'altra
     const dx = Math.round((tx * span - vx0) * scale), dy = Math.round((ty * span - vy0) * scale);
@@ -4836,71 +4946,43 @@ function render() {
   const vis = tileRange(vx0, vy0, vx1, vy1, 2);
   const k = S / 42;
   ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-  // territori: il paese di ciascun impero, velato e contornato nel suo colore
-  const terr = {}; // paese -> impero che lo guida (il tuo vince, se un vecchio salvataggio li sovrappone)
-  for (const o of imperiIA()) if (players[o].country) terr[players[o].country] = o;
-  if (players.p.country) terr[players.p.country] = 'p';
-  // le caselle conquistate in guerra passano al colore di chi le ha prese
-  const vivi = new Set(['p', ...imperiIA()]);
-  const padrone = t => (t.terra && vivi.has(t.terra) ? t.terra : t.country ? terr[t.country] : undefined);
-  const imperiTerr = [...vivi];
-  if (imperiTerr.length) {
-    const lati = {}, dentro = {}, presi = {}; // segmenti x1,y1,x2,y2 e centri x,y (presi: conquistate)
-    for (const o of imperiTerr) { lati[o] = []; dentro[o] = []; presi[o] = []; }
-    let nDentro = 0;
-    for (let r = vis.r0; r <= vis.r1; r++) for (let c = vis.c0; c <= vis.c1; c++) {
-      const t = map[r][c];
-      const o = padrone(t);
-      if (!o) continue;
-      const path = lati[o];
-      const p = center(t);
-      dentro[o].push(p.x, p.y); nDentro += 2;
-      if (t.terra === o) presi[o].push(p.x, p.y);
-      for (const n of neighbors(t)) {
-        if (padrone(n) === o) continue;
-        const q = center(n), ang = Math.atan2(q.y - p.y, q.x - p.x);
-        // il lato appena dentro il paese, cosi' non copre il tratteggio dei confini
-        const a1 = ang - Math.PI / 6, a2 = ang + Math.PI / 6, rr = S * 0.9;
-        path.push(p.x + rr * Math.cos(a1), p.y + rr * Math.sin(a1), p.x + rr * Math.cos(a2), p.y + rr * Math.sin(a2));
-      }
+  // territori: il paese di ciascun impero, velato e contornato nel suo colore.
+  // Le forme si calcolano a pezzi (territorioPezzo) e si tengono in memoria finche' non
+  // cambiano: prima si ricalcolavano a ogni fotogramma, e con la mappa intera nello schermo
+  // costavano la maggior parte del tempo di disegno
+  const pezzi = [];
+  let nDentro = 0;
+  for (let pr = Math.floor(vis.r0 / TERR_PEZZO); pr <= Math.floor(vis.r1 / TERR_PEZZO); pr++)
+    for (let pc = Math.floor(vis.c0 / TERR_PEZZO); pc <= Math.floor(vis.c1 / TERR_PEZZO); pc++) {
+      const z = territorioPezzo(pr, pc);
+      pezzi.push(z);
+      // caselle del pezzo dentro lo schermo, in proporzione (come contava il disegno di prima)
+      const ar = Math.min(vis.r1, (pr + 1) * TERR_PEZZO - 1) - Math.max(vis.r0, pr * TERR_PEZZO) + 1;
+      const ac = Math.min(vis.c1, (pc + 1) * TERR_PEZZO - 1) - Math.max(vis.c0, pc * TERR_PEZZO) + 1;
+      nDentro += z.n * ar * ac / (TERR_PEZZO * TERR_PEZZO);
     }
-    // il velo solo se le caselle sullo schermo non sono troppe (mappa gigante tutta in vista)
-    if (nDentro < 60000) {
-      ctx.globalAlpha = 0.16;
-      for (const o of imperiTerr) {
-        const d = dentro[o];
-        if (!d.length) continue;
-        ctx.beginPath();
-        for (let i = 0; i < d.length; i += 2) for (let j = 0; j < 6; j++) {
-          const ang = Math.PI / 180 * (60 * j - 30), px = d[i] + S * Math.cos(ang), py = d[i+1] + S * Math.sin(ang);
-          j === 0 ? ctx.moveTo(px, py) : ctx.lineTo(px, py);
-        }
-        ctx.fillStyle = players[o].color; ctx.fill();
-      }
-    }
-    // le caselle conquistate hanno un velo piu' deciso: si vede subito che hanno cambiato colore
-    ctx.globalAlpha = 0.3;
+  const imperiTerr = ['p', ...imperiIA()];
+  // il velo solo se le caselle sullo schermo non sono troppe (mappa gigante tutta in vista)
+  if (nDentro < 30000) {
+    ctx.globalAlpha = 0.16;
     for (const o of imperiTerr) {
-      const d = presi[o];
-      if (!d.length) continue;
-      ctx.beginPath();
-      for (let i = 0; i < d.length; i += 2) for (let j = 0; j < 6; j++) {
-        const ang = Math.PI / 180 * (60 * j - 30), px = d[i] + S * Math.cos(ang), py = d[i+1] + S * Math.sin(ang);
-        j === 0 ? ctx.moveTo(px, py) : ctx.lineTo(px, py);
-      }
-      ctx.fillStyle = players[o].color; ctx.fill();
+      ctx.fillStyle = players[o].color;
+      for (const z of pezzi) if (z.o[o]) ctx.fill(z.velo(z.o[o]));
     }
-    ctx.lineWidth = Math.max(4*k, 3 / scale); ctx.lineCap = 'round'; // almeno 3 pixel anche da lontano
-    ctx.globalAlpha = 0.9;
-    for (const o of imperiTerr) {
-      const s = lati[o];
-      if (!s.length) continue;
-      ctx.beginPath();
-      for (let i = 0; i < s.length; i += 4) { ctx.moveTo(s[i], s[i+1]); ctx.lineTo(s[i+2], s[i+3]); }
-      ctx.strokeStyle = players[o].color; ctx.stroke();
-    }
-    ctx.globalAlpha = 1; ctx.lineCap = 'butt';
   }
+  // le caselle conquistate hanno un velo piu' deciso: si vede subito che hanno cambiato colore
+  ctx.globalAlpha = 0.3;
+  for (const o of imperiTerr) {
+    ctx.fillStyle = players[o].color;
+    for (const z of pezzi) if (z.o[o] && z.o[o].nPresi) ctx.fill(z.o[o].presi);
+  }
+  ctx.lineWidth = Math.max(4*k, 3 / scale); ctx.lineCap = 'round'; // almeno 3 pixel anche da lontano
+  ctx.globalAlpha = 0.9;
+  for (const o of imperiTerr) {
+    ctx.strokeStyle = players[o].color;
+    for (const z of pezzi) if (z.o[o] && z.o[o].nLati) ctx.stroke(z.o[o].lati);
+  }
+  ctx.globalAlpha = 1; ctx.lineCap = 'butt';
   // evidenziazioni: solo sulle caselle interessate
   const paint = (arr, style) => { for (const t of arr) { const p = center(t); hexPathOn(ctx, p.x, p.y); ctx.fillStyle = style; ctx.fill(); } };
   if (placing) {
@@ -5074,6 +5156,18 @@ function render() {
 
 
 // ============ UI ============
+// un errore imprevisto: si scrive in console e si avvisa il giocatore invece di bloccarsi in silenzio
+let erroriMostrati = 0;
+function erroreGioco(e) {
+  try { console.error(e); } catch (x) {}
+  if (erroriMostrati++ > 5) return; // non riempire lo schermo se si ripete
+  const el = document.getElementById('msg');
+  if (el) el.textContent = `⚠️ Qualcosa è andato storto (${(e && e.message) || e}). La partita continua; se vedi cose strane, salva e ricarica la pagina.`;
+}
+if (typeof window !== 'undefined' && typeof window.addEventListener === 'function') {
+  window.addEventListener('error', ev => erroreGioco(ev.error || ev.message));
+  window.addEventListener('unhandledrejection', ev => erroreGioco(ev.reason));
+}
 function msg(s) {
   if (current !== 'p') { aiLogAdd(s); return; } // durante il turno IA i messaggi vanno nella cronaca
   document.getElementById('msg').textContent = s;
