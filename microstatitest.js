@@ -1,4 +1,4 @@
-// Test dei microstati (v65): San Marino nuovo (il Vaticano, tolto nella v72, lo prova vaticanotest.js), e Monaco, Liechtenstein e Andorra
+// Test dei microstati (v65): San Marino nuovo (il Vaticano, tolto nella v73, lo prova vaticanotest.js), e Monaco, Liechtenstein e Andorra
 // giocabili a ogni taglia (i paesi nuovi del nord e dell'est li prova paesinuovitest.js).
 // uso: cat stub.js game.js microstatitest.js > _run.js && node _run.js   (circa 20 secondi)
 function assert(cond, msg) { if (!cond) { console.error('ASSERT FAIL:', msg); process.exit(1); } else console.log('OK:', msg); }

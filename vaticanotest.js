@@ -1,4 +1,4 @@
-// Test della v72: la Città del Vaticano non c'è più fra gli stati di oggi (la sua casella è Italia),
+// Test della v73: la Città del Vaticano non c'è più fra gli stati di oggi (la sua casella è Italia),
 // lo Stato della Chiesa resta nelle epoche storiche e le partite salvate prima, con il Vaticano
 // in gioco, si caricano ancora com'erano.
 // uso: cat stub.js game.js vaticanotest.js > _run.js && node _run.js   (circa 20 secondi)

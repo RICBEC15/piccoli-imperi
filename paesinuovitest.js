@@ -1,5 +1,5 @@
 // Test dei paesi europei aggiunti nella v65: Polonia, Cechia, Slovacchia, la Scandinavia,
-// i Baltici, la Bielorussia, l'Islanda, Malta, il Caucaso, il Kazakistan, San Marino (il Vaticano, tolto nella v72, lo prova vaticanotest.js).
+// i Baltici, la Bielorussia, l'Islanda, Malta, il Caucaso, il Kazakistan, San Marino (il Vaticano, tolto nella v73, lo prova vaticanotest.js).
 // uso: cat stub.js game.js paesinuovitest.js > _run.js && node _run.js   (circa 30 secondi)
 function assert(cond, msg) { if (!cond) { console.error('ASSERT FAIL:', msg); process.exit(1); } else console.log('OK:', msg); }
 let seme = 64;
@@ -32,7 +32,7 @@ for (const taglia of ['piccola', 'media']) {
   // l'Øresund e il Grande Belt restano mare: la Selandia (Copenaghen) non e' saldata alla Svezia
   assert(at(12.7, 55.85).terrain === 'water' && at(10.95, 55.35).terrain === 'water', `${taglia}: l'Øresund e il Grande Belt sono mare`);
   assert(at(13.0, 58.95).terrain === 'water' && at(27.5, 58.6).terrain === 'water', `${taglia}: il Vänern e il Peipus sono laghi`);
-  // i microstati: una casella sola, libera per la capitale; dalla v72 niente Vaticano: Roma e dintorni sono Italia
+  // i microstati: una casella sola, libera per la capitale; dalla v73 niente Vaticano: Roma e dintorni sono Italia
   for (const cc of ['SM', 'MC']) assert(info[cc].caselle === 1 && capitaleDi(cc), `${taglia}: ${nomePaese(cc)} ha la sua casella e la sua capitale`);
   assert(at(12.50, 41.90).country === 'IT' && at(12.453, 41.903).country === 'IT' && !info.VA, `${taglia}: Roma e il Vaticano sono Italia`);
 }
