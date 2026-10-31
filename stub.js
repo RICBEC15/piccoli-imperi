@@ -37,7 +37,8 @@ function makeCtx() {
     fill: noop, stroke: noop, fillRect: noop, clearRect: noop, strokeRect: noop,
     fillText: noop, strokeText: noop, drawImage: noop, setLineDash: noop,
     measureText: () => ({ width: 10 }), createLinearGradient: () => ({ addColorStop: noop }),
-    getImageData: () => ({ data: [] }), putImageData: noop
+    getImageData: () => ({ data: [] }), putImageData: noop,
+    createImageData: (w, h) => ({ width: w, height: h, data: new Uint8ClampedArray(w * h * 4) })
   }, { get: (t, k) => (k in t ? t[k] : noop), set: (t, k, v) => { t[k] = v; return true; } });
   return ctx;
 }
@@ -106,3 +107,20 @@ global.alert = () => {};
 global.confirm = () => true;
 global.URL = global.URL || { createObjectURL: () => 'blob:test', revokeObjectURL: () => {} };
 global.Blob = global.Blob || function Blob() {};
+
+// v74: dalla v18 il salvataggio e' compatto (terreno in RLE, solo le caselle occupate). I test che
+// preparano un salvataggio vecchio partono da uno nuovo e lo riportano alla forma v17, una voce per casella
+function comeSalvataggioV17(d) {
+  const x = JSON.parse(JSON.stringify(d));
+  if (x.v < 18) return x;
+  const nome = Object.fromEntries(Object.entries(SALVA_TERRENI).map(([k, v]) => [v, k]));
+  const g = rleGriglia(x.terreno, x.rows * x.cols);
+  const occ = new Map(x.caselle.map(s => [s.r + ',' + s.c, s])), ponti = new Set(x.ponti.map(([r, c]) => r + ',' + c));
+  x.tiles = [];
+  for (let r = 0, i = 0; r < x.rows; r++) for (let c = 0; c < x.cols; c++, i++) {
+    const k = r + ',' + c, s = occ.get(k) || { y: 0, u: 0, s: 0, q: 0 };
+    x.tiles.push({ r, c, g: nome[String.fromCharCode(g[i])], b: ponti.has(k) ? 1 : 0, y: s.y, u: s.u, s: s.s, q: s.q });
+  }
+  delete x.terreno; delete x.caselle; delete x.ponti; x.v = 17;
+  return x;
+}

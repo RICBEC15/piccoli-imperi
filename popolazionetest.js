@@ -67,7 +67,7 @@ check(dati && applySave(dati), 'salvataggio ricaricato');
 const r2 = map.flat().find(t => t.city && t.city.capital && t.city.owner === 'p');
 check(r2 && r2.city.n === 'Roma' && r2.city.ab === 3339000, 'dopo il caricamento la capitale è ancora Roma con 3.339.000 abitanti');
 // un vecchio salvataggio senza abitanti li ricava dalla posizione
-for (const x of dati.tiles) if (x.y) { delete x.y.n; delete x.y.a; }
+for (const x of dati.caselle) if (x.y) { delete x.y.n; delete x.y.a; }
 check(applySave(dati), 'vecchio salvataggio (senza abitanti) caricato');
 const r3 = map.flat().find(t => t.city && t.city.capital && t.city.owner === 'p');
 check(r3 && r3.city.n === 'Roma' && map.flat().every(t => !t.city || t.city.ab > 0), 'vecchio salvataggio: abitanti ricalcolati, la capitale torna Roma');

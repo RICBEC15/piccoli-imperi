@@ -23,20 +23,20 @@ const w = mkUnit('warrior', 'p'); w.count = 5; w.maxHp = UNIT_TYPES.warrior.hp*5
 shipTile.unit.cargo = w;
 
 const data = serialize();
-assert(data.v === 17, 'versione salvataggio = 17');
+assert(data.v === 18 && typeof data.terreno === 'string' && Array.isArray(data.caselle), 'versione salvataggio = 18 (compatto)');
 
 // distruggi lo stato e ricarica
 const savedLvl = shipTile.unit.lvl, savedCargoCount = shipTile.unit.cargo.count;
 newGame();
 const ok = applySave(data);
-assert(ok === true, 'applySave riesce su salvataggio v17');
+assert(ok === true, 'applySave riesce su salvataggio v18');
 const shipTile2 = map.flat().find(t => t.unit && UNIT_TYPES[t.unit.type].ship && t.unit.owner === 'p');
 assert(!!shipTile2, 'nave ritrovata dopo il caricamento');
 assert(shipTile2.unit.lvl === savedLvl, `livello nave preservato dal salvataggio (${savedLvl})`);
 assert(shipTile2.unit.cargo && shipTile2.unit.cargo.count === savedCargoCount, 'carico preservato dal salvataggio');
 
 // simulazione salvataggio "legacy" v14 senza campo lv sulla nave (pre-potenziamento navi)
-const legacyData = JSON.parse(JSON.stringify(data));
+const legacyData = comeSalvataggioV17(data);
 legacyData.v = 14;
 // fino alla v16 il nemico era uno solo e si chiamava 'a'
 const vecchio = o => (o && o !== 'p' ? 'a' : o);
