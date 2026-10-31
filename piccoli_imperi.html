@@ -351,7 +351,7 @@
       <h4>🏛️ Città e stelle</h4>
       <ul>
         <li>Ogni città ha i suoi <b>abitanti veri</b> 👥 (agglomerato urbano, dati Natural Earth: Roma 3.339.000, Parigi 9.904.000…) e rende <b>più stelle quanto più è popolosa</b>: sotto 5.000 abitanti <b>1⭐</b>, da 5.000 <b>2⭐</b>, da 50.000 <b>3⭐</b>, da 200.000 <b>4⭐</b>, da 700.000 <b>5⭐</b>, da 2 milioni <b>6⭐</b>, da 5 milioni <b>7⭐</b> a turno. La <b>capitale</b> 🏛️ rende <b>1⭐ in più</b> (e mai meno di 3⭐).</li>
-        <li>Ogni città reale da <b>un milione</b> di abitanti in su ha il suo villaggio sulla mappa; i villaggi lontani dalle città note hanno abitanti <b>stimati</b>. Tocca una città per vederne nome, abitanti e rendita; ingrandendo la mappa i nomi compaiono sotto le città.</li>
+        <li>Sulla mappa ci sono solo <b>città vere da 100.000 abitanti in su</b> e le <b>capitali</b> (anche più piccole, come Podgorica); ogni città da un milione in su ha sempre il suo villaggio. Tocca una città per vederne nome, abitanti e rendita; ingrandendo la mappa i nomi compaiono sotto le città.</li>
         <li>La capitale si può fondare anche <b>su un villaggio neutrale</b> del tuo paese: ne prende nome e abitanti (es. Roma per l'Italia).</li>
         <li>I <b>villaggi neutrali</b> ⛺ (bordo beige) non appartengono a nessuno: muovi un'unità sopra per conquistarli.</li>
         <li>Clicca una tua città <b>senza unità sopra</b> per addestrare truppe: la nuova unità è pronta dal turno successivo.</li>
@@ -1067,6 +1067,9 @@ const CITTA_REALI = [
 ];
 // CITTA_REALI_FINE
 const ABITANTI_GRANDI = 1000000; // ogni città da un milione in su ha sempre il suo villaggio
+// dalla v71 restano sulla mappa solo i villaggi delle città da 100.000 abitanti in su e quelli
+// delle capitali vere, anche se più piccole
+const ABITANTI_MINIMI = 100000;
 // abitanti -> stelle a turno (a scaglioni, quasi logaritmici: Roma non vale 300 villaggi)
 const SCAGLIONI_ABITANTI = [[5000000, 7], [2000000, 6], [700000, 5], [200000, 4], [50000, 3], [5000, 2]];
 function renditaAbitanti(ab) {
@@ -1121,6 +1124,15 @@ function assegnaAbitanti() {
   }
   attesa.forEach((t, i) => { if (libero[i]) { t.city.n = null; t.city.ab = stimaAbitanti(t); } });
 }
+// via i villaggi neutrali sotto i 100.000 abitanti (e quelli con abitanti solo stimati),
+// tranne quelli delle capitali vere nel loro paese (Podgorica, La Valletta...)
+function togliVillaggiPiccoli() {
+  const capitali = new Map(); // nome -> paese (Andorra la Vella resta solo se è in Andorra)
+  for (const cc of Object.keys(CAPITALI_REALI)) { capitali.set(CAPITALI_REALI[cc][0], cc); const v = nomeCittaCapitale(cc); if (v) capitali.set(v, cc); }
+  for (const t of map.flat())
+    if (t.city && t.city.owner === null && !t.city.capital && t.city.ab < ABITANTI_MINIMI
+        && !(t.city.n && capitali.get(t.city.n) === t.country)) t.city = null;
+}
 // un villaggio neutrale su ogni città reale da un milione in su che non ne ha già uno
 // accanto (deterministico: fa parte della mappa fissa)
 function villaggiGrandiCitta(g, vills, vieta) {
@@ -1137,6 +1149,34 @@ function villaggiGrandiCitta(g, vills, vieta) {
     spot.terrain = 'grass'; delete spot.dvar;
     spot.city = { owner: null, capital: false, pop: 1, n, ab };
     vills.push(spot);
+  }
+}
+// v71: un villaggio anche su ogni capitale vera, pure sotto i 100.000 abitanti (Lubiana, Podgorica...),
+// se il paese ha posto anche per la capitale dell'impero; un villaggio senza nome lì accanto
+// diventa la capitale
+function villaggiCapitali(g, vieta) {
+  const casellePaese = {}, nomi = new Set();
+  for (const t of map.flat()) {
+    if (t.country && (t.terrain === 'grass' || t.terrain === 'forest' || t.terrain === 'hill')) casellePaese[t.country] = (casellePaese[t.country] || 0) + 1;
+    if (t.city && t.city.n) nomi.add(t.city.n);
+  }
+  for (const cc of Object.keys(CAPITALI_REALI).sort()) {
+    const cap = CAPITALI_REALI[cc], vera = cittaRealeCapitale(cc);
+    const n = vera ? vera[0] : cap[0];
+    if (nomi.has(n) || (casellePaese[cc] || 0) < 2) continue;
+    const vt = tileAtGeo(cap[1], cap[2], g);
+    if (!vt) continue;
+    const vicine = [vt, ...neighbors(vt)];
+    let spot = vicine.find(x => x.city && !x.city.n && x.country === cc && !(vieta && vieta.has(x)));
+    if (!spot) {
+      if (vicine.some(x => x.city)) continue;
+      spot = vicine.find(x => x.terrain !== 'water' && x.terrain !== 'river' && x.country === cc && !(vieta && vieta.has(x)));
+      if (!spot) continue;
+      spot.terrain = 'grass'; delete spot.dvar;
+      spot.city = { owner: null, capital: false, pop: 1 };
+    }
+    spot.city.n = n; spot.city.ab = vera ? vera[3] : stimaAbitanti(spot);
+    nomi.add(n);
   }
 }
 // ============ I BIOMI REALI (OpenStreetMap) ============
@@ -1593,7 +1633,9 @@ function genMap() {
   // le capitali degli imperi IA le fonda assegnaPaesi, ciascuna nel suo paese
   // le grandi città reali, poi nomi e abitanti veri a tutti i villaggi
   villaggiGrandiCitta(g, vills, micro); // non sulla casella di un microstato (il Vaticano accanto a Roma)
+  villaggiCapitali(g, micro);
   assegnaAbitanti();
+  togliVillaggiPiccoli(); // v71: restano le città da 100.000 abitanti in su e le capitali
 
   // i volti del deserto (dune, pietra, sale, tundra): solo aspetto
   assegnaDeserti(g);
@@ -1983,10 +2025,12 @@ function nomeCittaCapitale(cc) {
 function battezzaCapitale(t, cc) {
   if (!t.city || t.city.n) return;
   const vera = cittaRealeCapitale(cc);
-  if (!vera) { t.city.ab = t.city.ab || stimaAbitanti(t); return; }
+  // (v71) senza una città vera nella lista la capitale prende almeno il suo nome (Città del Vaticano)
+  if (!vera) { t.city.ab = t.city.ab || stimaAbitanti(t); if (CAPITALI_REALI[cc] && !dallIndice(conCitta, x => x.city.n === CAPITALI_REALI[cc][0]).length) t.city.n = CAPITALI_REALI[cc][0]; return; }
   const altri = dallIndice(conCitta, x => x !== t && x.city.n === vera[0]);
   if (altri.some(x => x.city.capital)) { t.city.ab = t.city.ab || stimaAbitanti(t); return; }
-  for (const x of altri) { x.city.n = null; x.city.ab = stimaAbitanti(x); }
+  // dalla v71 il villaggio lì accanto non resta come doppione senza nome: la città è la capitale
+  for (const x of altri) { if (x.unit) { x.city.n = null; x.city.ab = stimaAbitanti(x); } else x.city = null; }
   t.city.n = vera[0]; t.city.ab = vera[3];
 }
 function fondaCapitaleIA(cc) {
