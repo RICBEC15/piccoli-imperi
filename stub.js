@@ -100,6 +100,8 @@ global.localStorage = {
 };
 
 global.window = global;
+// le forme dei territori (v71) si disegnano con Path2D: qui basta che i metodi esistano
+global.Path2D = global.Path2D || class Path2D { moveTo() {} lineTo() {} closePath() {} };
 global.alert = () => {};
 global.confirm = () => true;
 global.URL = global.URL || { createObjectURL: () => 'blob:test', revokeObjectURL: () => {} };
