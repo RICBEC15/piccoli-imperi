@@ -303,9 +303,9 @@
       <p style="margin:4px 0 0"><small>La mappa è sempre la stessa: cambiano gli stati, con i confini e i nomi di quell'anno.</small></p>
       <h4>Scegli la grandezza della mappa</h4>
       <div class="ovrow">
-        <button class="ov-play" onclick="startGame('piccola')">▶️ Mappa piccola<br><small>esagoni grandi · 249×210</small></button>
-        <button class="ov-play" onclick="startGame('media')">▶️ Mappa media<br><small>esagoni a metà · 500×420</small></button>
-        <button class="ov-play" onclick="startGame('gigante')">▶️ Mappa gigante<br><small>esagoni a un terzo · 750×632</small></button>
+        <button class="ov-play" onclick="startGame('piccola')">▶️ Mappa piccola<br><small>esagoni grandi · <span class="mapdim" data-mode="piccola"></span></small></button>
+        <button class="ov-play" onclick="startGame('media')">▶️ Mappa media<br><small>esagoni a metà · <span class="mapdim" data-mode="media"></span></small></button>
+        <button class="ov-play" onclick="startGame('gigante')">▶️ Mappa gigante<br><small>esagoni a un terzo · <span class="mapdim" data-mode="gigante"></span></small></button>
       </div>
       <div class="ovrow">
         <button class="ov-tut" onclick="startTutorial()">🎓 Tutorial guidato</button>
@@ -3473,10 +3473,13 @@ const AI_DELAY = 700; // ms fra una mossa e l'altra
 //  soglia/rapporto: soldati minimi (e rapporto con i tuoi) per passare all'offensiva
 //  tregua:   fino a questo turno l'IA non attacca: si espande e difende solo il suo territorio
 //  coloni:   probabilità di addestrare un Cittadino per espandersi
+//  ricchezza: quanto l'IA punta alle città che rendono di più (abitanti veri): per ogni stella
+//             di rendita in più accetta questa strada in più (in terzi di turno) per arrivarci.
+//             A Facile 0: va alla città più vicina, come prima della v70
 const AI_LIVELLI = {
-  facile:    { nome: 'Facile',    economia: 0.7,  spesa: 0.35, soglia: 16, rapporto: 1.5, tregua: 60, coloni: 0.3 },
-  normale:   { nome: 'Normale',   economia: 0.85, spesa: 0.5,  soglia: 10, rapporto: 1.1, tregua: 30, coloni: 0.4 },
-  difficile: { nome: 'Difficile', economia: 1,    spesa: 0.6,  soglia: 6,  rapporto: 0.8, tregua: 0,  coloni: 0.5 } // l'IA della v54
+  facile:    { nome: 'Facile',    economia: 0.7,  spesa: 0.35, soglia: 16, rapporto: 1.5, tregua: 60, coloni: 0.3, ricchezza: 0 },
+  normale:   { nome: 'Normale',   economia: 0.85, spesa: 0.5,  soglia: 10, rapporto: 1.1, tregua: 30, coloni: 0.4, ricchezza: 2 },
+  difficile: { nome: 'Difficile', economia: 1,    spesa: 0.6,  soglia: 6,  rapporto: 0.8, tregua: 0,  coloni: 0.5, ricchezza: 4 } // l'IA della v54, che ora sceglie le prede ricche
 };
 let aiLivello = 'normale';
 try { const v = localStorage.getItem('piccoliImperi.ia'); if (AI_LIVELLI[v]) aiLivello = v; } catch (e) {}
@@ -3777,7 +3780,15 @@ const AI_DIR = [[[1,0],[-1,0],[0,-1],[-1,-1],[0,1],[-1,1]], [[1,0],[-1,0],[1,-1]
 // raggiungibile si rifà su tutta la mappa. Con un impero per paese fa la differenza.
 const AI_OLTRE = 60;     // margine oltre l'unità più lontana (una mossa costa al massimo una ventina)
 const AI_FINESTRA = 30;  // esagoni di margine attorno alle unità (scalati sulla taglia della mappa)
-function aiCampo(sorgenti, costi = aiCosti, mete = null, finestra = true) {
+// Una città ricca "sembra più vicina": parte con meno strada da fare. Con ricchezza 4
+// Parigi (8⭐) contro un villaggio (1⭐) vale una deviazione di 28 terzi, cioè 9 turni di marcia.
+const AI_RICCHEZZA_TETTO = 9; // oltre queste stelle non si guarda più
+function aiPartenza(t) {
+  const k = aiDiff().ricchezza || 0;
+  if (!k || !t.city) return 0;
+  return k * (AI_RICCHEZZA_TETTO - Math.min(AI_RICCHEZZA_TETTO, renditaCitta(t.city)));
+}
+function aiCampo(sorgenti, costi = aiCosti, mete = null, finestra = true, partenza = null) {
   const d = new Int32Array(ROWS * COLS).fill(AI_INF);
   if (mete && !mete.length) return d;
   let r0 = 0, r1 = ROWS - 1, c0 = 0, c1 = COLS - 1;
@@ -3791,7 +3802,8 @@ function aiCampo(sorgenti, costi = aiCosti, mete = null, finestra = true) {
   let fuori = 0;
   for (const t of sorgenti) {
     if (t.r < r0 || t.r > r1 || t.c < c0 || t.c > c1) { fuori++; continue; }
-    const i = aiIdx(t); if (d[i]) { d[i] = 0; secchi[0].push(i); }
+    const i = aiIdx(t), p = partenza ? partenza(t) : 0;
+    if (p < d[i]) { d[i] = p; (secchi[p] || (secchi[p] = [])).push(i); }
   }
   const daTrovare = mete ? new Set(mete) : null;
   let stop = AI_INF;
@@ -3814,7 +3826,7 @@ function aiCampo(sorgenti, costi = aiCosti, mete = null, finestra = true) {
   }
   // qualche unità non vede nessun obiettivo nella finestra, ma fuori ce ne sono: tutta la mappa
   if (daTrovare && daTrovare.size && fuori && (r0 > 0 || c0 > 0 || r1 < ROWS - 1 || c1 < COLS - 1))
-    return aiCampo(sorgenti, costi, mete, false);
+    return aiCampo(sorgenti, costi, mete, false, partenza);
   return d;
 }
 function aiSoldati(owner) {
@@ -3868,8 +3880,10 @@ function aiPreparaTurno() {
   const pigro = f => { let v = null; return () => v || (v = f()); };
   // le mappe si fermano poco oltre l'unità più lontana: il resto della mappa non serve
   const mie = unitsOf(aiMe).map(aiIdx);
-  const att = pigro(() => aiCampo(cittaNemiche(), aiCosti, mie)), esp = pigro(() => aiCampo(cities(null), aiCosti, mie));
-  const terra = pigro(() => aiCampo(cittaNemiche(), aiCosti.map(c => c === 1 ? 60 : c), mie));
+  // le città più ricche (più abitanti, più stelle) attirano di più, secondo la difficoltà
+  const att = pigro(() => aiCampo(cittaNemiche(), aiCosti, mie, true, aiPartenza));
+  const esp = pigro(() => aiCampo(cities(null), aiCosti, mie, true, aiPartenza));
+  const terra = pigro(() => aiCampo(cittaNemiche(), aiCosti.map(c => c === 1 ? 60 : c), mie, true, aiPartenza));
   aiCampi = { get attacco() { return att(); }, get espansione() { return esp(); }, get attaccoTerra() { return terra(); } };
   // offensiva quando l'esercito è abbastanza forte (con isteresi, per non tentennare),
   // e mai prima della fine della tregua decisa dalla difficoltà
@@ -4206,7 +4220,8 @@ function aiTryAttack(tile) {
     if (to.unit && to.unit.type === 'archer') s += 15;           // elimina prima gli arcieri
     if (to.unit && UNIT_TYPES[to.unit.type].medic) s += 14;      // e i medici!
     if (to.unit && UNIT_TYPES[to.unit.type].civil) s += 10 + to.unit.count * 2; // carovane: bersagli succosi
-    if (to.city && to.city.owner && to.city.owner !== aiMe) s += 10; // scaccia i difensori delle città
+    if (to.city && to.city.owner && to.city.owner !== aiMe)      // scaccia i difensori delle città,
+      s += 10 + Math.round(renditaCitta(to.city) * (aiDiff().ricchezza || 0) / 2); // prima quelle ricche
     if (to.unit && dist(tile, to) > UNIT_TYPES[to.unit.type].range) s += 8; // attacco senza risposta
     return s;
   };
@@ -5132,6 +5147,8 @@ function ui() {
   }
 }
 
+// v69: le misure delle mappe nel menu vengono dalle taglie vere (con le estensioni della v65)
+for (const el of document.querySelectorAll('.mapdim')) { setMapSize(el.dataset.mode); el.textContent = `${COLS}×${ROWS}`; }
 setMapSize('piccola');
 aggiornaSelIA(); // la difficoltà scelta l'ultima volta
 { const el = document.getElementById('avvSelIntro'); if (el) el.value = modoAvversari; } // e gli avversari
