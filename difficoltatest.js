@@ -67,7 +67,7 @@ setDifficolta('difficile');
 assert(applySave(data) && aiLivello === 'facile', 'caricando il file torna la difficoltà salvata');
 const vecchio = JSON.parse(JSON.stringify(data)); delete vecchio.ia;
 assert(applySave(vecchio) && aiLivello === 'normale', 'un salvataggio senza difficoltà si carica a Normale');
-const v15 = JSON.parse(JSON.stringify(vecchio)); v15.v = 15; delete v15.paesi; delete v15.imperi; delete v15.modo;
+const v15 = comeSalvataggioV17(vecchio); v15.v = 15; delete v15.paesi; delete v15.imperi; delete v15.modo;
 // fino alla v16 il nemico era uno solo e si chiamava 'a'
 const conA = o => (o && o !== 'p' ? 'a' : o);
 for (const s of v15.tiles) { if (s.y) s.y.o = conA(s.y.o); if (s.u) s.u.o = conA(s.u.o); if (s.s) s.s.o = conA(s.s.o); if (s.q) s.q.o = conA(s.q.o); }

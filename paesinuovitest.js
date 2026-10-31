@@ -54,7 +54,7 @@ assert(current === 'p' && !gameOver, 'tre giri di turni con 55 imperi IA, senza 
 // lo si ricava da uno nuovo tagliando la cornice e annegando le terre della v65
 const nuovo = serialize();
 const tagliaR = EXTN - EXTN_V63, tagliaC = EXTC;
-const v63 = JSON.parse(JSON.stringify(nuovo));
+const v63 = comeSalvataggioV17(nuovo);
 v63.rows = ROWS - tagliaR; v63.cols = COLS - tagliaC;
 v63.imperi = v63.imperi.filter(o => !PAESI_V65[o]);
 for (const o of NUOVI) { delete v63.stars[o]; delete v63.paesi[o]; }

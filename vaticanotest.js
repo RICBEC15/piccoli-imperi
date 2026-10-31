@@ -31,7 +31,7 @@ function casellaVecchia() {
   return t;
 }
 function salvaConVaticano(padrone) {
-  const t = casellaVecchia(), data = serialize();
+  const t = casellaVecchia(), data = comeSalvataggioV17(serialize());
   const s = data.tiles.find(x => x.r === t.r && x.c === t.c);
   s.g = 'grass'; s.u = 0; s.s = 0; s.q = 0;
   s.y = { o: padrone, k: true, p: 1, n: VATICANO.nome, a: 800 };

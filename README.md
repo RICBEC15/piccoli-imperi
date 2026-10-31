@@ -12,10 +12,11 @@ In locale: apri `piccoli_imperi.html` nel browser con un doppio clic. Non serve 
 
 - `piccoli_imperi.html`: il gioco completo (HTML, CSS e JavaScript in un unico file).
 - `index.html`: pagina d'ingresso per GitHub Pages, rimanda subito a `piccoli_imperi.html`.
-- `stub.js`, `shiptest.js`, `savetest.js`, `playtest.js`, `aitest.js`, `paesitest.js`, `imperitest.js`, `difficoltatest.js`, `mappatest.js`, `diplotest.js`, `conquistatest.js`, `capitalitest.js`, `paesinuovitest.js`, `microstatitest.js`, `vaticanotest.js`, `popolazionetest.js`, `biomitest.js`, `epochetest.js`, `browser_check.js`, `mobile_check.js`, `pantest.js`, `conquista_check.js`, `citta_check.js`, `unitatest.js`, `stabilita_check.js`: test automatici (`mobile_check.js` prova il gioco su un iPhone emulato con Playwright, `pantest.js` lo spostamento nella mappa col mouse, le frecce e il dito).
+- `stub.js`, `shiptest.js`, `savetest.js`, `playtest.js`, `aitest.js`, `paesitest.js`, `imperitest.js`, `difficoltatest.js`, `mappatest.js`, `diplotest.js`, `conquistatest.js`, `capitalitest.js`, `paesinuovitest.js`, `microstatitest.js`, `vaticanotest.js`, `popolazionetest.js`, `biomitest.js`, `epochetest.js`, `browser_check.js`, `mobile_check.js`, `pantest.js`, `conquista_check.js`, `citta_check.js`, `unitatest.js`, `stabilita_check.js`, `mappefissetest.js`, `caricamento_check.js`: test automatici (`mobile_check.js` prova il gioco su un iPhone emulato con Playwright, `pantest.js` lo spostamento nella mappa col mouse, le frecce e il dito).
 - `build_russia.js`: script che ha estratto il confine della Russia dal dataset Natural Earth.
 - `build_paesi_nord.py`: estrae da Natural Earth i confini dei paesi aggiunti nella v65 (`POLY_NORD`, `SEMI_NORD`).
 - `build_biomi.py`, `export_tiles.js`: costruiscono i biomi fissi dai dati di OpenStreetMap.
+- `build_mappe.js`: scrive la mappa già pronta di ogni grandezza (`const MAPPE_FISSE = ...`), così una partita nuova non la ricalcola.
 - `build_popolazione.js`: costruisce la lista delle città vere con i loro abitanti (Natural Earth).
 - `build_epoche.py`: costruisce gli stati storici di ogni epoca (con `export_tiles.js`).
 - `ISTRUZIONI_MIGRAZIONE.md`: note di sviluppo, storia delle ultime versioni e istruzioni dettagliate.
@@ -43,6 +44,7 @@ cat stub.js game.js microstatitest.js > _run.js && node _run.js   # i microstati
 cat stub.js game.js vaticanotest.js > _run.js && node _run.js   # niente Vaticano fra gli stati di oggi (v73): circa 20 secondi
 cat stub.js game.js popolazionetest.js > _run.js && node _run.js   # abitanti veri delle città
 cat stub.js game.js biomitest.js > _run.js && node _run.js   # i biomi OSM
+cat stub.js game.js mappefissetest.js > _run.js && node _run.js   # la mappa pronta = la mappa calcolata: circa 10 secondi
 ```
 
 ## La mappa
@@ -51,7 +53,8 @@ C'è **una sola mappa per ogni grandezza** (piccola, media, gigante), uguale a o
 
 - Confini e coste: Natural Earth (poligoni dentro `piccoli_imperi.html`).
 - Biomi: **OpenStreetMap**, precalcolati casella per casella e scritti nella riga `const BIOMI = ...` del gioco. Prato, bosco, collina, montagna, ghiacciaio, deserto di dune o di pietra, salina, tundra, e dalla v66 palude, campi coltivati, vigneti e frutteti, città (zone costruite), macchia, brughiera e prateria. Si leggono i poligoni `natural=*` (boschi, rocce, ghiacciai, sabbie, zone umide, macchie, brughiere, praterie), i `landuse=*` (campi, vigneti, frutteti, zone residenziali e industriali, saline) e le quote delle cime. Dati © OpenStreetMap contributors (ODbL), letti tramite il tema `base` di Overture Maps.
-- Per rifare i biomi (per esempio dopo aver cambiato la forma della mappa) si usano `build_biomi.py` ed `export_tiles.js`: le istruzioni sono in testa a `build_biomi.py`. Non serve altro: fiumi, laghi, stretti e villaggi restano calcolati dal gioco in modo fisso.
+- Per rifare i biomi (per esempio dopo aver cambiato la forma della mappa) si usano `build_biomi.py` ed `export_tiles.js`: le istruzioni sono in testa a `build_biomi.py`. Fiumi, laghi, stretti e villaggi li calcola il gioco (`calcolaMappa`) in modo fisso.
+- **Dalla v74 la mappa di ogni grandezza è già pronta dentro il file** (riga `const MAPPE_FISSE = ...`: terreno, paesi e villaggi in RLE, circa 100 KB compressi in tutto), invece di ricalcolarla a ogni partita. **Dopo ogni modifica alla mappa** (confini, fiumi, laghi, biomi, città vere, villaggi) va rilanciato `node build_mappe.js`; `mappefissetest.js` fallisce se la mappa pronta non è più uguale a quella calcolata.
 
 ## Città e abitanti
 
@@ -74,6 +77,15 @@ Nella schermata iniziale (e nella scelta del paese, prima di fondare la capitale
 Ogni modifica alla mappa va verificata con `mappatest.js`, che controlla anche che due partite abbiano la stessa mappa.
 
 ## Versione
+
+v74 (formato di salvataggio v18; i salvataggi di prima si caricano ancora): **le mappe si caricano molto più in fretta**. Misure nel browser di prova (computer; fra parentesi con la CPU 4 volte più lenta, come un tablet): una partita nuova sulla gigante da 6,2 a 0,9 secondi (da 31 a 3,7), sulla media da 2,8 a 0,5 (da 14 a 2,3), sulla piccola da 1,0 a 0,5 (da 4,5 a 2,5); caricare una partita salvata sulla gigante da 3,4 a 0,7 secondi (da 16 a 2,7); aprire la pagina da 1,1 a 0,15 secondi (da 5,4 a 0,5).
+
+- La mappa di ogni grandezza è già pronta dentro il file (`MAPPE_FISSE`, scritta da `build_mappe.js`) invece di ricalcolare confini, laghi, fiumi e villaggi a ogni partita: sulla gigante da 4-5 secondi a 0,3. È identica a quella calcolata (`mappefissetest.js`). Il file passa da 809 a circa 1070 KB (da 328 a 447 KB compressi).
+- Da lontano (casella sotto i 3 pixel) il terreno si disegna da un'immagine con due pixel per casella invece di disegnare uno per uno tutti gli esagoni: la mappa intera della gigante da 2,5 secondi a pochi decimi. L'aspetto resta lo stesso.
+- La scelta delle capitali degli imperi è più veloce (la ricerca delle terre usa indici numerici e i controlli si fanno solo sulle caselle più vicine al punto vero): stesse capitali di prima, in tutte le epoche e grandezze.
+- **Salvataggi leggeri** (formato v18): il terreno in una riga RLE e solo le caselle con città, unità, ospedali e porti. Sulla gigante il file passa da circa 32 MB a circa 115 KB (media 14 MB → 67 KB, piccola 3,5 MB → 35 KB), e caricarlo non ricalcola più i confini casella per casella.
+- All'apertura della pagina non si prepara più una partita nascosta sotto la schermata di benvenuto (la scelta della mappa la buttava via): la pagina si apre molto prima. Se la schermata si chiude senza scegliere la mappa (Esc, Enciclopedia), parte una partita sulla piccola come prima.
+- Test nuovi: `mappefissetest.js` e `caricamento_check.js` (nel browser). `stub.js` ha `createImageData` e `comeSalvataggioV17` (per i test che preparano salvataggi vecchi).
 
 v73 (formato di salvataggio invariato, v17): **la Città del Vaticano non c'è più fra gli stati di oggi**. Non si sceglie, non è un impero IA e non è nella diplomazia; la sua casella accanto a Roma è Italia (con il Tevere al suo posto). Nelle epoche storiche lo Stato della Chiesa resta com'era. Le partite salvate prima con il Vaticano in gioco (tuo o dell'IA) si caricano ancora com'erano, con il Vaticano; quelle senza lo lasciano all'Italia.
 

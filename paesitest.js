@@ -62,13 +62,13 @@ pCapital().unit = pCapital().unit || mkUnit('warrior', 'p');
 assert(defOf(pCapital()) === UNIT_TYPES.warrior.def + 1, 'in capitale il bonus della citta e della patria non si sommano');
 casa.unit = null; fuori.unit = null;
 
-// 6. il salvataggio v17 conserva i paesi; i vecchi salvataggi (nemico 'a') li ricavano dalle capitali
+// 6. il salvataggio (v17, compatto dalla v18) conserva i paesi; i vecchi salvataggi (nemico 'a') li ricavano dalle capitali
 const data = serialize();
 const aCc = A();
-assert(data.v === 17 && data.modo === 'duello' && data.paesi.p === 'FR' && data.imperi.join() === aCc, 'il salvataggio v17 contiene modo, paesi e imperi');
+assert(data.v === 18 && data.modo === 'duello' && data.paesi.p === 'FR' && data.imperi.join() === aCc, 'il salvataggio v18 contiene modo, paesi e imperi');
 newGame();
 assert(applySave(data) && players.p.country === 'FR' && A() === aCc && modoPartita === 'duello', 'i paesi tornano dopo il caricamento');
-const vecchio = JSON.parse(JSON.stringify(data));
+const vecchio = comeSalvataggioV17(data);
 vecchio.v = 15; delete vecchio.paesi; delete vecchio.imperi; delete vecchio.modo;
 const conA = o => (o && o !== 'p' ? 'a' : o);
 for (const s of vecchio.tiles) { if (s.y) s.y.o = conA(s.y.o); if (s.u) s.u.o = conA(s.u.o); if (s.s) s.s.o = conA(s.s.o); if (s.q) s.q.o = conA(s.q.o); }

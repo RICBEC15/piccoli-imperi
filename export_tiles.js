@@ -3,7 +3,7 @@
 // con FIUMI=1 esporta anche le caselle di fiume (servono a build_epoche.py)
 const out = {};
 for (const m of ['piccola', 'media', 'gigante']) {
-  setMapSize(m); genMap();
+  setMapSize(m); calcolaMappa(); // v74: la mappa calcolata da zero, non quella gia' pronta di MAPPE_FISSE
   const g = geoSetup();
   const tiles = [];
   for (const t of map.flat()) {

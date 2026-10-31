@@ -90,9 +90,9 @@ assert(lento < 5000, `nessun turno degli imperi troppo lento (${lento} ms)`);
 assert(map.flat().every(t => !t.unit || players[t.unit.owner]), 'nessuna unità di un impero inesistente');
 assert(imperiIA().every(o => capitaleDi(o)), 'ogni impero in piedi ha ancora la sua capitale');
 
-// 5. salvataggio v17: tutti gli imperi, con stelle e caduti, tornano uguali
+// 5. salvataggio v18: tutti gli imperi, con stelle e caduti, tornano uguali
 const data = serialize();
-assert(data.v === 17 && data.modo === 'tutti' && data.imperi.length === imperiIA().length, 'il salvataggio v17 contiene tutti gli imperi');
+assert(data.v === 18 && data.modo === 'tutti' && data.imperi.length === imperiIA().length, 'il salvataggio v18 contiene tutti gli imperi');
 const prima = JSON.stringify({ imp: imperiIA(), st: imperiIA().map(o => players[o].stars), c: imperiIA().map(o => cities(o).length), cad: caduti });
 newGame();
 assert(applySave(data) && modoPartita === 'tutti', 'il salvataggio si ricarica');
