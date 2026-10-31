@@ -268,7 +268,7 @@
       <p>Un piccolo gioco di strategia a turni ispirato a Civilization e Polytopia.
       Guidi l'<b style="color:#4da3ff">Impero Azzurro</b>: <b>tocca sulla mappa il paese</b> che vuoi guidare, fonda la capitale (tutte le città del tuo paese sono già tue), espanditi, conquista altre città
       e addestra un esercito. <b>Ogni altro paese è un impero guidato dall'IA</b>, in guerra con tutti: fai cadere le loro capitali prima che prendano la tua.</p>
-      <p style="font-size:12px;opacity:.75">Mappa reale, uguale a ogni partita: biomi © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener" style="color:#9cc9ff">OpenStreetMap contributors</a>; abitanti delle città da <a href="https://www.naturalearthdata.com/" target="_blank" rel="noopener" style="color:#9cc9ff">Natural Earth</a>;
+      <p style="font-size:12px;opacity:.75">Mappa reale, uguale a ogni partita: biomi © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener" style="color:#9cc9ff">OpenStreetMap contributors</a>; abitanti delle città da <a href="https://www.naturalearthdata.com/" target="_blank" rel="noopener" style="color:#9cc9ff">Natural Earth</a> e dei paesini da <a href="https://www.geonames.org/" target="_blank" rel="noopener" style="color:#9cc9ff">GeoNames</a> (CC BY 4.0);
       confini storici: <a href="https://github.com/aourednik/historical-basemaps" target="_blank" rel="noopener" style="color:#9cc9ff">historical-basemaps</a> (GPL-3.0).</p>
       <h4>In breve</h4>
       <ul>
@@ -351,7 +351,7 @@
       <h4>🏛️ Città e stelle</h4>
       <ul>
         <li>Ogni città ha i suoi <b>abitanti veri</b> 👥 (agglomerato urbano, dati Natural Earth: Roma 3.339.000, Parigi 9.904.000…) e rende <b>più stelle quanto più è popolosa</b>: sotto 5.000 abitanti <b>1⭐</b>, da 5.000 <b>2⭐</b>, da 50.000 <b>3⭐</b>, da 200.000 <b>4⭐</b>, da 700.000 <b>5⭐</b>, da 2 milioni <b>6⭐</b>, da 5 milioni <b>7⭐</b> a turno. La <b>capitale</b> 🏛️ rende <b>1⭐ in più</b> (e mai meno di 3⭐).</li>
-        <li>Ogni città reale da <b>un milione</b> di abitanti in su ha il suo villaggio sulla mappa; i villaggi lontani dalle città note hanno abitanti <b>stimati</b>. Tocca una città per vederne nome, abitanti e rendita; ingrandendo la mappa i nomi compaiono sotto le città.</li>
+        <li>Ogni città reale da <b>un milione</b> di abitanti in su ha il suo villaggio sulla mappa; i villaggi lontani dalle città prendono nome e abitanti del <b>paesino vero</b> più grande lì vicino (dati GeoNames: Verdun, Lisieux, Steyr…); solo dove non se ne conosce nessuno (in parte del Nordafrica) gli abitanti sono <b>stimati</b>. Tocca una città per vederne nome, abitanti e rendita; ingrandendo la mappa i nomi compaiono sotto le città.</li>
         <li>La capitale si può fondare anche <b>su un villaggio neutrale</b> del tuo paese: ne prende nome e abitanti (es. Roma per l'Italia).</li>
         <li>I <b>villaggi neutrali</b> ⛺ (bordo beige) non appartengono a nessuno: muovi un'unità sopra per conquistarli.</li>
         <li>Clicca una tua città <b>senza unità sopra</b> per addestrare truppe: la nuova unità è pronta dal turno successivo.</li>
@@ -1066,6 +1066,42 @@ const CITTA_REALI = [
   ["Beida",21.62,32.76,1794],["Borgarnes",-21.862,64.57,1783],["Giarabub",24.517,29.75,1744],["Höfn",-15.214,64.272,1695]
 ];
 // CITTA_REALI_FINE
+// i paesini veri (dalla v69): nome e abitanti da GeoNames (CC BY 4.0, geonames.org) per i
+// villaggi che non hanno una città di Natural Earth vicina. Solo quelli che servono alla
+// mappa fissa: li sceglie e li riscrive build_paesini.js. [nome, lon, lat, abitanti, paese]
+// PAESINI_REALI_INIZIO
+const PAESINI_REALI = [
+  ["Reus",1.11,41.16,107118,"ES"],["Barika",5.37,35.39,98846,"DZ"],["Berrechid",-7.59,33.27,93954,"MA"],["Ksar el Boukhari",2.75,35.89,77166,"DZ"],["Khenifra",-5.66,32.93,73906,"MA"],["Gela",14.24,37.07,73854,"IT"],
+  ["Cheria",7.75,35.27,72095,"DZ"],["Essaouira",-9.77,31.51,70634,"MA"],["Sidi Aïssa",3.77,35.89,69740,"DZ"],["Ponferrada",-6.6,42.55,68736,"ES"],["Sagunto",-0.27,39.68,66070,"ES"],["Tissemsilt",1.81,35.61,61155,"DZ"],
+  ["Irun",-1.79,43.34,60951,"ES"],["Granollers",2.29,41.61,60658,"ES"],["Oued Rhiou",0.92,35.96,59864,"DZ"],["Guercif",-3.35,34.23,57544,"MA"],["Cerignola",15.9,41.27,54056,"IT"],["Blois",1.33,47.59,53660,"FR"],
+  ["Châteauroux",1.69,46.81,53301,"FR"],["Djamaa",5.99,33.53,52882,"DZ"],["Albi",2.15,43.93,52409,"FR"],["Sour el Ghozlane",3.69,36.15,50204,"DZ"],["Angoulême",0.15,45.65,49468,"FR"],["Foligno",12.7,42.95,47747,"IT"],
+  ["Chalon-sur-Saône",4.85,46.78,47251,"FR"],["Mazara del Vallo",12.59,37.66,45953,"IT"],["Martigues",5.06,43.41,45749,"FR"],["Sama",-5.68,43.3,45565,"ES"],["Hennef",7.28,50.78,45409,"DE"],["Valenciennes",3.53,50.36,44821,"FR"],
+  ["Thionville",6.16,49.36,44311,"FR"],["Souq Larb’a al Gharb",-6,34.69,44059,"MA"],["El Attaf",1.67,36.22,43837,"DZ"],["Otwock",21.26,52.11,43388,"PL"],["Novodvinsk",40.81,64.42,42900,"RU"],["Varaždin",16.34,46.3,41808,"HR"],
+  ["Vic",2.25,41.93,39844,"ES"],["El Hadjira",5.51,32.61,39744,"DZ"],["Miranda de Ebro",-2.95,42.69,39264,"ES"],["El Idrissia",2.53,34.45,38714,"DZ"],["Bougaa",5.09,36.33,38597,"DZ"],["Steyr",14.42,48.04,38331,"AT"],
+  ["Ontinyent",-0.61,38.82,37735,"ES"],["Martina Franca",17.34,40.7,37685,"IT"],["Celje",15.26,46.23,37520,"SI"],["Ronda",-5.17,36.74,36827,"ES"],["Mont-de-Marsan",-0.5,43.89,36205,"FR"],["Teramo",13.7,42.66,36099,"IT"],
+  ["Don Benito",-5.86,38.96,35791,"ES"],["Villena",-0.87,38.64,35222,"ES"],["Rovereto",11.04,45.89,34152,"IT"],["Alençon",0.09,48.43,30786,"FR"],["Piombino",10.53,42.93,30103,"IT"],["Chaumont",5.14,48.11,28981,"FR"],
+  ["Bouarfa",-1.96,32.53,28846,"MA"],["El Abadia",1.69,36.27,28724,"DZ"],["Douz",9.02,33.47,28127,"TN"],["Mechraa Bel Ksiri",-5.96,34.57,27802,"MA"],["Ribeira",-8.44,42.75,27518,"ES"],["Doboj",18.09,44.73,27235,"BA"],
+  ["Épernay",3.96,49.04,27082,"FR"],["Saint-Dié-des-Vosges",6.95,48.28,24628,"FR"],["Lisieux",0.23,49.15,24473,"FR"],["Sarreguemines",7.07,49.11,24446,"FR"],["Libourne",-0.24,44.91,24240,"FR"],["Beaune",4.84,47.02,24162,"FR"],
+  ["Fougères",-1.2,48.35,23719,"FR"],["Novo Mesto",15.17,45.8,23341,"SI"],["Cahors",1.44,44.45,23331,"FR"],["Millau",3.08,44.1,23307,"FR"],["Moulins",3.33,46.56,23095,"FR"],["Le Puy-en-Velay",3.89,45.04,22718,"FR"],
+  ["Hatvan",19.68,47.67,22710,"HU"],["Llíria",-0.6,39.63,22706,"ES"],["Mazouna",0.9,36.12,22366,"DZ"],["Ciempozuelos",-3.62,40.16,22132,"ES"],["Voiron",5.59,45.36,22114,"FR"],["Verdun",5.38,49.16,21798,"FR"],
+  ["Saint-Lô",-1.09,49.12,21722,"FR"],["Navalcarnero",-4.01,40.29,21584,"ES"],["Požega",17.69,45.34,21153,"HR"],["Galatina",18.17,40.17,19569,"IT"],["Casarano",18.16,40.01,19359,"IT"],["Flers",-0.57,48.74,17430,"FR"],
+  ["San Giovanni in Fiore",16.7,39.25,17358,"IT"],["Pontivy",-2.96,48.07,16752,"FR"],["Zafra",-6.42,38.43,16424,"ES"],["Alcañiz",-0.13,41.05,16392,"ES"],["Montbrison",4.07,45.61,16164,"FR"],["Ginosa",16.76,40.58,16151,"IT"],
+  ["La Roda",-2.16,39.21,16060,"ES"],["Landerneau",-4.25,48.45,16052,"FR"],["Gien",2.63,47.69,15966,"FR"],["Sinnai",9.2,39.3,15791,"IT"],["Noyon",3,49.58,15138,"FR"],["Billère",-0.4,43.3,14914,"FR"],
+  ["Taglio",12.21,45.02,14441,"IT"],["Issoudun",1.99,46.95,14385,"FR"],["Sanski Most",16.67,44.77,13551,"BA"],["Jaca",-0.55,42.57,13396,"ES"],["Alora",-4.71,36.82,13395,"ES"],["Nova Gradiška",17.38,45.26,13329,"HR"],
+  ["Coria",-6.54,39.98,12896,"ES"],["Paola",16.04,39.36,12649,"IT"],["Obernai",7.48,48.46,12138,"FR"],["Ried im Innkreis",13.49,48.21,11903,"AT"],["Policoro",16.68,40.21,11810,"IT"],["Sinj",16.64,43.7,11524,"HR"],
+  ["Knittelfeld",14.82,47.22,11521,"AT"],["Knin",16.2,44.04,11182,"HR"],["Gemona",13.12,46.27,11141,"IT"],["Gland",6.27,46.42,10641,"CH"],["Albert",2.65,50,10588,"FR"],["Miajadas",-5.91,39.15,10338,"ES"],
+  ["Jerez de los Caballeros",-6.77,38.32,10237,"ES"],["Xinzo de Limia",-7.72,42.06,10161,"ES"],["Alfonsine",12.04,44.51,9838,"IT"],["Scalea",15.8,39.81,9344,"IT"],["Champagnole",5.91,46.74,9239,"FR"],["Skhira",10.07,34.3,9211,"TN"],
+  ["Rethel",4.37,49.51,8505,"FR"],["Portoferraio",10.31,42.81,8296,"IT"],["Milići",19.09,44.17,8210,"BA"],["Moraleja",-6.66,40.07,7995,"ES"],["Revin",4.64,49.94,7960,"FR"],["Labin",14.12,45.09,7943,"HR"],
+  ["Haffouz",9.68,35.63,7765,"TN"],["La Puebla de Montalbán",-4.36,39.86,7695,"ES"],["Fermignano",12.65,43.69,7309,"IT"],["Ključ",16.78,44.53,7245,"BA"],["Langon",-0.25,44.55,7102,"FR"],["Prnjavor",17.66,44.87,7099,"BA"],
+  ["Châtillon-sur-Seine",4.57,47.86,6939,"FR"],["Prades",2.42,42.62,6836,"FR"],["Abbadia San Salvatore",11.67,42.88,6364,"IT"],["Buzet",13.97,45.41,6059,"HR"],["Aubigny-sur-Nère",2.44,47.49,5984,"FR"],["Infantes",-3.01,38.74,5835,"ES"],
+  ["Črnomelj",15.19,45.57,5776,"SI"],["Wimpassing",13.98,48.17,5748,"AT"],["Montbard",4.34,47.62,5737,"FR"],["Mezzouna",9.84,34.58,5564,"TN"],["Bourbon-Lancy",3.77,46.62,5484,"FR"],["Calvi",8.76,42.57,5477,"FR"],
+  ["La Charité-sur-Loire",3.02,47.18,5460,"FR"],["Bar-sur-Aube",4.71,48.23,5387,"FR"],["Barbezieux-Saint-Hilaire",-0.15,45.47,5184,"FR"],["Djebilet Rosfa",0.83,34.86,4930,"DZ"],["Sigüenza",-2.64,41.07,4818,"ES"],["Muravera",9.57,39.42,4424,"IT"],
+  ["Ribérac",0.34,45.25,4333,"FR"],["Varennes-sur-Allier",3.4,46.31,4314,"FR"],["Villamanrique de la Condesa",-6.31,37.24,3779,"ES"],["Herrera del Duque",-5.05,39.17,3616,"ES"],["Laragne-Montéglin",5.82,44.32,3556,"FR"],["Langogne",3.86,44.73,3490,"FR"],
+  ["Vitigudino",-6.43,41.01,2961,"ES"],["Sahagún",-5.03,42.37,2846,"ES"],["Feldkirchen in Kärnten",14.1,46.72,2831,"AT"],["Buis-les-Baronnies",5.27,44.28,2497,"FR"],["Grenade-sur-l'Adour",-0.43,43.78,2476,"FR"],["Minglanilla",-1.6,39.53,2300,"ES"],
+  ["Siruela",-5.05,38.98,2218,"ES"],["Prémery",3.33,47.17,2206,"FR"],["Lumbrales",-6.72,40.94,2018,"ES"],["Font-Romeu-Odeillo-Via",2.04,42.51,1889,"FR"],["Arcos de Jalón",-2.27,41.22,1867,"ES"],["Fermoselle",-6.4,41.32,1538,"ES"],
+  ["Jebel Tiskaouine",-5.12,31.03,1197,"MA"],["Ayerbe",-0.69,42.27,1096,"ES"]
+];
+// PAESINI_REALI_FINE
 const ABITANTI_GRANDI = 1000000; // ogni città da un milione in su ha sempre il suo villaggio
 // abitanti -> stelle a turno (a scaglioni, quasi logaritmici: Roma non vale 300 villaggi)
 const SCAGLIONI_ABITANTI = [[5000000, 7], [2000000, 6], [700000, 5], [200000, 4], [50000, 3], [5000, 2]];
@@ -1107,11 +1143,13 @@ function assegnaAbitanti() {
   if (!attesa.length) return;
   const pos = attesa.map(t => tileLonLat(t, g));
   const libero = attesa.map(() => true);
-  for (const [n, lon, lat, ab] of CITTA_REALI) {
+  // prima le città di Natural Earth, poi i paesini di GeoNames per i villaggi rimasti senza nome
+  // (un paesino va solo a un villaggio del suo paese: niente nomi belgi sulle caselle francesi)
+  for (const lista of [CITTA_REALI, PAESINI_REALI]) for (const [n, lon, lat, ab, cc] of lista) {
     if (usati.has(n)) continue;
     let best = -1, bd = R;
     for (let i = 0; i < attesa.length; i++) {
-      if (!libero[i]) continue;
+      if (!libero[i] || (cc && attesa[i].country !== cc)) continue;
       const d = kmGeo(lon, lat, pos[i].lon, pos[i].lat);
       if (d <= bd) { bd = d; best = i; }
     }
