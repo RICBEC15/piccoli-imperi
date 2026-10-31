@@ -287,7 +287,7 @@
       <h2>⚔️ Piccoli Imperi</h2>
       <p>Un piccolo gioco di strategia a turni ispirato a Civilization e Polytopia.
       Guidi l'<b style="color:#4da3ff">Impero Azzurro</b>: <b>tocca sulla mappa il paese</b> che vuoi guidare, fonda la capitale (tutte le città del tuo paese sono già tue), espanditi, conquista altre città
-      e addestra un esercito. <b>Ogni altro paese è un impero guidato dall'IA</b>. All'inizio tutti sono <b>in pace</b>: per attaccare qualcuno bisogna prima <b>dichiarargli guerra</b>. Fai cadere le loro capitali prima che prendano la tua.</p>
+      e addestra un esercito. <b>Ogni altro paese è un impero guidato dall'IA</b>. All'inizio tutti sono <b>in pace</b>: per attaccare qualcuno bisogna prima <b>dichiarargli guerra</b>. Prendi le loro capitali e tienile per 7 turni (una settimana) per prenderti tutto il paese, prima che lo facciano con te.</p>
       <p style="font-size:12px;opacity:.75">Mappa reale, uguale a ogni partita: biomi © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener" style="color:#9cc9ff">OpenStreetMap contributors</a>; abitanti delle città da <a href="https://www.naturalearthdata.com/" target="_blank" rel="noopener" style="color:#9cc9ff">Natural Earth</a>;
       confini storici: <a href="https://github.com/aourednik/historical-basemaps" target="_blank" rel="noopener" style="color:#9cc9ff">historical-basemaps</a> (GPL-3.0).</p>
       <h4>In breve</h4>
@@ -295,7 +295,7 @@
         <li>🏛️ Le tue <b>città</b> producono <b>stelle ⭐</b> a ogni turno: sono la tua moneta.</li>
         <li>⚔️ Con le stelle <b>addestri unità</b> cliccando su una tua città libera.</li>
         <li>⛺ Porta un'unità su un <b>villaggio neutrale</b> per conquistarlo e aumentare le entrate.</li>
-        <li>🏆 Vinci conquistando la <b>capitale nemica</b>.</li>
+        <li>🏆 Vinci prendendo la <b>capitale nemica</b> e tenendola per 7 turni.</li>
         <li>🤝 Tocca il territorio di un altro impero per <b>dichiarargli guerra</b> o proporgli <b>pace</b> o <b>alleanza</b>.</li>
       </ul>
       <h4>Difficoltà dell'IA
@@ -341,7 +341,7 @@
       <h2>📖 Come si gioca</h2>
       <h4>🎯 Obiettivo</h4>
       <p><b>Ogni paese della mappa è un impero</b>: il tuo e, uno per ciascun altro paese, gli imperi guidati dall'IA, ognuno con la sua capitale 🏛️ (bordo del suo colore), le sue truppe e la sua economia. All'inizio sono <b>tutti in pace con tutti</b>: si espandono e, quando si sentono forti, dichiarano guerra ai vicini, fra loro e prima o poi anche a te.
-      Quando un impero perde la capitale <b>cade</b>: chi l'ha presa la tiene, le sue altre città tornano villaggi liberi e il suo esercito si scioglie. <b>Vinci quando sono caduti tutti</b>; se cade la tua capitale, hai perso.
+      <b>Chi prende la capitale di un impero e la tiene per 7 turni (una settimana) si prende tutto il paese</b>: le sue città, i porti, gli ospedali e tutto il territorio passano al vincitore e il suo esercito si scioglie. Sulla capitale occupata un tondo arancione mostra i turni che mancano; se lo sconfitto la riprende prima il conto si annulla, se la prende un terzo impero riparte da zero. Il conto avanza solo in guerra, e finché uno tiene la capitale dell'altro i due non fanno la pace. <b>Vinci quando sono caduti tutti</b>; se il nemico tiene la tua capitale per 7 turni, hai perso.
       <b>A inizio partita tocca sulla mappa il paese che vuoi guidare</b> (il menu 🌍 Elenco dei paesi aiuta a trovarlo) e poi toccalo ancora per <b>fondare la capitale</b>: ogni impero, il tuo e quelli dell'IA, comincia dalla <b>vera capitale</b> del suo paese (la Spagna a Madrid, la Francia a Parigi...) o dalla casella libera più vicina (evidenziata).
       Nella schermata iniziale puoi scegliere anche il <b>duello</b>: un solo nemico, l'Impero Cremisi, in un paese vicino al tuo.</p>
       <h4>🏳️ Territori</h4>
@@ -2431,25 +2431,112 @@ function scegliNemico(cc) {
   if (placing && players.p.country) { assegnaPaesi(players.p.country, paeseNemicoScelto); msgPiazzamento(); ui(); render(); apriSceltaPaese(); }
 }
 
-// la caduta di un impero: chi gli prende la capitale la tiene (come città qualunque),
-// le altre sue città tornano villaggi liberi, l'esercito si scioglie, porti e ospedali restano vuoti
-let conquistatoreP = null; // chi ha preso la tua capitale
-function cadeImpero(o, chi, t) {
+// ============ LA CAPITALE OCCUPATA ============
+// (v79) chi prende la capitale di un impero con cui è in guerra non lo fa cadere subito: la deve
+// TENERE per CAPITALE_TURNI turni (una settimana di gioco: un turno = un giorno). Allora tutto il
+// paese è suo: le città, i porti, gli ospedali e tutto il territorio (anche le caselle che lo
+// sconfitto aveva conquistato altrove); l'esercito sconfitto si scioglie. Se lo sconfitto ripassa
+// sulla sua capitale la riprende e il conto si annulla; se la prende un terzo impero il conto
+// riparte da zero per lui. Il conto avanza solo finché i due sono in guerra.
+// La città occupata non è più capitale (city.capital = false) ma ricorda di chi era: city.occ = { o, n }
+// (o = l'impero a cui è stata presa, n = turni già tenuti).
+const CAPITALE_TURNI = 7;
+let conquistatoreP = null; // chi ti ha preso tutto il paese
+// il promemoria a inizio turno: le capitali che tieni e la tua, se è occupata
+function notaOccupazioni() {
+  const out = [];
+  const mia = capitaleOccupata('p');
+  if (mia) out.push(`💀 La tua capitale è in mano a ${bandiera(mia.city.owner)} ${nomeImpero(mia.city.owner)}: riprendila, ${restanoTurni(mia) === 1 ? 'resta 1 turno' : `restano ${restanoTurni(mia)} turni`}!`
+    + (ostile('p', mia.city.owner) ? '' : ' (siete in pace: il conto è fermo)'));
+  for (const t of capitaliTenute('p'))
+    out.push(`🏛️ Tieni ${escHtml(nomeCitta(t.city))} (${bandiera(t.city.occ.o)}): ancora ${turniTxt(restanoTurni(t))} e il paese è tuo.`);
+  return out.length ? ' ' + out.join(' ') : '';
+}
+// la riga del pannello di una capitale occupata
+function notaCapitale(t) {
+  const occ = t.city && t.city.occ;
+  if (!occ) return '';
+  const r = restanoTurni(t), chi = t.city.owner, o = occ.o;
+  const fermo = ostile(chi, o) ? '' : ' (non sono in guerra: il conto è fermo)';
+  const testo = chi === 'p' ? `capitale di ${bandiera(o)} ${escHtml(nomePaese(o))}: tienila ancora ${turniTxt(r)} e il paese è tuo`
+    : o === 'p' ? `la tua capitale! Riprendila: ${r === 1 ? 'resta 1 turno' : `restano ${r} turni`}`
+    : `capitale occupata di ${bandiera(o)} ${escHtml(nomePaese(o))}: fra ${turniTxt(r)} il paese passa a ${bandiera(chi)} ${escHtml(nomeImpero(chi))}`;
+  return ` · <span style="color:#ffb35c">⏳ ${occ.n}/${CAPITALE_TURNI} — ${testo}${fermo}</span>`;
+}
+function capitaleOccupata(o) { return dallIndice(conCitta, t => t.city.occ && t.city.occ.o === o)[0] || null; }
+function capitaliTenute(o) { return dallIndice(conCitta, t => t.city.owner === o && t.city.occ); }
+function restanoTurni(t) { return Math.max(0, CAPITALE_TURNI - t.city.occ.n); }
+function turniTxt(n) { return n === 1 ? '1 turno' : n + ' turni'; }
+// la capitale di o è appena caduta in mano a chi
+function occupaCapitale(o, chi, t) {
   t.city.capital = false;
-  if (o === 'p') { conquistatoreP = chi; return; } // la partita finisce: il resto non serve
-  players[o].vivo = false;
-  caduti.push(o);
-  for (const k of Object.keys(diplo.rel)) if (k.split('|').includes(o)) delete diplo.rel[k]; // i suoi patti finiscono con lui
-  for (const x of cities(o)) x.city.owner = null;
-  for (const x of unitsOf(o)) x.unit = null;
-  for (const x of ports(o)) x.port.owner = null;
-  for (const x of dallIndice(conOsp, x => x.hosp.owner === o)) x.hosp = { owner: null, level: 0, hp: 0 };
+  t.city.occ = { o, n: 0 };
+  const nome = escHtml(nomeCitta(t.city));
+  if (chi === 'p') {
+    msg(`🏛️ Hai preso ${nome}, la capitale di ${bandiera(o)} ${nomePaese(o)}! Tienila per ${turniTxt(CAPITALE_TURNI)} e tutto il paese sarà tuo: città, porti e territorio.`);
+  } else if (o === 'p') {
+    aiLogAdd(`💀 ${bandiera(chi)} ${nomeImpero(chi)} ha preso la tua CAPITALE! Riprendila entro ${turniTxt(CAPITALE_TURNI)} o perderai tutto il paese.`, true);
+    document.getElementById('msg').textContent = `💀 La tua capitale è caduta! Riprendila entro ${turniTxt(CAPITALE_TURNI)} o perderai tutto.`;
+  } else aiLogAdd(`🏛️ ${bandiera(chi)} ${nomeImpero(chi)} ha preso ${nome}, capitale di ${bandiera(o)} ${nomePaese(o)}: se la tiene ${turniTxt(CAPITALE_TURNI)}, il paese è suo.`, true);
+}
+// una capitale occupata cambia ancora padrone
+function passaCapitale(t, chi) {
+  const occ = t.city.occ, o = occ.o, nome = escHtml(nomeCitta(t.city));
+  if (chi === o) { // lo sconfitto se la riprende: torna capitale e il conto si annulla
+    t.city.capital = true;
+    delete t.city.occ;
+    if (chi === 'p') msg(`🎉 Hai ripreso ${nome}: è di nuovo la tua capitale!`);
+    else aiLogAdd(`🏛️ ${bandiera(o)} ${nomePaese(o)} riprende la sua capitale ${nome}`, true);
+    return;
+  }
+  occ.n = 0; // un nuovo occupante: il conto riparte
+  if (chi === 'p') msg(`🏛️ Hai preso ${nome}, la capitale di ${bandiera(o)} ${nomePaese(o)}! Tienila per ${turniTxt(CAPITALE_TURNI)} e tutto il paese sarà tuo.`);
+  else if (o === 'p') aiLogAdd(`💀 Ora la tua capitale è di ${bandiera(chi)} ${nomeImpero(chi)}: il conto riparte, hai ${turniTxt(CAPITALE_TURNI)} per riprenderla.`, true);
+  else aiLogAdd(`🏛️ ${bandiera(chi)} ${nomeImpero(chi)} prende ${nome}, capitale occupata di ${bandiera(o)} ${nomePaese(o)}: il conto riparte`, true);
+}
+// a ogni nuovo turno: chi tiene una capitale nemica (in guerra) avanza di un turno
+function avanzaOccupazioni() {
+  for (const t of dallIndice(conCitta, x => x.city.occ)) {
+    const occ = t.city.occ, chi = t.city.owner;
+    if (!occ) continue; // già sistemata da un'annessione di questo stesso giro
+    if (!chi || chi === occ.o || !players[occ.o] || players[occ.o].vivo === false) { delete t.city.occ; continue; }
+    if (!ostile(chi, occ.o)) continue; // conta solo in guerra
+    occ.n++;
+    if (occ.n >= CAPITALE_TURNI) { annettePaese(occ.o, chi, t); if (gameOver || capitalePersa()) return; }
+  }
+}
+function capitalePersa() { return !pCapital() && !capitaleOccupata('p'); }
+// la capitale è stata tenuta abbastanza: tutto il paese di o passa a chi
+function annettePaese(o, chi, t) {
+  delete t.city.occ;
+  t.city.capital = false;
+  const terre = map.flat().filter(x => padroneTerra(x) === o); // prima che o cada: dopo non ha più padrone
+  const citta = cities(o);
+  for (const x of citta) x.city.owner = chi;
+  for (const x of unitsOf(o)) x.unit = null; // l'esercito sconfitto si scioglie
+  for (const x of ports(o)) x.port.owner = chi;
+  for (const x of dallIndice(conOsp, x => x.hosp.owner === o)) x.hosp.owner = chi;
+  if (o === 'p') conquistatoreP = chi; // la partita finisce (checkEnd)
+  else {
+    players[o].vivo = false;
+    if (!caduti.includes(o)) caduti.push(o);
+    for (const k of Object.keys(diplo.rel)) if (k.split('|').includes(o)) delete diplo.rel[k]; // i suoi patti finiscono con lui
+  }
+  for (const x of terre) x.terra = padroneNaturale(x) === chi ? null : chi;
+  // le capitali che lo sconfitto teneva: se una è di chi vince, torna sua capitale; le altre ricominciano il conto
+  for (const x of citta) {
+    if (!x.city.occ) continue;
+    if (x.city.occ.o === chi) { x.city.capital = true; delete x.city.occ; }
+    else x.city.occ.n = 0;
+  }
+  terrainDirty = true;
+  if (o === 'p') { aiLogAdd(`💀 ${bandiera(chi)} ${nomeImpero(chi)} ha tenuto la tua capitale per ${turniTxt(CAPITALE_TURNI)}: il tuo paese è suo.`, true); checkEnd(); return; }
   const resto = imperiIA().length;
   if (chi === 'p') {
     msg(modoPartita === 'tutti'
-      ? `👑 Hai preso la capitale: ${bandiera(o)} ${nomePaese(o)} è caduto! Le sue città tornano villaggi liberi. ${resto ? `Restano ${resto} imperi.` : ''}`
-      : `👑 Hai preso la capitale nemica!`);
-  } else aiLogAdd(`🏳️ ${bandiera(o)} ${nomePaese(o)} è caduto: ${bandiera(chi)} ${nomeImpero(chi)} ne ha preso la capitale. Restano ${resto} imperi.`, true);
+      ? `👑 ${bandiera(o)} ${nomePaese(o)}: il paese è tuo! Hai tenuto la capitale per ${turniTxt(CAPITALE_TURNI)}: le sue altre ${citta.length} città e tutto il territorio passano a te. ${resto ? `Restano ${resto} imperi.` : ''}`
+      : `👑 Hai tenuto la capitale nemica per ${turniTxt(CAPITALE_TURNI)}: il paese è tuo!`);
+  } else aiLogAdd(`🏳️ ${bandiera(o)} ${nomePaese(o)} è caduto: ${bandiera(chi)} ${nomeImpero(chi)} ne ha tenuto la capitale per ${turniTxt(CAPITALE_TURNI)} e si prende tutto il paese. Restano ${resto} imperi.`, true);
 }
 
 // ============ LA DIPLOMAZIA ============
@@ -2519,12 +2606,21 @@ function diploAttesa(o) {
 // la diplomazia c'è quando ogni paese è un impero (non nel duello né nel tutorial)
 function diploAttiva() { return modoPartita === 'tutti' && !tutorial; }
 
+// v79: finché uno dei due tiene la capitale dell'altro non si fa la pace (né l'alleanza)
+function occupazioneFra(a, b) {
+  const da = capitaleOccupata(b), mia = capitaleOccupata(a);
+  if (da && da.city.owner === a) return `✋ ${bandiera(b)} ${nomePaese(b)} non tratta finché tieni la sua capitale ${escHtml(nomeCitta(da.city))}.`;
+  if (mia && mia.city.owner === b) return `✋ ${bandiera(b)} ${nomePaese(b)} non tratta: tiene la tua capitale ${escHtml(nomeCitta(mia.city))} e vuole il tuo paese.`;
+  return '';
+}
 // le azioni del giocatore
 function proponi(o, tipo) {
   if (!diploAttiva() || current !== 'p' || gameOver || placing || !players[o] || !players[o].vivo) return false;
   const ora = relazione('p', o);
   if (ora === tipo || (tipo === 'pace' && ora === 'alleanza')) return false;
   if (diploAttesa(o)) { msg(`⏳ ${bandiera(o)} ${nomePaese(o)} ha appena rifiutato: riprova fra ${diploAttesa(o)} turni.`); return false; }
+  const occ = occupazioneFra('p', o);
+  if (occ) { msg(occ); return false; }
   const ok = valutaProposta(o, tipo) + Math.random() * 20 >= DIPLO_SOGLIA;
   if (ok) {
     setRelazione('p', o, tipo);
@@ -2584,7 +2680,7 @@ function aiDiplomazia() {
   const G = aiGuerraDiff(), D = aiDiff();
   // la pace fra IA dopo una lunga guerra senza vincitori
   for (const x of imperiIA()) {
-    if (x === aiMe || relazione(aiMe, x) !== 'guerra' || turn - dalRel(aiMe, x) < GUERRA_STALLO_TURNI) continue;
+    if (x === aiMe || relazione(aiMe, x) !== 'guerra' || turn - dalRel(aiMe, x) < GUERRA_STALLO_TURNI || occupazioneFra(aiMe, x)) continue;
     const a = aiSoldati(aiMe), b = aiSoldati(x);
     if (Math.max(a, b) > 1.5 * Math.min(a, b) + 2 || Math.random() > 0.05) continue;
     setRelazione(aiMe, x, 'pace');
@@ -2624,8 +2720,9 @@ function apriDiplomazia(o, esito = '') {
   const prob = tipo => { const v = valutaProposta(o, tipo); return v >= DIPLO_SOGLIA ? 'alta' : v + 20 >= DIPLO_SOGLIA ? 'media' : 'nessuna'; };
   const bott = (txt, fn, colore, dis) => `<button class="ov-play" style="background:${colore}"${dis ? ' disabled' : ''} onclick="${fn}">${txt}</button>`;
   let azioni = '';
-  if (ora === 'guerra') azioni += bott(`🕊️ Proponi la pace <small>(probabilità ${prob('pace')})</small>`, `diploAzione('${o}','pace')`, '#2e7d4f', attesa);
-  if (ora !== 'alleanza') azioni += bott(`🤝 Proponi un'alleanza <small>(probabilità ${prob('alleanza')})</small>`, `diploAzione('${o}','alleanza')`, '#1f6f8c', attesa);
+  const bloccata = attesa || !!occupazioneFra('p', o);
+  if (ora === 'guerra') azioni += bott(`🕊️ Proponi la pace <small>(probabilità ${prob('pace')})</small>`, `diploAzione('${o}','pace')`, '#2e7d4f', bloccata);
+  if (ora !== 'alleanza') azioni += bott(`🤝 Proponi un'alleanza <small>(probabilità ${prob('alleanza')})</small>`, `diploAzione('${o}','alleanza')`, '#1f6f8c', bloccata);
   if (ora !== 'guerra') azioni += bott(ora === 'alleanza' ? "⚔️ Rompi l'alleanza: guerra!" : '⚔️ Dichiara guerra', `diploAzione('${o}','guerra')`, '#a83a2f');
   const patti = imperiIA().filter(x => relazione('p', x) !== 'guerra');
   document.getElementById('diploBox').innerHTML = `
@@ -2635,6 +2732,7 @@ function apriDiplomazia(o, esito = '') {
     <p style="font-size:13px;opacity:.85">In pace o alleati non vi attaccate e non entrate nelle città e nei porti dell'altro.
     L'alleanza dà +${ALLEANZA_RENDITA}⭐ a turno a testa. Chi rompe un patto perde la fiducia degli altri imperi.
     L'IA accetta più volentieri se sei forte, se le tue truppe sono vicine alle sue città e se ti sei sempre comportato bene.</p>
+    ${occupazioneFra('p', o) ? `<p style="color:#ffb35c">${occupazioneFra('p', o)}</p>` : ''}
     ${attesa ? `<p style="color:#ffb35c">⏳ Ha rifiutato da poco: puoi riprovare fra ${attesa} ${attesa === 1 ? 'turno' : 'turni'}.</p>` : ''}
     ${esito ? `<p id="diploEsito" style="color:#ffd76e">${esito}</p>` : ''}
     <div class="ovrow diplo-azioni">${azioni}${bott('Chiudi', 'chiudiDiplomazia()', '#3a4d6b')}</div>
@@ -3145,7 +3243,7 @@ function playerFound() {
 
 function captureIfCity(t, owner) {
   if (t.city && t.city.owner !== owner) {
-    const was = t.city.owner, capitale = !!t.city.capital;
+    const was = t.city.owner, capitale = !!t.city.capital, occupata = !!t.city.occ;
     t.city.owner = owner;
     // la guerra fa fuggire parte degli abitanti
     if (was) t.city.pop = Math.max(1, (t.city.pop || 1) - 1);
@@ -3156,13 +3254,16 @@ function captureIfCity(t, owner) {
     } else {
       if (was === null) aiLogAdd('⛺ Il nemico ha conquistato un villaggio neutrale');
       else if (was === 'p') {
-        aiLogAdd(capitale ? '💀 Il nemico ha preso la tua CAPITALE!' : '⚠️ Il nemico ha conquistato una tua città!', true);
-        document.getElementById('msg').textContent = '⚠️ Il nemico ha conquistato una tua città!';
+        if (!capitale) {
+          aiLogAdd('⚠️ Il nemico ha conquistato una tua città!', true);
+          document.getElementById('msg').textContent = '⚠️ Il nemico ha conquistato una tua città!';
+        }
       } else aiLogAdd(`🔥 Il nemico ha conquistato una città di ${bandiera(was)} ${nomeImpero(was)}`);
     }
     // v78: la città è un'unica area: chi la prende prende tutte le sue caselle (anche il fiume)
     for (const x of areaCitta(t)) if (x !== t) conquistaTerra(x, owner);
-    if (was && capitale) cadeImpero(was, owner, t);
+    if (was && capitale) occupaCapitale(was, owner, t);
+    else if (occupata) passaCapitale(t, owner);
   }
 }
 
@@ -3218,10 +3319,11 @@ function congedaClick(t) {
   refreshSets(); ui(); render();
 }
 
-// si perde quando cade la propria capitale, si vince quando non resta nessun impero IA
+// si perde quando la propria capitale resta in mano al nemico per CAPITALE_TURNI turni (o se non resta
+// più niente: né città né unità), si vince quando non resta nessun impero IA
 function checkEnd() {
   if (gameOver || placing) return;
-  if (!pCapital()) endGame(false);
+  if (capitalePersa() || (!pCapital() && !cities('p').length && !unitsOf('p').length)) endGame(false);
   else if (!imperiIA().length) endGame(true);
   // vittoria diplomatica: tutti gli imperi rimasti sono tuoi alleati
   else if (modoPartita === 'tutti' && imperiIA().every(o => relazione('p', o) === 'alleanza')) endGame(true);
@@ -3237,10 +3339,11 @@ function endGame(win) {
       ? `Vittoria diplomatica: tutti gli imperi rimasti (${imperiIA().length}) sono tuoi alleati, al turno ${turn}. L'Europa è in pace sotto la tua guida!`
       : modoPartita === 'tutti'
       ? `Hai fatto cadere tutti gli imperi in ${turn} turni. L'Europa è tua!`
-      : `Hai conquistato la capitale dell'Impero Cremisi in ${turn} turni. Il continente è tuo!`)
+      : `Hai tenuto la capitale dell'Impero Cremisi per ${turniTxt(CAPITALE_TURNI)}: al turno ${turn} il continente è tuo!`)
     : (modoPartita === 'tutti' && chi
-      ? `${bandiera(conquistatoreP)} ${chi.name} ha preso la tua capitale al turno ${turn}. Andrà meglio la prossima volta!`
-      : `L'Impero Cremisi ha preso la tua capitale al turno ${turn}. Andrà meglio la prossima volta!`);
+      ? `${bandiera(conquistatoreP)} ${chi.name} ha tenuto la tua capitale per ${turniTxt(CAPITALE_TURNI)} e al turno ${turn} si è preso il tuo paese. Andrà meglio la prossima volta!`
+      : chi ? `L'Impero Cremisi ha tenuto la tua capitale per ${turniTxt(CAPITALE_TURNI)}: al turno ${turn} il tuo paese è suo. Andrà meglio la prossima volta!`
+      : `Al turno ${turn} non ti resta più niente: né città né truppe. Andrà meglio la prossima volta!`);
   ov.style.display = 'flex';
   render();
 }
@@ -3292,6 +3395,9 @@ function startPlayerTurn() {
   if (gameOver) return;
   turn++;
   current = 'p'; aiMe = null;
+  avanzaOccupazioni();
+  checkEnd();
+  if (gameOver) return;
   players.p.stars += income('p');           // prima incassi...
   const upk = upkeep('p');
   if (upk > players.p.stars) {               // ...e se non puoi pagare, scegli chi congedare
@@ -3300,7 +3406,7 @@ function startPlayerTurn() {
     congedoMsg();
   } else {
     players.p.stars -= upk;                  // pagamento automatico
-    msg(`Turno ${turn}: +${income('p')} ⭐ − ${upk} di mantenimento. Tocca a te!`);
+    msg(`Turno ${turn}: +${income('p')} ⭐ − ${upk} di mantenimento. Tocca a te!${notaOccupazioni()}`);
   }
   updateAiLog(); // la cronaca resta visibile in trasparenza sulla mappa
   ui(); render();
@@ -3313,7 +3419,8 @@ function snapshot() {
     stelle: Object.fromEntries(Object.keys(players).map(o => [o, players[o].stars])), vivi: imperiIA(), turn,
     tiles: map.flat().map(t => ({
       g: t.terrain, b: t.bridge ? 1 : 0,
-      y: t.city ? { o: t.city.owner, k: t.city.capital, p: t.city.pop || 1, n: t.city.n, a: t.city.ab } : 0,
+      y: t.city ? { o: t.city.owner, k: t.city.capital, p: t.city.pop || 1, n: t.city.n, a: t.city.ab,
+                    x: t.city.occ ? [t.city.occ.o, t.city.occ.n] : 0 } : 0,
       u: t.unit ? { t: t.unit.type, o: t.unit.owner, n: t.unit.count, h: t.unit.hp,
                     m: t.unit.maxHp, mv: t.unit.moved, ak: t.unit.attacked, cl: t.unit.climb || 0,
                     lv: UNIT_TYPES[t.unit.type].ship ? (t.unit.lvl || 1) : 0,
@@ -3335,6 +3442,7 @@ function restoreSnapshot(s) {
     t.terrain = x.g;
     t.bridge = !!x.b;
     t.city = x.y ? { owner: x.y.o, capital: x.y.k, pop: x.y.p || 1, n: x.y.n, ab: x.y.a } : null;
+    if (t.city && x.y.x) t.city.occ = { o: x.y.x[0], n: x.y.x[1] };
     t.unit = x.u ? { type: x.u.t, owner: x.u.o, count: x.u.n, hp: x.u.h,
                      maxHp: x.u.m, moved: x.u.mv, attacked: x.u.ak, climb: x.u.cl || 0 } : null;
     if (t.unit && UNIT_TYPES[t.unit.type].ship) {
@@ -3385,7 +3493,9 @@ function serialize() {
     if (!t.city && !t.unit && !t.hosp && !t.port) continue;
     caselle.push({
       r, c,
-      y: t.city ? { o: t.city.owner, k: !!t.city.capital, p: t.city.pop || 1, n: t.city.n || null, a: t.city.ab } : 0,
+      y: t.city ? Object.assign({ o: t.city.owner, k: !!t.city.capital, p: t.city.pop || 1, n: t.city.n || null, a: t.city.ab },
+                                // v79 (campo facoltativo): capitale occupata, [impero a cui è stata presa, turni tenuti]
+                                t.city.occ ? { x: [t.city.occ.o, t.city.occ.n] } : {}) : 0,
       u: t.unit ? { t: t.unit.type, o: t.unit.owner, n: t.unit.count, h: t.unit.hp, m: t.unit.maxHp, cl: t.unit.climb || 0,
                     lv: UNIT_TYPES[t.unit.type].ship ? (t.unit.lvl || 1) : 0, f: fattoDi(t.unit),
                     k: t.unit.cargo ? { t: t.unit.cargo.type, o: t.unit.cargo.owner, n: t.unit.cargo.count,
@@ -3492,6 +3602,11 @@ function caricaSalvataggio(data) {
       // nome e abitanti reali (dalla v66); i salvataggi precedenti li ricalcolano dopo
       if (typeof s.y.n === 'string' && s.y.n.length <= 80) t.city.n = s.y.n;
       if (Number.isFinite(s.y.a) && s.y.a >= 0) t.city.ab = Math.min(50000000, Math.round(s.y.a));
+      // la capitale occupata (dalla v79); i salvataggi di prima non ce l'hanno
+      if (Array.isArray(s.y.x) && s.y.o && proprietario(s.y.x[0]) && s.y.x[0] !== s.y.o) {
+        t.city.capital = false;
+        t.city.occ = { o: s.y.x[0], n: Math.min(CAPITALE_TURNI - 1, Math.max(0, s.y.x[1] | 0)) };
+      }
     }
     if (s.u) {
       if (!(s.u.t in UNIT_TYPES) || !proprietario(s.u.o)) return false;
@@ -3602,7 +3717,7 @@ function caricaSalvataggio(data) {
     players[o].country = cc;
     players[o].stars = Math.max(0, data.stars[o0] | 0);
     // un impero senza capitale nel file è già caduto
-    if (!capitaleDi(o)) { players[o].vivo = false; if (!caduti.includes(o)) caduti.push(o); }
+    if (!capitaleDi(o) && !capitaleOccupata(o)) { players[o].vivo = false; if (!caduti.includes(o)) caduti.push(o); }
   }
   // le caselle conquistate in guerra (campo facoltativo, dalla v62)
   if (Array.isArray(data.conquiste)) for (const x of data.conquiste) {
@@ -3696,7 +3811,7 @@ const TUT_STEPS = [
       return vills[0];
     } },
 ];
-const TUT_DONE = "🎉 <b>Tutorial completato!</b> Ora sai tutto: espandi l'economia, addestra un esercito e trova e conquista la capitale nemica 🏛️. Puoi rileggere le schede di unità e terreni col pulsante 📚 Enciclopedia, e le regole col 📖. Buona fortuna, imperatore!";
+const TUT_DONE = "🎉 <b>Tutorial completato!</b> Ora sai tutto: espandi l'economia, addestra un esercito, prendi la capitale nemica 🏛️ e tienila per 7 turni: il suo paese sarà tuo. Puoi rileggere le schede di unità e terreni col pulsante 📚 Enciclopedia, e le regole col 📖. Buona fortuna, imperatore!";
 
 function nextTutStep() {
   tutStep++;
@@ -3892,10 +4007,14 @@ const AI_DELAY = 700; // ms fra una mossa e l'altra
 //  ricchezza: quanto l'IA punta alle città che rendono di più (abitanti veri): per ogni stella
 //             di rendita in più accetta questa strada in più (in terzi di turno) per arrivarci.
 //             A Facile 0: va alla città più vicina, come prima della v70
+//  riscossa: (v79) quando un nemico tiene la sua capitale, le unità entro questi esagoni (scalati
+//             sulla mappa) marciano a riprenderla; 0 = tutte
+//  presidio: (v79) sulla capitale nemica che tiene lascia sempre un presidio (a Facile solo se
+//             ci sono nemici vicini, come per la sua capitale)
 const AI_LIVELLI = {
-  facile:    { nome: 'Facile',    economia: 0.7,  spesa: 0.35, soglia: 16, rapporto: 1.5, tregua: 60, coloni: 0.3, ricchezza: 0 },
-  normale:   { nome: 'Normale',   economia: 0.85, spesa: 0.5,  soglia: 10, rapporto: 1.1, tregua: 30, coloni: 0.4, ricchezza: 2 },
-  difficile: { nome: 'Difficile', economia: 1,    spesa: 0.6,  soglia: 6,  rapporto: 0.8, tregua: 0,  coloni: 0.5, ricchezza: 4 } // l'IA della v54, che ora sceglie le prede ricche
+  facile:    { nome: 'Facile',    economia: 0.7,  spesa: 0.35, soglia: 16, rapporto: 1.5, tregua: 60, coloni: 0.3, ricchezza: 0, riscossa: 12, presidio: false },
+  normale:   { nome: 'Normale',   economia: 0.85, spesa: 0.5,  soglia: 10, rapporto: 1.1, tregua: 30, coloni: 0.4, ricchezza: 2, riscossa: 30, presidio: true },
+  difficile: { nome: 'Difficile', economia: 1,    spesa: 0.6,  soglia: 6,  rapporto: 0.8, tregua: 0,  coloni: 0.5, ricchezza: 4, riscossa: 0,  presidio: true } // l'IA della v54, che ora sceglie le prede ricche
 };
 let aiLivello = 'normale';
 try { const v = localStorage.getItem('piccoliImperi.ia'); if (AI_LIVELLI[v]) aiLivello = v; } catch (e) {}
@@ -4017,6 +4136,10 @@ function aiTrainPhase() {
   if (gameOver) return;
   const cap = capitaleDi(aiMe);
   const capThreat = cap && nemiciVicino(cap, aiR(5)).length > 0;
+  // v79: le capitali prese ai nemici, minacciate, vanno presidiate come la propria
+  const tenuteInPericolo = new Set(capitaliTenute(aiMe).filter(x => nemiciVicino(x, aiR(5)).length > 0));
+  // ...e se un nemico tiene la propria capitale l'impero è in pericolo: si arruolano soldati
+  const urgenza = capThreat || tenuteInPericolo.size > 0 || !!aiRiscossa;
   aiFaseNavi();
   const conta = f => unitsOf(aiMe).filter(x => f(UNIT_TYPES[x.unit.type])).length;
   let settlers = conta(d => d.settler), builders = conta(d => d.builder), medics = conta(d => d.medic);
@@ -4025,7 +4148,9 @@ function aiTrainPhase() {
   const naveLibera = unitsOf(aiMe).some(x => UNIT_TYPES[x.unit.type].ship && !x.unit.cargo);
   const risparmio = aiAttese().length > 0 && !naveLibera && ports(aiMe).length > 0;
   // capitale per prima, così le stelle vanno prima alla difesa
-  const cts = cities(aiMe).sort((a, b) => (b.city.capital ? 1 : 0) - (a.city.capital ? 1 : 0));
+  // (e quando si deve riprendere la capitale, prima le città più vicine a lei)
+  const peso = x => x.city.capital ? 0 : tenuteInPericolo.has(x) ? 1 : 2;
+  const cts = cities(aiMe).sort((a, b) => peso(a) - peso(b) || (aiRiscossa ? dist(a, aiRiscossa) - dist(b, aiRiscossa) : 0));
   for (const ct of cts) {
     if (ct.unit) continue;
     aiVisibile = aiMostra(ct);
@@ -4036,13 +4161,13 @@ function aiTrainPhase() {
     const margine = aiTregua() ? Math.floor(aiEntrata() * aiDiff().spesa / 2) - upkeep(aiMe)
       : Math.floor(aiEntrata() * aiDiff().spesa) - upkeep(aiMe) + Math.floor(stelle / 15);
     let pick = null;
-    if (capThreat && ct.city.capital && stelle >= 2) pick = 'warrior'; // presidio d'emergenza
-    else if (!capThreat && (aiBisogni.ponti.size || aiSenzaPorto.length) && builders < (stelle >= 30 ? 3 : 2) && stelle >= 6) pick = 'builder';
-    else if (!capThreat && builders < 1 && stelle >= 6 && Math.random() < 0.3) pick = 'builder';
-    else if (!capThreat && settlers < 3 && spazio && stelle >= 3 && Math.random() < aiDiff().coloni) pick = 'citizen';
+    if (((capThreat && ct.city.capital) || tenuteInPericolo.has(ct)) && stelle >= 2) pick = 'warrior'; // presidio d'emergenza
+    else if (!urgenza && (aiBisogni.ponti.size || aiSenzaPorto.length) && builders < (stelle >= 30 ? 3 : 2) && stelle >= 6) pick = 'builder';
+    else if (!urgenza && builders < 1 && stelle >= 6 && Math.random() < 0.3) pick = 'builder';
+    else if (!urgenza && settlers < 3 && spazio && stelle >= 3 && Math.random() < aiDiff().coloni) pick = 'citizen';
     else if (stelle >= 6 && Math.random() < 0.15 && unitsOf(aiMe).length >= 3 && medics < 2) pick = 'medic';
-    else if (risparmio && !capThreat) pick = null;
-    else if (margine >= 1 || capThreat) {
+    else if (risparmio && !urgenza) pick = null;
+    else if (margine >= 1 || urgenza) {
       if (stelle >= 5 && Math.random() < 0.55) pick = 'knight';
       else if (stelle >= 3 && Math.random() < 0.55) pick = 'archer';
       else if (stelle >= 2) pick = 'warrior';
@@ -4052,7 +4177,7 @@ function aiTrainPhase() {
       let n = 1;
       if (d.atk > 0 && !d.ship) { // anche il nemico compra armate già in gruppo, se può mantenerle
         n = Math.min(AI_ARMATA_MAX, Math.floor(stelle / d.cost), 1 + Math.floor(Math.random() * 3));
-        if (!capThreat) n = Math.min(n, margine * 2);
+        if (!urgenza) n = Math.min(n, margine * 2);
         n = Math.max(1, n);
       }
       players[aiMe].stars -= d.cost * n;
@@ -4320,6 +4445,15 @@ function cheatConquista(o) {
   }
   const citta = cities(o);
   for (const x of citta) { x.city.owner = 'p'; x.city.capital = false; }
+  // v79: le capitali occupate che teneva: la tua torna tua capitale, le altre ricominciano il conto
+  for (const x of citta) {
+    if (!x.city.occ) continue;
+    if (x.city.occ.o === 'p') { x.city.capital = true; delete x.city.occ; }
+    else x.city.occ.n = 0;
+  }
+  // ...e la sua capitale, se un altro impero la teneva, resta a lui come città qualunque
+  const suaPresa = capitaleOccupata(o);
+  if (suaPresa) delete suaPresa.city.occ;
   for (const x of unitsOf(o)) x.unit = null;
   for (const x of ports(o)) x.port.owner = 'p';
   for (const x of dallIndice(conOsp, x => x.hosp.owner === o)) x.hosp.owner = 'p';
@@ -4350,6 +4484,15 @@ function aiR(x) { return Math.max(x, Math.round(x * tileScale())); }
 const AI_INF = 1e9;
 const AI_ARMATA_MAX = 3;  // le armate in marcia si fermano a 3: entrano in una nave di livello 1
 let aiCosti = null, aiCostiBase = null, aiMareIdx = null, aiCampi = null, aiOffensiva = false;
+let aiRiscossa = null; // v79: la propria capitale in mano a un nemico, da riprendere
+// le capitali da difendere: la propria e quelle nemiche che si tengono
+function aiDaDifendere() { const c = capitaleDi(aiMe); return (c ? [c] : []).concat(capitaliTenute(aiMe)); }
+// l'unità in t va a riprendere la capitale? (secondo la difficoltà, solo quelle abbastanza vicine)
+function aiInRiscossa(t) {
+  if (!aiRiscossa || !aiCampi) return false;
+  const R = aiDiff().riscossa;
+  return (!R || dist(t, aiRiscossa) <= aiR(R)) && aiCampi.riscossa[aiIdx(t)] < AI_INF;
+}
 // fiumi da attraversare (servono ponti) e armate ferme sulla costa (servono navi)
 let aiBisogni = { ponti: new Map(), imbarchi: new Map() };
 let aiFronte = new Map(); // per ogni armata in attesa, il mare su cui vuole salpare
@@ -4381,6 +4524,7 @@ const AI_RICCHEZZA_TETTO = 9; // oltre queste stelle non si guarda più
 function aiPartenza(t) {
   const k = aiDiff().ricchezza || 0;
   if (!k || !t.city) return 0;
+  if (t.city.capital || t.city.occ) return 0; // v79: chi tiene una capitale si prende il paese: vale quanto la più ricca
   return k * (AI_RICCHEZZA_TETTO - Math.min(AI_RICCHEZZA_TETTO, renditaCitta(t.city)));
 }
 function aiCampo(sorgenti, costi = aiCosti, mete = null, finestra = true, partenza = null) {
@@ -4479,7 +4623,11 @@ function aiPreparaTurno() {
   const att = pigro(() => aiCampo(cittaNemiche(), aiCosti, mie, true, aiPartenza));
   const esp = pigro(() => aiCampo(cities(null), aiCosti, mie, true, aiPartenza));
   const terra = pigro(() => aiCampo(cittaNemiche(), aiCosti.map(c => c === 1 ? 60 : c), mie, true, aiPartenza));
-  aiCampi = { get attacco() { return att(); }, get espansione() { return esp(); }, get attaccoTerra() { return terra(); } };
+  const mia = capitaleOccupata(aiMe);
+  aiRiscossa = mia && mia.city.owner && ostile(aiMe, mia.city.owner) ? mia : null;
+  const ris = pigro(() => aiCampo(aiRiscossa ? [aiRiscossa] : [], aiCosti, mie, true));
+  aiCampi = { get attacco() { return att(); }, get espansione() { return esp(); }, get attaccoTerra() { return terra(); },
+              get riscossa() { return ris(); } };
   // offensiva quando l'esercito è abbastanza forte (con isteresi, per non tentennare),
   // e mai prima della fine della tregua decisa dalla difficoltà
   const D = aiDiff();
@@ -4508,6 +4656,7 @@ function aiRiservata(x) {
 // la mappa da seguire per un'unità militare: villaggi neutrali finché non si va all'attacco
 function aiCampoMilitare(t) {
   if (!aiCampi) aiPreparaTurno();
+  if (aiInRiscossa(t)) return aiCampi.riscossa; // prima di tutto si riprende la capitale
   if (aiOffensiva || (aiCampi.espansione[aiIdx(t)] >= AI_INF && !aiTregua()))
     return t.unit && t.unit.aiAttesa > AI_PAZIENZA ? aiCampi.attaccoTerra : aiCampi.attacco;
   return aiCampi.espansione;
@@ -4520,7 +4669,7 @@ function aiPasso(t, campo) {
   const civile = UNIT_TYPES[t.unit.type].builder, tregua = aiTregua();
   for (const m of movesFor(t)) {
     if (!civile && aiRiservata(m)) continue;
-    if (tregua && m.city && m.city.owner && m.city.owner !== aiMe) continue; // in tregua non prende le città altrui
+    if (tregua && m.city && m.city.owner && m.city.owner !== aiMe && m !== aiRiscossa) continue; // in tregua non prende le città altrui (tranne la sua capitale)
     const v = campo[aiIdx(m)];
     if (v < bv) { bv = v; best = m; }
   }
@@ -4568,7 +4717,8 @@ function aiSegui(t, path) {
 function aiLiberaCitta(t) {
   const u = t.unit;
   if (!u || u.owner !== aiMe || u.moved || !t.city || t.city.owner !== aiMe) return;
-  if (t.city.capital && nemiciVicino(t, aiR(6)).length) return;
+  if ((t.city.capital || t.city.occ) && nemiciVicino(t, aiR(6)).length) return;
+  if (t.city.occ && aiDiff().presidio) return; // v79: la capitale presa non resta mai sguarnita
   const fuori = movesFor(t).find(m => !m.city && m.terrain !== 'mountain');
   if (fuori) doMove(t, fuori);
 }
@@ -4716,9 +4866,12 @@ function aiActUnit(t) {
   const hitTile = aiTryAttack(t);
   if (hitTile) return t.unit ? t : hitTile; // in mischia può aver occupato la casella del bersaglio
 
-  // 2. difesa della capitale: se è minacciata e sguarnita, le unità vicine ripiegano
-  const cap = capitaleDi(aiMe);
-  if (cap) {
+  // 2. difesa della capitale (v79: anche delle capitali nemiche che tiene, che fra qualche turno gli
+  //    danno tutto il paese): se è minacciata e sguarnita, le unità vicine ripiegano
+  for (const cap of aiDaDifendere()) {
+    const mia = !!cap.city.capital;
+    // la capitale presa al nemico: chi la presidia resta (a Facile solo con nemici vicini, qui sotto)
+    if (!mia && t === cap && aiDiff().presidio) return t;
     const threats = nemiciVicino(cap, aiR(4)).length;
     const defenders = unitsOf(aiMe).filter(f => f !== t && dist(cap, f) <= aiR(2)).length;
     // chi presidia la capitale minacciata non la lascia, a meno che sia l'unico soldato e ci
@@ -4738,7 +4891,7 @@ function aiActUnit(t) {
       const moves = movesFor(t);
       const back = moves.filter(m => dist(m, cap) < dist(t, cap)).sort((a, b) => dist(a, cap) - dist(b, cap))[0];
       if (back) {
-        aiLogAdd(`${icon} Il ${name} nemico ripiega a difesa della capitale`);
+        aiLogAdd(`${icon} Il ${name} nemico ripiega a difesa ${mia ? 'della capitale' : 'della capitale che ha preso'}`);
         doMove(t, back);
         aiTryAttack(back);
         return back;
@@ -4802,7 +4955,8 @@ function aiTryAttack(tile) {
   // in tregua l'IA colpisce solo chi entra nel suo territorio, e mai dentro le tue città
   if (aiTregua()) {
     const mie = cities(aiMe);
-    atks = atks.filter(to => !(to.city && to.city.owner && to.city.owner !== aiMe) && mie.some(c => dist(c, to) <= aiR(3)));
+    atks = atks.filter(to => (aiRiscossa && dist(aiRiscossa, to) <= aiR(3))
+      || (!(to.city && to.city.owner && to.city.owner !== aiMe) && mie.some(c => dist(c, to) <= aiR(3))));
   }
   if (!atks.length) return null;
   const u = tile.unit, d = UNIT_TYPES[u.type];
@@ -4817,6 +4971,7 @@ function aiTryAttack(tile) {
     if (to.unit && UNIT_TYPES[to.unit.type].civil) s += 10 + to.unit.count * 2; // carovane: bersagli succosi
     if (to.city && to.city.owner && to.city.owner !== aiMe)      // scaccia i difensori delle città,
       s += 10 + Math.round(renditaCitta(to.city) * (aiDiff().ricchezza || 0) / 2); // prima quelle ricche
+    if (to.city && to.city.occ && (to.city.occ.o === aiMe || to.city.owner !== aiMe)) s += 20; // v79: le capitali occupate decidono un paese
     if (to.unit && dist(tile, to) > UNIT_TYPES[to.unit.type].range) s += 8; // attacco senza risposta
     return s;
   };
@@ -5651,9 +5806,23 @@ function render() {
     // città
     if (t.city) {
       ctx.font = Math.max(7, Math.round(34*k)) + 'px serif';
-      const icon = t.city.owner === null ? '⛺' : (t.city.capital ? '🏛️' : '🏘️');
+      const icon = t.city.owner === null ? '⛺' : (t.city.capital || t.city.occ ? '🏛️' : '🏘️');
       const cy = p.y - (t.unit ? 17*k : 0);
       ctx.fillText(icon, p.x, cy);
+      // capitale occupata: anello tratteggiato del colore di chi l'ha persa e i turni che mancano
+      if (t.city.occ) {
+        const vitt = players[t.city.occ.o];
+        hexPathOn(ctx, p.x, p.y);
+        ctx.lineWidth = Math.max(1, 2.5*k); ctx.strokeStyle = vitt ? vitt.color : '#d8c9a3';
+        ctx.setLineDash([5*k, 4*k]); ctx.stroke(); ctx.setLineDash([]);
+        const bx = p.x + 17*k, by = cy - 14*k, rr = Math.max(5, 10*k);
+        ctx.beginPath(); ctx.arc(bx, by, rr, 0, Math.PI * 2);
+        ctx.fillStyle = '#ff9d3a'; ctx.fill();
+        ctx.lineWidth = Math.max(1, 1.5*k); ctx.strokeStyle = '#4a2200'; ctx.stroke();
+        ctx.font = 'bold ' + Math.max(7, Math.round(12*k)) + 'px sans-serif'; ctx.fillStyle = '#2b1400';
+        ctx.fillText(String(restanoTurni(t)), bx, by + 0.5*k);
+        ctx.font = Math.max(7, Math.round(34*k)) + 'px serif';
+      }
       if (t.city.owner && (t.city.pop || 1) > 1 && k > 0.3) {
         const bx = p.x - 16*k, by = cy - 14*k;
         ctx.beginPath(); ctx.arc(bx, by, 8.5*k, 0, Math.PI * 2);
@@ -5862,10 +6031,10 @@ function ui() {
     }
     panel.innerHTML = `<div id="unitinfo"><b>${uIcon(u)} ${uName(u)}</b>
       &nbsp; ❤️ ${u.hp}/${u.maxHp} · ⚔️ ${atkTxt} · 🛡️ ${d.def} · 👣 ${d.move} · 🎯 ${d.range}
-      &nbsp; ${u.moved ? '✔️ mosso' : '🟢 può muovere'} · ${u.attacked ? '✔️ attaccato' : '🟢 può attaccare'}${u.count > 1 ? ` · <span style="color:#9fd8ff">${n} in forze</span>` : ''}${u.climb > 0 ? ' · <span style="color:#ffb35c">⛰️ in scalata (ferma)</span>' : ''}${extra}</div>`;
+      &nbsp; ${u.moved ? '✔️ mosso' : '🟢 può muovere'} · ${u.attacked ? '✔️ attaccato' : '🟢 può attaccare'}${u.count > 1 ? ` · <span style="color:#9fd8ff">${n} in forze</span>` : ''}${u.climb > 0 ? ' · <span style="color:#ffb35c">⛰️ in scalata (ferma)</span>' : ''}${extra}${notaCapitale(selected)}</div>`;
   } else if (selected && selected.city && selected.city.owner === 'p') {
     const sc = selected.city, cp = sc.pop || 1;
-    let html = `<span id="unitinfo"><b>${sc.capital ? '🏛️' : '🏘️'} ${escHtml(nomeCitta(sc))}</b> · 👥 ${fmtAbitanti(sc.ab || 0)} abitanti${sc.n ? '' : ' (stima)'} · crescita ${cp}/${MAX_POP} · rendita ${renditaCitta(sc)}⭐ — addestra:</span>`;
+    let html = `<span id="unitinfo"><b>${sc.capital || sc.occ ? '🏛️' : '🏘️'} ${escHtml(nomeCitta(sc))}</b> · 👥 ${fmtAbitanti(sc.ab || 0)} abitanti${sc.n ? '' : ' (stima)'} · crescita ${cp}/${MAX_POP} · rendita ${renditaCitta(sc)}⭐${notaCapitale(selected)} — addestra:</span>`;
     for (const [k, d] of Object.entries(UNIT_TYPES)) {
       if (!d.trainable) continue;
       const dis = players.p.stars < d.cost ? 'disabled' : '';
@@ -5881,7 +6050,7 @@ function ui() {
   } else if (selected && selected.city && !selected.unit) {
     const sc = selected.city;
     const chi = sc.owner === null ? '⛺ neutrale: portaci un\'unità per conquistarla' : `${bandiera(sc.owner)} di ${escHtml(nomeImpero(sc.owner))}`;
-    panel.innerHTML = `<div id="unitinfo"><b>${sc.owner === null ? '⛺' : sc.capital ? '🏛️' : '🏘️'} ${escHtml(nomeCitta(sc))}</b> · 👥 ${fmtAbitanti(sc.ab || 0)} abitanti${sc.n ? '' : ' (stima)'} · rendita ${renditaCitta(sc)}⭐/turno · ${chi}</div>`;
+    panel.innerHTML = `<div id="unitinfo"><b>${sc.owner === null ? '⛺' : sc.capital || sc.occ ? '🏛️' : '🏘️'} ${escHtml(nomeCitta(sc))}</b> · 👥 ${fmtAbitanti(sc.ab || 0)} abitanti${sc.n ? '' : ' (stima)'} · rendita ${renditaCitta(sc)}⭐/turno · ${chi}${notaCapitale(selected)}</div>`;
   } else if (selected && selected.port && !selected.unit && !selected.city && !selected.hosp) {
     let html = `<span id="unitinfo"><b>⚓ Porto</b> · +${PORT_INCOME}⭐/turno</span>`;
     if (canBuyShip(selected, 'p')) html += ` <button class="btn" style="background:#1f6f8c" onclick="playerBuyShip()">🚢 Compra nave ${SHIP_COST}⭐ (liv.1, capacità ${NAVE_CAPACITA[0]})</button>`;

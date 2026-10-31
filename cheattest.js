@@ -108,7 +108,7 @@ prova("la truppa va anche sopra un'unità nemica (che sparisce) e nella città d
   return true;
 });
 
-prova("una truppa messa nella città di un nemico in guerra la conquista; sulla capitale l'impero cade", () => {
+prova("una truppa messa nella città di un nemico in guerra la conquista; sulla capitale parte il conto e dopo 7 turni l'impero cade", () => {
   partita();
   const o = imperiIA().find(x => capitaleDi(x));
   setRelazione('p', o, 'guerra'); // dalla v75 si parte in pace
@@ -116,7 +116,9 @@ prova("una truppa messa nella città di un nemico in guerra la conquista; sulla 
   cap.unit = null;
   if (!cheatMettiTruppa(cap, 'warrior', 10)) return 'rifiutata';
   if (cap.city.owner !== 'p') return 'capitale non presa';
-  if (imperiIA().includes(o)) return "l'impero non è caduto";
+  if (!imperiIA().includes(o) || !cap.city.occ || cap.city.occ.o !== o) return "la capitale non è segnata come occupata (v79)";
+  for (let i = 0; i < CAPITALE_TURNI; i++) avanzaOccupazioni();
+  if (imperiIA().includes(o)) return "l'impero non è caduto dopo 7 turni";
   return true;
 });
 

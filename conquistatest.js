@@ -149,19 +149,19 @@ assert(applySave(salvato), 'ricarico la partita con le conquiste');
   if (map[da.r][da.c].unit) map[da.r][da.c].unit = null;
 }
 
-// le conquiste di un impero caduto tornano al loro paese; quelle prese a lui restano tue
+// le conquiste di un impero caduto (v79: annesso da te) diventano tue, come quelle prese a lui
 {
   const mia = map.flat().find(t => t.country === 'IT' && libera(t));
   mia.terra = vicino;
   assert(padroneTerra(mia) === vicino, 'una tua casella in mano al vicino');
   const capV = capitaleDi(vicino);
   if (capV.unit) capV.unit = null;
-  capV.city.owner = 'p';
-  cadeImpero(vicino, 'p', capV);
+  captureIfCity(capV, 'p');
+  for (let i = 0; i < CAPITALE_TURNI; i++) avanzaOccupazioni(); // v79: la capitale si tiene 7 turni
   assert(!players[vicino].vivo, `${ccV} è caduto`);
   assert(padroneTerra(mia) === 'p', 'la casella che ti aveva preso torna tua');
   assert(map.flat().filter(t => t.terra === 'p' && padroneTerra(t) === 'p').length >= prese, 'le caselle che gli avevi preso restano tue');
-  assert(map.flat().some(t => t.country === ccV && padroneTerra(t) === null), 'il resto del suo paese non è più di nessuno');
+  assert(map.flat().filter(t => t.country === ccV && terraConquistabile(t)).every(t => padroneTerra(t) === 'p'), 'tutto il suo paese ora è tuo');
 }
 
 // il disegno della mappa con le caselle conquistate non si rompe

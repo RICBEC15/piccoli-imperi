@@ -33,7 +33,7 @@ assert(placeSet.length === 1 && placeSet[0] === casellaCapitale('IT'), 'la tua c
 placePlayerCapital(placeSet[0]);
 assert(!placing && pCapital().country === 'IT', 'capitale fondata in Italia');
 
-// 2. la caduta di un impero: chi ne prende la capitale la tiene, il resto si scioglie
+// 2. la caduta di un impero (v79): chi ne prende la capitale la deve tenere 7 turni, poi il paese è suo
 const vittima = 'FR', capF = capitaleDi(vittima);
 const altra = map.flat().find(t => t.country === 'FR' && t !== capF && paeseLibero(t) && passable(t));
 altra.city = { owner: vittima, capital: false, pop: 2 };
@@ -42,11 +42,18 @@ soldato.unit = mkUnit('warrior', vittima);
 capF.unit = null;
 const vicino = neighbors(capF).find(n => passable(n) && !n.unit && !n.city);
 vicino.unit = mkUnit('knight', 'p');
+setRelazione('p', vittima, 'guerra'); // dalla v75 si parte in pace: il conto avanza solo in guerra
 pushUndo();
 doMove(vicino, capF);
-assert(!players.FR.vivo && !imperiIA().includes('FR') && caduti.includes('FR'), 'presa la capitale, la Francia cade');
+assert(players.FR.vivo && capF.city.owner === 'p' && capF.city.occ && capF.city.occ.o === 'FR', 'presa la capitale, la Francia non cade subito: parte il conto');
+undoMove();
+assert(players.FR.vivo && capitaleDi('FR') === capF && altra.city.owner === 'FR' && !capF.city.occ, "annullando la mossa Parigi torna capitale francese");
+pushUndo();
+doMove(vicino, capF);
+for (let i = 0; i < CAPITALE_TURNI; i++) avanzaOccupazioni();
+assert(!players.FR.vivo && !imperiIA().includes('FR') && caduti.includes('FR'), 'tenuta la capitale 7 turni, la Francia cade');
 assert(capF.city.owner === 'p' && !capF.city.capital, 'la capitale presa diventa una tua città qualunque');
-assert(altra.city.owner === null && !unitsOf('FR').length, "le altre città francesi tornano villaggi liberi e l'esercito si scioglie");
+assert(altra.city.owner === 'p' && !unitsOf('FR').length, "le altre città francesi sono tue e l'esercito si scioglie");
 assert(!gameOver, 'la partita continua: restano altri imperi');
 undoMove();
 assert(players.FR.vivo && capitaleDi('FR') === capF && altra.city.owner === 'FR', "annullando la mossa la Francia torna in piedi");
@@ -88,7 +95,7 @@ const ci = imperiIA().reduce((s, o) => s + cities(o).length, 0);
 assert(ci > imperiIA().length * 1.5, `gli imperi si espandono (${ci} città IA)`);
 assert(lento < 5000, `nessun turno degli imperi troppo lento (${lento} ms)`);
 assert(map.flat().every(t => !t.unit || players[t.unit.owner]), 'nessuna unità di un impero inesistente');
-assert(imperiIA().every(o => capitaleDi(o)), 'ogni impero in piedi ha ancora la sua capitale');
+assert(imperiIA().every(o => capitaleDi(o) || capitaleOccupata(o)), 'ogni impero in piedi ha ancora la sua capitale (o un nemico la tiene da meno di 7 turni)');
 
 // 5. salvataggio v18: tutti gli imperi, con stelle e caduti, tornano uguali
 const data = serialize();
@@ -100,10 +107,11 @@ const dopo = JSON.stringify({ imp: imperiIA(), st: imperiIA().map(o => players[o
 assert(prima === dopo, 'imperi, stelle, città e caduti identici dopo il caricamento');
 try { endTurn(); } catch (e) { console.error('CRASH', e.stack); process.exit(1); }
 // (il giocatore qui non muove mai: la sua capitale può anche cadere proprio in questo turno)
-assert(current === 'p' || (gameOver && !pCapital()), 'dopo il caricamento i turni proseguono');
+assert(current === 'p' || gameOver, 'dopo il caricamento i turni proseguono');
 
 // 6. vittoria: quando cadono tutti gli imperi
-for (const o of imperiIA()) { const c = capitaleDi(o); c.unit = null; captureIfCity(c, 'p'); }
+for (const o of imperiIA()) { setRelazione('p', o, 'guerra'); const c = capitaleDi(o) || capitaleOccupata(o); c.unit = null; captureIfCity(c, 'p'); }
+for (let i = 0; i < CAPITALE_TURNI; i++) avanzaOccupazioni();
 checkEnd();
 assert(gameOver && !imperiIA().length, 'caduti tutti gli imperi, hai vinto');
 console.log('TUTTI I TEST IMPERI SUPERATI');
