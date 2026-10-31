@@ -32,6 +32,7 @@ cat stub.js game.js imperitest.js > _run.js && node _run.js   # tutti i paesi co
 cat stub.js game.js epochetest.js > _run.js && node _run.js   # epoche: circa 3 minuti (anche la mappa gigante)
 cat stub.js game.js aitest.js > _run.js && node _run.js   # IA: 150 turni, circa un minuto
 cat stub.js game.js difficoltatest.js > _run.js && node _run.js   # difficoltà IA: circa 40 secondi
+cat stub.js game.js ricchezzatest.js > _run.js && node _run.js   # l'IA punta alle città ricche: circa 30 secondi
 cat stub.js game.js mappatest.js > _run.js && node _run.js
 cat stub.js game.js diplotest.js > _run.js && node _run.js   # diplomazia: circa 15 secondi
 cat stub.js game.js conquistatest.js > _run.js && node _run.js   # conquista del territorio: circa 20 secondi
@@ -70,6 +71,8 @@ Nella schermata iniziale (e nella scelta del paese, prima di fondare la capitale
 Ogni modifica alla mappa va verificata con `mappatest.js`, che controlla anche che due partite abbiano la stessa mappa.
 
 ## Versione
+
+v70 (formato di salvataggio v17, invariato): **l'IA punta alle città più ricche**. Nella scelta degli obiettivi (villaggi da prendere e città nemiche da attaccare) una città che rende più stelle, cioè con più abitanti veri, "sembra più vicina": l'IA accetta una deviazione per arrivarci. Quanto pesa dipende dalla difficoltà (`ricchezza` in `AI_LIVELLI`): a Facile niente (va alla più vicina, come prima), a Normale 2 terzi di turno di strada per ogni stella in più, a Difficile 4 (Parigi contro un villaggio: circa 9 turni di deviazione). Fra i difensori da colpire l'IA preferisce quelli delle città ricche. Test: `ricchezzatest.js`.
 
 v69 (formato di salvataggio v17, invariato): il menu iniziale mostra le misure vere delle tre mappe (273×220, 549×440, 824×660, con Islanda e Capo Nord aggiunti nella v65) invece di quelle vecchie; le misure sono calcolate dal gioco, quindi restano giuste se la mappa cambia ancora.
 
