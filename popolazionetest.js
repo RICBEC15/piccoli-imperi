@@ -17,23 +17,19 @@ for (const taglia of ['piccola', 'media', 'gigante']) {
   }
   const roma = tutte.find(x => x.city.n === 'Roma');
   check(roma && roma.country === 'IT' && renditaAbitanti(roma.city.ab) === 6, `${taglia}: Roma è in Italia e i suoi abitanti rendono 6⭐`);
-  // v69: i paesini veri di GeoNames, ciascuno nel suo paese
-  const paesini = new Map(PAESINI_REALI.map(x => [x[0], x]));
-  const conPaesino = tutte.filter(t => !t.city.capital && paesini.has(t.city.n) && !CITTA_REALI.some(x => x[0] === t.city.n));
-  check(conPaesino.length >= 80 && conPaesino.every(t => t.country === paesini.get(t.city.n)[4] && t.city.ab === paesini.get(t.city.n)[3]),
-        `${taglia}: ${conPaesino.length} villaggi col nome e gli abitanti di un paesino vero del loro paese`);
-  const anonimi = tutte.filter(t => !t.city.n);
-  check(anonimi.length <= 50 && anonimi.filter(t => !['DZ', 'MA', 'TN', 'LY', 'EG'].includes(t.country)).length <= 8,
-        `${taglia}: restano senza nome solo ${anonimi.length} villaggi, quasi tutti in Nordafrica`);
+  // v69: solo città da 100.000 abitanti in su e capitali vere (anche più piccole)
+  const capitaliVere = new Set(Object.keys(CAPITALI_REALI).flatMap(cc => [CAPITALI_REALI[cc][0], nomeCittaCapitale(cc)]));
+  const piccole = tutte.filter(t => !t.city.capital && t.city.ab < ABITANTI_MINIMI && !capitaliVere.has(t.city.n));
+  check(!piccole.length, `${taglia}: nessun villaggio sotto i 100.000 abitanti (${piccole.slice(0, 5).map(t => t.city.n).join(', ')})`);
+  check(tutte.every(t => t.city.n), `${taglia}: ogni città ha il suo nome vero`);
+  for (const n of ['Lubiana', 'Podgorica', 'Zagabria', 'Sarajevo'])
+    check(tutte.some(t => t.city.n === n), `${taglia}: c'è la capitale ${n}`);
   const a = firma();
   Math.random = mulberry32(77); newGame();
   check(firma() === a, `${taglia}: nomi e abitanti dei villaggi uguali a ogni partita`);
 }
 Math.random = realRandom;
 // scaglioni
-check(PAESINI_REALI.length > 0 && PAESINI_REALI.length <= 400 && PAESINI_REALI.every(x => x.length === 5 && x[3] >= 1000 && COUNTRY_NAMES[x[4]]),
-      `PAESINI_REALI: ${PAESINI_REALI.length} paesini con abitanti e paese del gioco`);
-check(!PAESINI_REALI.some(x => x[0] === 'Móstoles'), 'niente sobborghi delle grandi città (Móstoles è già nei 5 milioni di Madrid)');
 check(renditaAbitanti(1200) === 1 && renditaAbitanti(12000) === 2 && renditaAbitanti(80000) === 3
    && renditaAbitanti(300000) === 4 && renditaAbitanti(900000) === 5 && renditaAbitanti(3339000) === 6
    && renditaAbitanti(9904000) === 7, 'scaglioni: 1⭐ … 7⭐');

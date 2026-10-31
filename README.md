@@ -17,7 +17,6 @@ In locale: apri `piccoli_imperi.html` nel browser con un doppio clic. Non serve 
 - `build_paesi_nord.py`: estrae da Natural Earth i confini dei paesi aggiunti nella v65 (`POLY_NORD`, `SEMI_NORD`).
 - `build_biomi.py`, `export_tiles.js`: costruiscono i biomi fissi dai dati di OpenStreetMap.
 - `build_popolazione.js`: costruisce la lista delle città vere con i loro abitanti (Natural Earth).
-- `build_paesini.js`: costruisce la lista dei paesini veri con i loro abitanti (GeoNames), per i villaggi lontani dalle città di Natural Earth.
 - `build_epoche.py`: costruisce gli stati storici di ogni epoca (con `export_tiles.js`).
 - `ISTRUZIONI_MIGRAZIONE.md`: note di sviluppo, storia delle ultime versioni e istruzioni dettagliate.
 
@@ -57,8 +56,7 @@ Ogni città ha i suoi **abitanti veri**: quelli dell'agglomerato urbano (campo `
 
 - Ogni città vera da un milione di abitanti in su ha il suo villaggio neutrale sulla mappa.
 - Ogni villaggio prende nome e abitanti della città vera più popolosa entro poco più di una casella (almeno 25 km).
-- Dalla v69 i villaggi lontani dalle città di Natural Earth prendono nome e abitanti del **paesino vero** più popoloso lì vicino, sempre del loro paese: Verdun 21.798, Lisieux 24.473, Steyr 38.331... I dati sono di [GeoNames](https://www.geonames.org/) (*cities1000*, luoghi da 1.000 abitanti in su, licenza [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/)), letti dalla copia compatta del pacchetto npm `all-the-cities` 3.1.0. Nel gioco ci sono solo i 170 paesini che danno davvero il nome a un villaggio (lista `PAESINI_REALI`, circa 7 KB, scritta da `build_paesini.js`); i sobborghi delle città da un milione in su restano fuori, perché i loro abitanti sono già nell'agglomerato.
-- Solo dove non si conosce nessun paesino (soprattutto in Algeria, Marocco e Tunisia, dove GeoNames è rado) gli abitanti sono **stimati** (da 2.000 a 30.000, nel deserto da 500 a 8.000), fissi per casella.
+- Dalla v69 sulla mappa restano **solo le città da 100.000 abitanti in su e le capitali** (anche più piccole: Podgorica, La Valletta...). I villaggi sotto i 100.000 abitanti, e quelli senza una città vera vicina, non ci sono più; ogni capitale vera che non aveva un villaggio ne ha uno (Lubiana, Zagabria, Sarajevo, Tirana...). Quando la capitale di un impero sorge accanto al villaggio della sua città, il villaggio si fonde nella capitale.
 - La rendita cresce con gli abitanti, a scaglioni: sotto 5.000 abitanti 1⭐, da 5.000 2⭐, da 50.000 3⭐, da 200.000 4⭐, da 700.000 5⭐, da 2 milioni 6⭐, da 5 milioni 7⭐. La capitale rende 1⭐ in più (almeno 3⭐), e ogni livello di crescita portato dai cittadini aggiunge 1⭐.
 
 ## Le epoche
@@ -74,7 +72,7 @@ Ogni modifica alla mappa va verificata con `mappatest.js`, che controlla anche c
 
 ## Versione
 
-v69 (formato di salvataggio invariato, v17): **i paesini hanno nome e abitanti veri**. I villaggi lontani dalle città di Natural Earth (prima circa 135 per mappa, senza nome e con abitanti stimati) prendono quelli del paesino vero più popoloso lì vicino, dai dati GeoNames (CC BY 4.0): ne restano anonimi una quarantina, quasi tutti in Nordafrica. Il file cresce di circa 7 KB. I salvataggi già fatti tengono i loro nomi.
+v69 (formato di salvataggio invariato, v17; i salvataggi vecchi si caricano con i loro villaggi): **solo città vere da 100.000 abitanti in su e capitali**. Sulla mappa piccola le città passano da 321 a 170 (167 sulla media, 163 sulla gigante), tutte con nome e abitanti veri; ogni capitale ha il suo villaggio.
 
 v68 (formato di salvataggio v17, con il campo facoltativo `epoca`): **si sceglie l'epoca storica** a inizio partita: oggi, 1938, 1914, 1800, 1500 o l'anno Mille (vedi «Le epoche»). Ogni stato storico è un impero IA, con la capitale nella sua città più popolosa; le epoche coprono anche i paesi aggiunti nella v65.
 

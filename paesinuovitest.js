@@ -21,8 +21,8 @@ for (const taglia of ['piccola', 'media']) {
   const mancano = EUROPA.filter(cc => !info[cc]);
   assert(!mancano.length, `${taglia}: ogni paese europeo e' sulla mappa e si puo' giocare${mancano.length ? ' (mancano ' + mancano.join(' ') + ')' : ''}`);
   assert(NUOVI.every(cc => players[cc] && capitaleDi(cc) && capitaleDi(cc).country === cc), `${taglia}: ogni paese nuovo e' un impero IA con la capitale in patria`);
-  // i paesi grandi hanno villaggi da conquistare
-  assert(['PL', 'SE', 'NO', 'FI', 'BY', 'KZ'].every(cc => info[cc].vill >= 3), `${taglia}: Polonia, Scandinavia, Bielorussia e Kazakistan hanno villaggi`);
+  // i paesi grandi hanno villaggi da conquistare (dalla v69 solo le città da 100.000 in su: Göteborg, Bergen...)
+  assert(['PL', 'SE', 'NO', 'FI', 'BY', 'KZ'].every(cc => info[cc].vill >= 2), `${taglia}: Polonia, Scandinavia, Bielorussia e Kazakistan hanno villaggi`);
   const at = (lon, lat) => tileAtGeo(lon, lat, g);
   // l'Islanda (la mappa si e' allargata a ovest) e Capo Nord (a nord)
   assert(at(-21.94, 64.15).country === 'IS' || neighbors(at(-21.94, 64.15)).some(n => n.country === 'IS'), `${taglia}: Reykjavík e' in Islanda`);
