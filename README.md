@@ -47,6 +47,7 @@ cat stub.js game.js popolazionetest.js > _run.js && node _run.js   # abitanti ve
 cat stub.js game.js biomitest.js > _run.js && node _run.js   # i biomi OSM
 cat stub.js game.js mappefissetest.js > _run.js && node _run.js   # la mappa pronta = la mappa calcolata: circa 10 secondi
 cat stub.js game.js cheattest.js > _run.js && node _run.js   # i cheat (v77): circa 10 secondi
+cat stub.js game.js cittaunicatest.js > _run.js && node _run.js   # la città come area unica, fiume compreso (v78): pochi secondi
 node cheat_check.js   # il pannello dei cheat nel browser, computer e tablet col tocco (Playwright)
 ```
 
@@ -80,6 +81,8 @@ Nella schermata iniziale (e nella scelta del paese, prima di fondare la capitale
 Ogni modifica alla mappa va verificata con `mappatest.js`, che controlla anche che due partite abbiano la stessa mappa.
 
 ## Versione
+
+v78 (salvataggio sempre v18, la mappa pronta non cambia): **la città è un'unica area**. Le caselle di città (il bioma OSM) attorno a una città formano una sola area, disegnata senza righe fra una casella e l'altra e con un solo contorno nel colore del padrone; se una zona urbana tocca più città, ogni casella va alla città più vicina. Il **fiume che attraversa la città** (città su due sponde) o che ne è inglobato **conta come città**: ha già i suoi ponti cittadini (si attraversa a piedi, le navi ci passano sotto), si disegna come città con il canale del fiume, dà +1 difesa invece di −1 e si conquista come la terra. **Chi conquista la città prende tutta la sua area**, fiume compreso. Vale anche per i salvataggi di prima.
 
 v77 (salvataggio sempre v18): **pulsante 🧪 Cheat**, solo per provare il gioco. Apre un pannello sopra la mappa per: conquistare di colpo un impero (città, territorio, porti e ospedali passano a te, il suo esercito si scioglie e l'impero cade; conquistarli tutti fa vincere); mettere una truppa su qualunque casella (qualunque tipo, armate fino a 50, carovane fino a 6, navi fino al livello 11, anche al posto di un'unità nemica e nelle città di chi è in pace con te); costruire porti e ponti gratis senza Costruttore. Si usa solo nel tuo turno e fuori dal tutorial; ogni azione si annulla con ↩️.
 

@@ -571,7 +571,8 @@ let undoStack = [];
 // di continuo "dove sono le mie città, le mie unità?" e scorrere tutta la mappa
 // (fino a 474.000 caselle sulla gigante) a ogni domanda rallentava troppo i turni.
 const conUnita = new Set(), conCitta = new Set(), conPorto = new Set(), conOsp = new Set();
-function svuotaIndici() { conUnita.clear(); conCitta.clear(); conPorto.clear(); conOsp.clear(); }
+function svuotaIndici() { conUnita.clear(); conCitta.clear(); conPorto.clear(); conOsp.clear(); cittaVer++; }
+let cittaVer = 0; // cambia quando nasce o sparisce una citta': le aree cittadine (zone) si rifanno
 class Casella {
   constructor(r, c) {
     this.r = r; this.c = c; this.terrain = 'water'; this.country = null;
@@ -585,7 +586,7 @@ class Casella {
   get unit() { return this._u; }
   set unit(v) { this._u = v || null; if (v) conUnita.add(this); else conUnita.delete(this); }
   get city() { return this._y; }
-  set city(v) { this._y = v || null; if (v) conCitta.add(this); else conCitta.delete(this); }
+  set city(v) { if (!this._y !== !v) cittaVer++; this._y = v || null; if (v) conCitta.add(this); else conCitta.delete(this); }
   get port() { return this._q; }
   set port(v) { this._q = v || null; if (v) conPorto.add(this); else conPorto.delete(this); }
 }
@@ -1269,7 +1270,92 @@ function terraFertile(t) {
   for (const x of [t, ...neighbors(t)]) { const b = x.terrain === 'grass' ? bioma(x) : ''; if (b === 'c' || b === 'v') n++; }
   return n >= 3;
 }
-const BIOMA_DESERTO = { e: 'erg', r: 'reg', s: 'salt', i: 'ice' };
+// ============ LA CITTA' COME UN'UNICA AREA (v78) ============
+// una casella di citta' (bioma OSM 'u') o un pezzo di fiume dentro la citta'
+function urbana(t) { return t.fiumeCitta || (t.terrain === 'grass' && bioma(t) === 'u'); }
+// i 6 vicini in giro attorno alla casella (null fuori dalla mappa): serve per capire se il fiume
+// ha la citta' su due sponde
+function anello(t) {
+  const p = center(t);
+  return neighbors(t).map(n => ({ n, a: Math.atan2(center(n).y - p.y, center(n).x - p.x) }))
+    .sort((x, y) => x.a - y.a).map(x => x.n);
+}
+// il fiume attraversa la citta' (citta' su due sponde: ci sono i ponti) o ne e' inglobato
+function fiumeInCitta(t) {
+  const ns = anello(t);
+  if (ns.length < 6) return false;
+  const vere = ns.filter(n => n.terrain === 'grass' && bioma(n) === 'u').length;
+  if (vere < 2) return false; // almeno due caselle di citta' vera: il fiume non "risale" fuori
+  const u = ns.map(urbana), tot = u.filter(Boolean).length;
+  if (tot >= 4) return true;
+  let tratti = 0;
+  for (let i = 0; i < 6; i++) if (u[i] && !u[(i + 5) % 6]) tratti++;
+  return tratti >= 2;
+}
+// all'inizio (e al caricamento) i pezzi di fiume dentro le citta' diventano citta': hanno gia'
+// i loro ponti, si attraversano a piedi, le navi ci passano sotto, si conquistano come la terra
+function segnaFiumiCittadini() {
+  const fiumi = map.flat().filter(t => t.terrain === 'river');
+  for (const t of fiumi) t.fiumeCitta = false;
+  for (let giro = 0, nuovi = true; nuovi && giro < 4; giro++) {
+    nuovi = false;
+    for (const t of fiumi) if (!t.fiumeCitta && fiumeInCitta(t)) {
+      t.fiumeCitta = true; t.bridge = true; nuovi = true;
+      // un fiume di confine resta del paese di una sua sponda di citta'
+      if (!t.country) { const s = neighbors(t).find(n => n.country && urbana(n)); if (s) t.country = s.country; }
+    }
+  }
+}
+// le aree delle citta': ogni casella urbana va alla citta' piu' vicina (passando per la citta');
+// le zone urbane senza citta' restano un'area a se'. zona[i] = indice della casella capo-area (-1: non urbana)
+let zoneCitta = null;
+function zone() {
+  if (zoneCitta && zoneCitta.map === map && zoneCitta.ver === cittaVer) return zoneCitta;
+  const n = ROWS * COLS, zona = new Int32Array(n).fill(-1), idx = t => t.r * COLS + t.c;
+  let coda = [];
+  for (const t of dallIndice(conCitta, () => true)) { zona[idx(t)] = idx(t); coda.push(t); }
+  const allarga = () => {
+    for (let i = 0; i < coda.length; i++) {
+      const t = coda[i], z = zona[idx(t)];
+      for (const x of neighbors(t)) if (zona[idx(x)] < 0 && urbana(x) && !x.city) { zona[idx(x)] = z; coda.push(x); }
+    }
+  };
+  allarga();
+  for (const t of map.flat()) if (zona[idx(t)] < 0 && urbana(t)) { zona[idx(t)] = idx(t); coda = [t]; allarga(); }
+  zoneCitta = { map, ver: cittaVer, zona, bordi: new Map() };
+  return zoneCitta;
+}
+function zonaDi(t) { return zone().zona[t.r * COLS + t.c]; }
+// le caselle dell'area di una citta' (lei compresa)
+function areaCitta(t) {
+  const z = zone(), id = z.zona[t.r * COLS + t.c], out = [t];
+  if (id < 0) return out;
+  const vista = new Set(out);
+  for (let i = 0; i < out.length; i++) for (const x of neighbors(out[i]))
+    if (!vista.has(x) && z.zona[x.r * COLS + x.c] === id) { vista.add(x); out.push(x); }
+  return out;
+}
+// il contorno dell'area: i lati verso caselle di un'altra area (o fuori), come segmenti x1,y1,x2,y2
+function bordoArea(t) {
+  const z = zone(), id = t.r * COLS + t.c;
+  if (z.bordi.has(id)) return z.bordi.get(id);
+  const seg = [];
+  for (const a of areaCitta(t)) {
+    const p = center(a);
+    for (const n of neighbors(a)) {
+      if (z.zona[n.r * COLS + n.c] === z.zona[id]) continue;
+      const q = center(n), ang = Math.atan2(q.y - p.y, q.x - p.x);
+      seg.push(p.x + S * Math.cos(ang - Math.PI/6), p.y + S * Math.sin(ang - Math.PI/6),
+               p.x + S * Math.cos(ang + Math.PI/6), p.y + S * Math.sin(ang + Math.PI/6));
+    }
+  }
+  let x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity;
+  for (let i = 0; i < seg.length; i += 2) { x0 = Math.min(x0, seg[i]); x1 = Math.max(x1, seg[i]); y0 = Math.min(y0, seg[i + 1]); y1 = Math.max(y1, seg[i + 1]); }
+  seg.box = [x0, y0, x1, y1];
+  z.bordi.set(id, seg);
+  return seg;
+}
+const BIOMA_DESERTO ={ e: 'erg', r: 'reg', s: 'salt', i: 'ice' };
 const biomiCache = {};
 function biomiGriglia() {
   if (biomiCache[mapMode]) return biomiCache[mapMode];
@@ -1541,6 +1627,7 @@ function genMap() {
   assegnaDeserti();
   epocaPartita = tutorial ? 'oggi' : epocaScelta; // il tutorial si gioca sempre ai giorni nostri
   applicaEpoca();
+  segnaFiumiCittadini(); // v78: il fiume dentro la citta' e' citta' (con i suoi ponti)
   terrainDirty = true;
 }
 // la mappa di oggi calcolata da zero: confini, laghi, stretti, isole, fiumi, biomi e villaggi
@@ -2270,7 +2357,7 @@ function padroneTerra(t) {
   if (o && players[o] && players[o].vivo !== false) return o;
   return padroneNaturale(t);
 }
-function terraConquistabile(t) { return !!t.country && t.terrain !== 'water' && t.terrain !== 'river'; }
+function terraConquistabile(t) { return !!t.country && (t.fiumeCitta || (t.terrain !== 'water' && t.terrain !== 'river')); }
 // restituisce l'impero a cui è stata tolta la casella (o null se non cambia niente)
 function conquistaTerra(t, owner) {
   if (!owner || !players[owner] || !terraConquistabile(t)) return null;
@@ -2821,8 +2908,8 @@ function defOf(t) {
   if (t.terrain === 'hill') def += 1; // dall'alto della collina
   if (t.terrain === 'mountain') def += 1; // chi tiene la vetta domina dall'alto
   // si combatte casa per casa (non in una città, che ha già il suo +1: le capitali vere stanno in città)
-  if (t.terrain === 'grass' && bioma(t) === 'u' && !t.city) def += 1;
-  if (t.terrain === 'river' || t.terrain === 'water') def -= 1; // sul ponte si è allo scoperto
+  if (urbana(t) && !t.city) def += 1; // anche sul fiume in città: ponti fra le case
+  else if (t.terrain === 'river' || t.terrain === 'water') def -= 1; // sul ponte si è allo scoperto
   if ((t.city && t.city.owner === u.owner) || inPatria(t, u.owner)) def += 1; // in città o in patria (non si sommano)
   if (t.hosp && t.hosp.owner === u.owner && t.hosp.level > 0) def += 1; // presidio dell'ospedale
   return Math.max(0, def);
@@ -3073,6 +3160,8 @@ function captureIfCity(t, owner) {
         document.getElementById('msg').textContent = '⚠️ Il nemico ha conquistato una tua città!';
       } else aiLogAdd(`🔥 Il nemico ha conquistato una città di ${bandiera(was)} ${nomeImpero(was)}`);
     }
+    // v78: la città è un'unica area: chi la prende prende tutte le sue caselle (anche il fiume)
+    for (const x of areaCitta(t)) if (x !== t) conquistaTerra(x, owner);
     if (was && capitale) cadeImpero(was, owner, t);
   }
 }
@@ -3483,6 +3572,7 @@ function caricaSalvataggio(data) {
   epocaPartita = EPOCHE[data.epoca] ? data.epoca : 'oggi';
   applicaEpoca();
   assegnaDeserti(); // riconosce erg/reg/chott sul deserto salvato (solo aspetto)
+  segnaFiumiCittadini(); // anche nei salvataggi di prima: il fiume in citta' ha i suoi ponti
   assegnaAbitanti(); // salvataggi senza abitanti: li ricava dalla posizione
   terrainDirty = true;
   turn = Math.max(1, data.turn | 0);
@@ -4985,6 +5075,14 @@ const BIOMA_REGOLA = {
   hill: '+1 difesa', mountain: 'si scala, +1 difesa', z: 'si scala, +1 difesa',
 };
 function descriviCasella(t) {
+  if (!t.unit && !t.hosp && !t.port && !t.city && urbana(t)) {
+    const z = zonaDi(t), capo = z >= 0 ? map[Math.floor(z / COLS)][z % COLS] : null;
+    const nome = capo && capo.city ? (capo.city.n || 'la città') : null;
+    msg((t.fiumeCitta ? '🏙️ Fiume in città' : '🏙️ Città') + (nome ? ` — fa parte di ${nome}` : '') + (t.country ? ` (${nomePaese(t.country)})` : '')
+      + (t.fiumeCitta ? ': ha i suoi ponti, si attraversa a piedi e le navi ci passano sotto; +1 difesa.' : ': +1 difesa.')
+      + (nome ? ' Chi conquista la città prende tutta la sua area.' : ''));
+    return;
+  }
   if (t.terrain === 'water' || t.terrain === 'river' || t.unit || t.city || t.hosp || t.port) return;
   const b = bioma(t);
   const nome = t.terrain === 'desert' ? (DESERTO_NOME[t.dvar] || '🏜️ Deserto')
@@ -5185,6 +5283,7 @@ function disegnaBioma(b, bio, p, k) {
 // il colore di ogni casella (il "deserto glaciale" della tundra artica e' l'unica
 // variante con un colore diverso: bianco neve, non la sabbia degli altri deserti)
 function coloreCasella(t) {
+  if (t.fiumeCitta) return BIOMA_INFO.u.col; // il fiume in città è città
   const bio = (t.terrain === 'grass' || t.terrain === 'mountain') ? bioma(t) : '';
   return (t.terrain === 'desert' && t.dvar === 'ice') ? '#e9edf4'
     : (BIOMA_INFO[bio] && BIOMA_INFO[bio].col) || TERRAIN_COLORS[t.terrain];
@@ -5205,7 +5304,7 @@ function immaginePanoramica() {
   const daColore = col => rgb[col] || (rgb[col] = [1, 3, 5].map(i => Math.round(parseInt(col.slice(i, i + 2), 16) * 0.86)));
   for (let r = 0; r < ROWS; r++) for (let c = 0; c < COLS; c++) {
     const t = map[r][c];
-    const [R, G, B] = daColore(t.bridge && (t.terrain === 'river' || t.terrain === 'water') ? '#9a6b3f' : coloreCasella(t));
+    const [R, G, B] = daColore(t.bridge && !t.fiumeCitta && (t.terrain === 'river' || t.terrain === 'water') ? '#9a6b3f' : coloreCasella(t));
     for (let i = (r * w + 2 * c + (r & 1)) * 4, n = 0; n < 2; n++, i += 4) { px[i] = R; px[i + 1] = G; px[i + 2] = B; px[i + 3] = 255; }
   }
   g.putImageData(img, 0, 0);
@@ -5227,7 +5326,41 @@ function drawTerrain(b, tr, dettagli = true) {
     b.fill();
     b.lineWidth = Math.max(0.35, 1 * k);
     b.strokeStyle = 'rgba(0,0,0,.35)';
-    b.stroke();
+    if (urbana(t)) { // v78: la città è un'unica area: niente righe fra le sue caselle, solo il contorno
+      const z = zonaDi(t);
+      // l'esagono un filo piu' grande copre la sottile fessura chiara fra due caselle vicine
+      b.beginPath();
+      for (let i = 0; i < 6; i++) {
+        const ang = Math.PI / 180 * (60 * i - 30), R = S * 1.06;
+        i ? b.lineTo(p.x + R * Math.cos(ang), p.y + R * Math.sin(ang)) : b.moveTo(p.x + R * Math.cos(ang), p.y + R * Math.sin(ang));
+      }
+      b.fill();
+      b.beginPath();
+      for (const n of neighbors(t)) {
+        if (urbana(n) && zonaDi(n) === z) continue;
+        const q = center(n), ang = Math.atan2(q.y - p.y, q.x - p.x);
+        b.moveTo(p.x + S * Math.cos(ang - Math.PI/6), p.y + S * Math.sin(ang - Math.PI/6));
+        b.lineTo(p.x + S * Math.cos(ang + Math.PI/6), p.y + S * Math.sin(ang + Math.PI/6));
+      }
+      b.stroke();
+    } else b.stroke();
+    if (t.fiumeCitta) { // il fiume che scorre fra le case: un canale verso il fiume (o il mare) vicino
+      const acque = neighbors(t).filter(n => n.terrain === 'river' || n.terrain === 'water');
+      b.strokeStyle = TERRAIN_COLORS.river; b.lineCap = 'round';
+      b.lineWidth = Math.max(1, 13 * k);
+      b.beginPath();
+      if (!acque.length) { b.moveTo(p.x - 4*k, p.y); b.lineTo(p.x + 4*k, p.y); }
+      for (const n of acque) { const q = center(n); b.moveTo(p.x, p.y); b.lineTo((p.x + q.x) / 2, (p.y + q.y) / 2); }
+      b.stroke(); b.lineCap = 'butt';
+      if (dettagli && k > 0.15) { // e un ponte di città che lo attraversa
+        const q = center(acque[0] || t), ang = Math.atan2(q.y - p.y, q.x - p.x) + Math.PI / 2;
+        b.save(); b.translate(p.x, p.y); b.rotate(ang);
+        b.fillStyle = '#8c8378'; b.fillRect(-13*k, -3.5*k, 26*k, 7*k);
+        b.strokeStyle = 'rgba(50,44,40,.7)'; b.lineWidth = Math.max(0.4, 1.2*k); b.strokeRect(-13*k, -3.5*k, 26*k, 7*k);
+        b.restore();
+      }
+      continue;
+    }
     if (!dettagli) { // da lontano solo il colore (e il ponte, come una macchia di legno)
       if (t.bridge && (t.terrain === 'river' || t.terrain === 'water')) { hexPathOn(b, p.x, p.y); b.fillStyle = '#9a6b3f'; b.fill(); }
       continue;
@@ -5486,19 +5619,34 @@ function render() {
     ctx.lineWidth = Math.max(1.5, 4*k); ctx.strokeStyle = '#ff9d3a';
     ctx.setLineDash([6*k, 4*k]); ctx.stroke(); ctx.setLineDash([]);
   }
+  // le città grandi fuori dallo schermo con un pezzo della loro area dentro: il contorno si vede lo stesso
+  for (const t of conCitta) {
+    if (map[t.r][t.c] !== t || (t.r >= vis.r0 && t.r <= vis.r1 && t.c >= vis.c0 && t.c <= vis.c1)) continue; // ci pensa il giro qui sotto
+    const seg = bordoArea(t), bx = seg.box;
+    if (!seg.length || bx[2] < vx0 || bx[0] > vx1 || bx[3] < vy0 || bx[1] > vy1) continue;
+    ctx.beginPath();
+    for (let i = 0; i < seg.length; i += 4) { ctx.moveTo(seg[i], seg[i + 1]); ctx.lineTo(seg[i + 2], seg[i + 3]); }
+    ctx.lineWidth = Math.max(1.2, 3.5*k); ctx.lineCap = 'round';
+    ctx.strokeStyle = t.city.owner && players[t.city.owner] ? players[t.city.owner].color : '#d8c9a3';
+    ctx.stroke(); ctx.lineCap = 'butt';
+  }
   // strutture e unità (caselle sparse), solo quelle sullo schermo
   const etichette = [];
   for (let r = vis.r0; r <= vis.r1; r++) for (let c = vis.c0; c <= vis.c1; c++) {
     const t = map[r][c];
     if (!t.city && !t.hosp && !t.port && !t.unit) continue;
     const p = center(t);
-    // bordo di proprietà
+    // bordo di proprietà (la città: il contorno di tutta la sua area, v78)
     if (t.city || t.hosp || t.port) {
-      hexPathOn(ctx, p.x, p.y);
+      const seg = t.city ? bordoArea(t) : null;
+      if (seg && seg.length) {
+        ctx.beginPath();
+        for (let i = 0; i < seg.length; i += 4) { ctx.moveTo(seg[i], seg[i + 1]); ctx.lineTo(seg[i + 2], seg[i + 3]); }
+      } else hexPathOn(ctx, p.x, p.y);
       ctx.lineWidth = Math.max(1.2, 3.5*k);
       const col = o => (o && players[o] ? players[o].color : '#d8c9a3');
       ctx.strokeStyle = t.city ? col(t.city.owner) : t.hosp ? col(t.hosp.level > 0 && t.hosp.owner) : col(t.port.owner);
-      ctx.stroke();
+      ctx.lineCap = 'round'; ctx.stroke(); ctx.lineCap = 'butt';
     }
     // città
     if (t.city) {
