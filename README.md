@@ -71,6 +71,8 @@ Ogni modifica alla mappa va verificata con `mappatest.js`, che controlla anche c
 
 ## Versione
 
+v69 (formato di salvataggio v17, invariato): il menu iniziale mostra le misure vere delle tre mappe (273×220, 549×440, 824×660, con Islanda e Capo Nord aggiunti nella v65) invece di quelle vecchie; le misure sono calcolate dal gioco, quindi restano giuste se la mappa cambia ancora.
+
 v68 (formato di salvataggio v17, con il campo facoltativo `epoca`): **si sceglie l'epoca storica** a inizio partita: oggi, 1938, 1914, 1800, 1500 o l'anno Mille (vedi «Le epoche»). Ogni stato storico è un impero IA, con la capitale nella sua città più popolosa; le epoche coprono anche i paesi aggiunti nella v65.
 
 v67 (formato di salvataggio v17, i salvataggi precedenti si caricano): tutti i biomi di OpenStreetMap. Il prato si divide in palude, campi coltivati, vigneti e frutteti, città, macchia, brughiera e prateria, e le montagne coperte dai ghiacci diventano ghiacciai; le tre mappe fisse sono state rifatte con i nuovi dati. Ogni bioma ha il suo colore e piccoli segni; toccando una casella libera si legge che terreno è. Regole nuove: la palude ferma il movimento come la foresta e lì non si fondano capitali né villaggi; la città dà +1 difesa; una città con almeno 3 caselle coltivate (campi o vigneti) fra la sua e le 6 vicine rende +1⭐. Macchia, brughiera e prateria si giocano come il prato, il ghiacciaio come la montagna. Il bioma non si salva: viene dalla mappa fissa, quindi non serve un nuovo formato.

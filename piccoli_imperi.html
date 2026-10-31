@@ -303,9 +303,9 @@
       <p style="margin:4px 0 0"><small>La mappa è sempre la stessa: cambiano gli stati, con i confini e i nomi di quell'anno.</small></p>
       <h4>Scegli la grandezza della mappa</h4>
       <div class="ovrow">
-        <button class="ov-play" onclick="startGame('piccola')">▶️ Mappa piccola<br><small>esagoni grandi · 249×210</small></button>
-        <button class="ov-play" onclick="startGame('media')">▶️ Mappa media<br><small>esagoni a metà · 500×420</small></button>
-        <button class="ov-play" onclick="startGame('gigante')">▶️ Mappa gigante<br><small>esagoni a un terzo · 750×632</small></button>
+        <button class="ov-play" onclick="startGame('piccola')">▶️ Mappa piccola<br><small>esagoni grandi · <span class="mapdim" data-mode="piccola"></span></small></button>
+        <button class="ov-play" onclick="startGame('media')">▶️ Mappa media<br><small>esagoni a metà · <span class="mapdim" data-mode="media"></span></small></button>
+        <button class="ov-play" onclick="startGame('gigante')">▶️ Mappa gigante<br><small>esagoni a un terzo · <span class="mapdim" data-mode="gigante"></span></small></button>
       </div>
       <div class="ovrow">
         <button class="ov-tut" onclick="startTutorial()">🎓 Tutorial guidato</button>
@@ -5132,6 +5132,8 @@ function ui() {
   }
 }
 
+// v69: le misure delle mappe nel menu vengono dalle taglie vere (con le estensioni della v65)
+for (const el of document.querySelectorAll('.mapdim')) { setMapSize(el.dataset.mode); el.textContent = `${COLS}×${ROWS}`; }
 setMapSize('piccola');
 aggiornaSelIA(); // la difficoltà scelta l'ultima volta
 { const el = document.getElementById('avvSelIntro'); if (el) el.value = modoAvversari; } // e gli avversari
