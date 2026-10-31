@@ -39,7 +39,7 @@ cat stub.js game.js mappatest.js > _run.js && node _run.js
 cat stub.js game.js diplotest.js > _run.js && node _run.js   # diplomazia: circa 15 secondi
 cat stub.js game.js guerratest.js > _run.js && node _run.js   # pace iniziale e dichiarazioni di guerra (v75): circa 45 secondi
 cat stub.js game.js conquistatest.js > _run.js && node _run.js   # conquista del territorio: circa 20 secondi
-cat stub.js game.js capitaletest.js > _run.js && node _run.js   # capitale tenuta 7 turni = paese conquistato (v76): circa un minuto
+cat stub.js game.js capitaletest.js > _run.js && node _run.js   # capitale tenuta 7 turni = paese conquistato (v79): circa un minuto
 cat stub.js game.js capitalitest.js > _run.js && node _run.js   # capitali reali: pochi secondi
 cat stub.js game.js paesinuovitest.js > _run.js && node _run.js   # i paesi della v65: circa 20 secondi
 cat stub.js game.js microstatitest.js > _run.js && node _run.js   # i microstati: circa 20 secondi
@@ -48,6 +48,7 @@ cat stub.js game.js popolazionetest.js > _run.js && node _run.js   # abitanti ve
 cat stub.js game.js biomitest.js > _run.js && node _run.js   # i biomi OSM
 cat stub.js game.js mappefissetest.js > _run.js && node _run.js   # la mappa pronta = la mappa calcolata: circa 10 secondi
 cat stub.js game.js cheattest.js > _run.js && node _run.js   # i cheat (v77): circa 10 secondi
+cat stub.js game.js cittaunicatest.js > _run.js && node _run.js   # la città come area unica, fiume compreso (v78): pochi secondi
 node cheat_check.js   # il pannello dei cheat nel browser, computer e tablet col tocco (Playwright)
 ```
 
@@ -82,7 +83,7 @@ Ogni modifica alla mappa va verificata con `mappatest.js`, che controlla anche c
 
 ## Versione
 
-v76 (formato di salvataggio v18, con un campo facoltativo in più; i salvataggi di prima si caricano ancora): **chi tiene la capitale di un paese per 7 turni (una settimana: nel gioco un turno vale un giorno) si prende tutto il paese**.
+v79 (formato di salvataggio v18, con un campo facoltativo in più; i salvataggi di prima si caricano ancora): **chi tiene la capitale di un paese per 7 turni (una settimana: nel gioco un turno vale un giorno) si prende tutto il paese**.
 
 - Prendere la capitale di un impero in guerra non lo fa più cadere subito: parte un conto alla rovescia. Sulla capitale occupata c'è un anello tratteggiato del colore di chi l'ha persa e un tondo arancione con i turni che mancano; il pannello della città (o dell'unità che ci sta sopra) dice `⏳ 3/7` e cosa succede, e a inizio turno un promemoria ricorda le capitali che tieni e la tua, se è occupata.
 - Dopo 7 turni il paese sconfitto passa al vincitore: tutte le città (non tornano più villaggi liberi), i porti, gli ospedali e tutto il territorio, comprese le caselle che lo sconfitto aveva conquistato altrove (quelle prese a te tornano tue). L'esercito sconfitto si scioglie e i suoi patti finiscono. Se lo sconfitto teneva a sua volta la capitale del vincitore, gliela restituisce.
@@ -91,6 +92,8 @@ v76 (formato di salvataggio v18, con un campo facoltativo in più; i salvataggi 
 - L'IA: senza capitale manda le sue unità a riprenderla (a Facile solo quelle entro 12 esagoni, a Normale entro 30, a Difficile tutte), anche durante la tregua, e arruola soldati invece di coloni nelle città più vicine; sulla capitale che ha preso lascia sempre un presidio (a Facile solo con nemici vicini) e, se è minacciata, arruola lì e richiama le truppe come per la sua; a Normale e Difficile le capitali (anche occupate) attirano i suoi eserciti come le città più ricche.
 - Salvataggio: una capitale occupata ha il campo `x: [impero a cui è stata presa, turni tenuti]` nella città. I file di prima, dove la capitale presa era già una città qualunque, si caricano come prima (l'impero senza capitale è già caduto).
 - Test nuovi: `capitaletest.js` e `capitale_check.js` (nel browser, computer e telefono); aggiornati `imperitest.js` e `conquistatest.js`.
+
+v78 (salvataggio sempre v18, la mappa pronta non cambia): **la città è un'unica area**. Le caselle di città (il bioma OSM) attorno a una città formano una sola area, disegnata senza righe fra una casella e l'altra e con un solo contorno nel colore del padrone; se una zona urbana tocca più città, ogni casella va alla città più vicina. Il **fiume che attraversa la città** (città su due sponde) o che ne è inglobato **conta come città**: ha già i suoi ponti cittadini (si attraversa a piedi, le navi ci passano sotto), si disegna come città con il canale del fiume, dà +1 difesa invece di −1 e si conquista come la terra. **Chi conquista la città prende tutta la sua area**, fiume compreso. Vale anche per i salvataggi di prima.
 
 v77 (salvataggio sempre v18): **pulsante 🧪 Cheat**, solo per provare il gioco. Apre un pannello sopra la mappa per: conquistare di colpo un impero (città, territorio, porti e ospedali passano a te, il suo esercito si scioglie e l'impero cade; conquistarli tutti fa vincere); mettere una truppa su qualunque casella (qualunque tipo, armate fino a 50, carovane fino a 6, navi fino al livello 11, anche al posto di un'unità nemica e nelle città di chi è in pace con te); costruire porti e ponti gratis senza Costruttore. Si usa solo nel tuo turno e fuori dal tutorial; ogni azione si annulla con ↩️.
 

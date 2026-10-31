@@ -33,7 +33,7 @@ assert(placeSet.length === 1 && placeSet[0] === casellaCapitale('IT'), 'la tua c
 placePlayerCapital(placeSet[0]);
 assert(!placing && pCapital().country === 'IT', 'capitale fondata in Italia');
 
-// 2. la caduta di un impero (v76): chi ne prende la capitale la deve tenere 7 turni, poi il paese è suo
+// 2. la caduta di un impero (v79): chi ne prende la capitale la deve tenere 7 turni, poi il paese è suo
 const vittima = 'FR', capF = capitaleDi(vittima);
 const altra = map.flat().find(t => t.country === 'FR' && t !== capF && paeseLibero(t) && passable(t));
 altra.city = { owner: vittima, capital: false, pop: 2 };

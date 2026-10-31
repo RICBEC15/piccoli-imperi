@@ -149,7 +149,7 @@ assert(applySave(salvato), 'ricarico la partita con le conquiste');
   if (map[da.r][da.c].unit) map[da.r][da.c].unit = null;
 }
 
-// le conquiste di un impero caduto (v76: annesso da te) diventano tue, come quelle prese a lui
+// le conquiste di un impero caduto (v79: annesso da te) diventano tue, come quelle prese a lui
 {
   const mia = map.flat().find(t => t.country === 'IT' && libera(t));
   mia.terra = vicino;
@@ -157,7 +157,7 @@ assert(applySave(salvato), 'ricarico la partita con le conquiste');
   const capV = capitaleDi(vicino);
   if (capV.unit) capV.unit = null;
   captureIfCity(capV, 'p');
-  for (let i = 0; i < CAPITALE_TURNI; i++) avanzaOccupazioni(); // v76: la capitale si tiene 7 turni
+  for (let i = 0; i < CAPITALE_TURNI; i++) avanzaOccupazioni(); // v79: la capitale si tiene 7 turni
   assert(!players[vicino].vivo, `${ccV} è caduto`);
   assert(padroneTerra(mia) === 'p', 'la casella che ti aveva preso torna tua');
   assert(map.flat().filter(t => t.terra === 'p' && padroneTerra(t) === 'p').length >= prese, 'le caselle che gli avevi preso restano tue');

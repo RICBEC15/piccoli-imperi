@@ -1,4 +1,4 @@
-// Prova nel browser (computer e telefono emulato) della capitale occupata (v76): il tuo cavaliere
+// Prova nel browser (computer e telefono emulato) della capitale occupata (v79): il tuo cavaliere
 // entra davvero a Parigi toccando la mappa, e si controllano il conto alla rovescia sulla mappa,
 // il pannello della città e la caduta della Francia dopo 7 turni.
 // uso: node capitale_check.js [gioco.html] [cartella per le immagini]

@@ -23,6 +23,7 @@ const out = process.argv[3] || '.';
       if (typeof chiudiSceltaPaese === 'function') chiudiSceltaPaese();
       cambiaPaese('IT');
       if (placing && placeSet.length) placePlayerCapital(placeSet[0]);
+      nuovaDiplomazia(); // dalla v75 si parte in pace: qui tutti in guerra, per conquistare
       const libera = t => passable(t) && !t.unit && !t.city && !t.port && !t.hosp && t.terrain !== 'mountain';
       // caselle italiane libere accanto a una casella libera di un altro impero
       const mosse = [];

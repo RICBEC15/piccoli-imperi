@@ -1,4 +1,4 @@
-// Test della capitale occupata (v76): chi prende la capitale di un impero in guerra e la tiene
+// Test della capitale occupata (v79): chi prende la capitale di un impero in guerra e la tiene
 // per CAPITALE_TURNI turni (una settimana) si prende tutto il paese.
 //  1. presa la capitale l'impero non cade subito: parte il conto (Annulla, salvataggio);
 //  2. tenuta 7 turni: città, porti, ospedali e territorio passano al vincitore, l'esercito si scioglie;
