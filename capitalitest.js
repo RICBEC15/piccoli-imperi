@@ -22,7 +22,7 @@ for (const taglia of ['piccola', 'gigante']) {
   console.log(`  ${taglia}: le capitali più lontane dal punto vero (in caselle):`, scarti.slice(0, 5).map(([cc, d]) => `${cc} ${d.toFixed(1)}`).join(', '));
   // il punto vero può cadere su un fiume, in mare o su un villaggio: si sposta di poco
   assert(scarti[0][1] <= 3, `${taglia}: tutte le ${tutti.length} capitali entro 3 caselle dal punto vero`);
-  // i microstati (Monaco, San Marino, il Vaticano, Malta e il Liechtenstein sulla mappa piccola)
+  // i microstati (Monaco, San Marino, Malta e il Liechtenstein sulla mappa piccola)
   // hanno poche caselle (meno di due della mappa piccola): la loro capitale sta dove sta
   assert(tutti.every(cc => paesiInfo()[cc].caselle <= 2 * tileScale() ** 2 || neighbors(capitaleDi(cc)).filter(n => passable(n)).length >= 3),
     `${taglia}: ogni capitale ha spazio per uscire (non chiusa fra monti e mare)`);
