@@ -110,8 +110,8 @@ prova("la truppa va anche sopra un'unità nemica (che sparisce) e nella città d
 
 prova("una truppa messa nella città di un nemico in guerra la conquista; sulla capitale l'impero cade", () => {
   partita();
-  const o = imperiIA().find(x => relazione('p', x) === 'guerra' && capitaleDi(x));
-  if (!o) return 'nessun impero in guerra (partita in pace?)';
+  const o = imperiIA().find(x => capitaleDi(x));
+  setRelazione('p', o, 'guerra'); // dalla v75 si parte in pace
   const cap = capitaleDi(o);
   cap.unit = null;
   if (!cheatMettiTruppa(cap, 'warrior', 10)) return 'rifiutata';

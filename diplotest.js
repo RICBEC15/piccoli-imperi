@@ -20,8 +20,20 @@ const cap = pCapital();
 assert(cap && imperiIA().length > 3, `partita con ${imperiIA().length} imperi IA`);
 // il vicino con la capitale più vicina alla tua (non un microstato di una casella: serve terra da toccare)
 const vicino = imperiIA().filter(o => paesiInfo()[o].caselle > 2).sort((a, b) => dist(capitaleDi(a), cap) - dist(capitaleDi(b), cap))[0];
-assert(imperiIA().every(o => relazione('p', o) === 'guerra'), 'all\'inizio sei in guerra con tutti');
+assert(imperiIA().every(o => relazione('p', o) === 'pace'), 'all\'inizio sei in pace con tutti (v75)');
+assert(imperiIA().every(o => imperiIA().every(x => x === o || relazione(o, x) === 'pace')), 'e anche gli imperi IA sono in pace fra loro');
 assert(diploAttiva(), 'con un impero per paese la diplomazia è attiva');
+{ // in pace non si attacca: serve dichiarare guerra
+  const cV = capitaleDi(vicino), acc = neighbors(cV).find(n => passable(n) && !n.city && !n.port && !n.hosp && !n.unit);
+  acc.unit = mkUnit('warrior', 'p');
+  assert(!attacksFor(acc).includes(cV) && !movesFor(acc).includes(cV), 'in pace la tua unità non attacca né entra nella capitale del vicino');
+  selected = acc; onTileClick(cV);
+  assert(diploCon === vicino && /dichiarargli guerra/.test(document.getElementById('diploBox').innerHTML || ''), 'toccandolo con l\'unità si apre la sua scheda con il promemoria');
+  chiudiDiplomazia(); selected = null; acc.unit = null;
+}
+assert(dichiaraGuerra(vicino) && relazione('p', vicino) === 'guerra', 'dichiari guerra al vicino');
+assert(relazione('p', imperiIA().find(o => o !== vicino)) === 'pace', 'con gli altri resti in pace');
+diplo.fiducia = {};
 
 // --- il tocco sul territorio dell'altro impero apre la sua scheda ---
 selected = null;
