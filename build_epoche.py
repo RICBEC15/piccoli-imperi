@@ -1,6 +1,6 @@
 # Costruisce gli stati storici delle epoche di Piccoli Imperi. Fino al 1885: istantanee di
 # historical-basemaps (1000 1100 1200 1300 1400 1500 1530 1600 1650 1700 1715 1783 1800 1815 1880),
-# nel gioco vale l'ultima non successiva all'anno scelto. Dal 1886 al 2007 (v81): i confini
+# nel gioco vale l'ultima non successiva all'anno scelto. Dal 1886 al 2007 (v83): i confini
 # ufficiali di CShapes 2.0, anno per anno (vedi epoche_cshapes.py); dal 2008 gli stati di oggi.
 #
 # Fonte: historical-basemaps di Andre Ourednik (https://github.com/aourednik/historical-basemaps),
@@ -575,7 +575,7 @@ def vicino_prevalente(tiles, codici, idx_stato, validi):
     return max(voti, key=voti.get) if voti else None
 
 
-UGUALE = '`'  # v81: "come nella griglia di base" (non e' nell'alfabeto)
+UGUALE = '`'  # v83: "come nella griglia di base" (non e' nell'alfabeto)
 
 
 def codifica(rows, cols, tiles, codici, alfabeto, base=None):
@@ -622,7 +622,7 @@ def anteprima(path, rows, cols, tiles, codici, stati):
 
 
 def fatti_storici(basi, T, fine):
-    """v81: un'istantanea per ogni anno con un fatto storico (eventi_epoche.py), costruita sulla
+    """v83: un'istantanea per ogni anno con un fatto storico (eventi_epoche.py), costruita sulla
     precedente istantanea di historical-basemaps piu' i fatti venuti dopo"""
     from eventi_epoche import EVENTI
     anni_base = sorted(int(b[0]) for b in basi)
@@ -686,7 +686,7 @@ def main():
     lavori = []  # (anno, titolo, stati, codici per taglia, esatto)
     for anno, E in EPOCHE.items():
         if int(anno) >= epoche_cshapes.ANNO_PRIMO:
-            continue  # v81: dal 1886 i confini esatti di CShapes
+            continue  # v83: dal 1886 i confini esatti di CShapes
         geoms, nomi = leggi_poligoni(f'{src}/world_{anno}.geojson')
         per_taglia = {}
         for taglia, M in T.items():
@@ -751,7 +751,7 @@ def main():
             'stati': {c: {'nome': stati[c][0], 'emblema': stati[c][1]} for c in usati},
         }
         finali[anno] = per_taglia
-        # v81: i fatti storici si scrivono come differenza dalla loro istantanea, gli anni di CShapes
+        # v83: i fatti storici si scrivono come differenza dalla loro istantanea, gli anni di CShapes
         # dall'ultimo anno scritto per intero (se conviene): il file resta leggero
         base = None
         if nota:

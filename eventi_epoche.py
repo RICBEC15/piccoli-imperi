@@ -1,4 +1,4 @@
-# I fatti storici con la data che cambiano i confini fra un'istantanea e l'altra (v81), per
+# I fatti storici con la data che cambiano i confini fra un'istantanea e l'altra (v83), per
 # build_epoche.py. Prima del 1886 i confini veri ci sono solo per alcuni anni (historical-basemaps):
 # qui sono scritti a mano i cambi piu' importanti in mezzo, cosi' ogni anno scelto ha i confini
 # di quell'anno. I confini dei fatti sono per zone intere, quindi approssimativi.
