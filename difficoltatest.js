@@ -42,7 +42,10 @@ for (const l of ['facile', 'normale', 'difficile']) {
   esiti[l] = partita(5, l);
   console.log(l, 'capitale presa al turno', esiti[l].presa, '| al turno 20:', JSON.stringify(esiti[l].al20));
 }
-assert(esiti.difficile.presa < 25, "difficile: l'IA attacca subito, come la v54");
+// v85: il nemico e' uno dei 5 paesi vicini pescato a caso, e quale esce dipende dai numeri casuali gia'
+// usati per la mappa: con i biomi corretti la Tunisia (seme 5) pesca l'Italia, oltre il mare, invece
+// della Libia, e serve qualche turno in piu' per sbarcare. Resta: difficile prende la capitale ben prima di normale.
+assert(esiti.difficile.presa < 30 && esiti.difficile.presa < esiti.normale.presa - 10, "difficile: l'IA attacca subito, come la v54");
 assert(esiti.normale.presa >= AI_LIVELLI.normale.tregua && esiti.normale.presa > esiti.difficile.presa + 10,
   'normale: niente attacchi alla capitale prima della fine della tregua');
 assert(esiti.facile.presa >= AI_LIVELLI.facile.tregua && esiti.facile.presa > esiti.normale.presa + 15,
