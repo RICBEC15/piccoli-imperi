@@ -17,7 +17,7 @@ function partita(size = 'piccola') {
 function setModalitaTest(size) {
   setMapSize(size);
   newGame();
-  cambiaPaese('FR'); // v81: con i rilievi veri l'Italia della mappa piccola non ha più 7 caselle di prato attaccate
+  cambiaPaese('FR'); // v82: con i rilievi veri l'Italia della mappa piccola non ha più 7 caselle di prato attaccate
   tutorial = false;
   if (placing && placeSet.length) placePlayerCapital(placeSet[0]);
   deselect();

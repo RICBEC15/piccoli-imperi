@@ -1,4 +1,4 @@
-# Controlla e corregge i biomi di Piccoli Imperi con i dati da satellite (v81).
+# Controlla e corregge i biomi di Piccoli Imperi con i dati da satellite (v82).
 #
 # I biomi di BIOMI vengono da OpenStreetMap (build_biomi.py), che in molte zone e' incompleto:
 # boschi non disegnati (Russia, Finlandia, Svezia), campi non segnati (Russia, Ucraina, Turchia),
