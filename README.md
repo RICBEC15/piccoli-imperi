@@ -12,14 +12,16 @@ In locale: apri `piccoli_imperi.html` nel browser con un doppio clic. Non serve 
 
 - `piccoli_imperi.html`: il gioco completo (HTML, CSS e JavaScript in un unico file).
 - `index.html`: pagina d'ingresso per GitHub Pages, rimanda subito a `piccoli_imperi.html`.
-- `stub.js`, `shiptest.js`, `savetest.js`, `playtest.js`, `aitest.js`, `paesitest.js`, `imperitest.js`, `difficoltatest.js`, `mappatest.js`, `diplotest.js`, `conquistatest.js`, `capitalitest.js`, `paesinuovitest.js`, `microstatitest.js`, `vaticanotest.js`, `popolazionetest.js`, `biomitest.js`, `epochetest.js`, `browser_check.js`, `mobile_check.js`, `pantest.js`, `conquista_check.js`, `citta_check.js`, `unitatest.js`, `stabilita_check.js`, `mappefissetest.js`, `caricamento_check.js`, `cheattest.js`, `cheat_check.js`, `capitaletest.js`, `capitale_check.js`, `anno_check.js`, `medioorientetest.js`: test automatici (`mobile_check.js` prova il gioco su un iPhone emulato con Playwright, `pantest.js` lo spostamento nella mappa col mouse, le frecce e il dito).
+- `stub.js`, `shiptest.js`, `savetest.js`, `playtest.js`, `aitest.js`, `paesitest.js`, `imperitest.js`, `difficoltatest.js`, `mappatest.js`, `diplotest.js`, `conquistatest.js`, `capitalitest.js`, `paesinuovitest.js`, `microstatitest.js`, `vaticanotest.js`, `popolazionetest.js`, `biomitest.js`, `epochetest.js`, `browser_check.js`, `mobile_check.js`, `pantest.js`, `conquista_check.js`, `citta_check.js`, `unitatest.js`, `stabilita_check.js`, `mappefissetest.js`, `caricamento_check.js`, `cheattest.js`, `cheat_check.js`, `capitaletest.js`, `capitale_check.js`, `anno_check.js`, `popstoricatest.js`, `popstorica_check.js`, `medioorientetest.js`: test automatici (`mobile_check.js` prova il gioco su un iPhone emulato con Playwright, `pantest.js` lo spostamento nella mappa col mouse, le frecce e il dito).
 - `build_russia.js`: script che ha estratto il confine della Russia dal dataset Natural Earth.
 - `build_paesi_nord.py`: estrae da Natural Earth i confini dei paesi aggiunti nella v65 (`POLY_NORD`, `SEMI_NORD`).
-- `build_paesi_est.py`: estrae da Natural Earth i confini del Medio Oriente, del Sahel e dell'Asia centrale (v82: `POLY_EST`, `SEMI_EST`).
-- `build_biomi_est.py`: i biomi OpenStreetMap delle terre aggiunte nella v82, senza toccare quelli di prima.
+- `build_paesi_est.py`: estrae da Natural Earth i confini del Medio Oriente, del Sahel e dell'Asia centrale (v83: `POLY_EST`, `SEMI_EST`).
+- `build_biomi_est.py`: i biomi OpenStreetMap delle terre aggiunte nella v83, senza toccare quelli di prima.
 - `build_biomi.py`, `export_tiles.js`: costruiscono i biomi fissi dai dati di OpenStreetMap.
+- `correggi_biomi.py` (v82): controlla e corregge i biomi con i dati da satellite (ESA WorldCover) e il modello del terreno (Copernicus DEM).
 - `build_mappe.js`: scrive la mappa già pronta di ogni grandezza (`const MAPPE_FISSE = ...`), così una partita nuova non la ricalcola.
 - `build_popolazione.js`: costruisce la lista delle città vere con i loro abitanti (Natural Earth).
+- `build_popolazione_storica.py`: costruisce gli abitanti di ogni città negli anni dal 1000 a oggi (`POP_STORICA`, v81).
 - `build_epoche.py`: costruisce gli stati storici di ogni epoca (con `export_tiles.js`).
 - `ISTRUZIONI_MIGRAZIONE.md`: note di sviluppo, storia delle ultime versioni e istruzioni dettagliate.
 
@@ -48,11 +50,13 @@ cat stub.js game.js paesinuovitest.js > _run.js && node _run.js   # i paesi dell
 cat stub.js game.js microstatitest.js > _run.js && node _run.js   # i microstati: circa 20 secondi
 cat stub.js game.js vaticanotest.js > _run.js && node _run.js   # niente Vaticano fra gli stati di oggi (v73): circa 20 secondi
 cat stub.js game.js popolazionetest.js > _run.js && node _run.js   # abitanti veri delle città
+cat stub.js game.js popstoricatest.js > _run.js && node _run.js   # abitanti che cambiano con l'anno (v81): pochi secondi
+node popstorica_check.js   # abitanti e stelle del 1200 e del 1900 nel browser, computer e tablet (v81)
 cat stub.js game.js biomitest.js > _run.js && node _run.js   # i biomi OSM
 cat stub.js game.js mappefissetest.js > _run.js && node _run.js   # la mappa pronta = la mappa calcolata: circa 10 secondi
 cat stub.js game.js cheattest.js > _run.js && node _run.js   # i cheat (v77): circa 10 secondi
 cat stub.js game.js cittaunicatest.js > _run.js && node _run.js   # la città come area unica, fiume compreso (v78): pochi secondi
-cat stub.js game.js medioorientetest.js > _run.js && node _run.js   # il Medio Oriente (v82): pochi secondi
+cat stub.js game.js medioorientetest.js > _run.js && node _run.js   # il Medio Oriente (v83): pochi secondi
 node cheat_check.js   # il pannello dei cheat nel browser, computer e tablet col tocco (Playwright)
 ```
 
@@ -62,7 +66,8 @@ C'è **una sola mappa per ogni grandezza** (piccola, media, gigante), uguale a o
 
 - Confini e coste: Natural Earth (poligoni dentro `piccoli_imperi.html`).
 - Biomi: **OpenStreetMap**, precalcolati casella per casella e scritti nella riga `const BIOMI = ...` del gioco. Prato, bosco, collina, montagna, ghiacciaio, deserto di dune o di pietra, salina, tundra, e dalla v66 palude, campi coltivati, vigneti e frutteti, città (zone costruite), macchia, brughiera e prateria. Si leggono i poligoni `natural=*` (boschi, rocce, ghiacciai, sabbie, zone umide, macchie, brughiere, praterie), i `landuse=*` (campi, vigneti, frutteti, zone residenziali e industriali, saline) e le quote delle cime. Dati © OpenStreetMap contributors (ODbL), letti tramite il tema `base` di Overture Maps.
-- Per rifare i biomi (per esempio dopo aver cambiato la forma della mappa) si usano `build_biomi.py` ed `export_tiles.js`: le istruzioni sono in testa a `build_biomi.py`. Fiumi, laghi, stretti e villaggi li calcola il gioco (`calcolaMappa`) in modo fisso.
+- Dalla v82 i biomi di OpenStreetMap sono **controllati casella per casella con dati da satellite**: © ESA WorldCover 2021 (10 m, CC BY 4.0) per boschi, campi, città, deserti, paludi e ghiacci, e Copernicus DEM GLO-90 (© DLR e Airbus, fornito dall'ESA) per colline e montagne. Dove i dati veri smentiscono chiaramente OSM, `correggi_biomi.py` corregge (le regole sono nella sua funzione `correggi`).
+- Per rifare i biomi (per esempio dopo aver cambiato la forma della mappa) si usano `build_biomi.py` ed `export_tiles.js`, poi `correggi_biomi.py` (che riparte dai biomi già scritti), poi `node build_mappe.js`: le istruzioni sono in testa ai due script Python. Fiumi, laghi, stretti e villaggi li calcola il gioco (`calcolaMappa`) in modo fisso.
 - **Dalla v74 la mappa di ogni grandezza è già pronta dentro il file** (riga `const MAPPE_FISSE = ...`: terreno, paesi e villaggi in RLE, circa 100 KB compressi in tutto), invece di ricalcolarla a ogni partita. **Dopo ogni modifica alla mappa** (confini, fiumi, laghi, biomi, città vere, villaggi) va rilanciato `node build_mappe.js`; `mappefissetest.js` fallisce se la mappa pronta non è più uguale a quella calcolata.
 
 ## Città e abitanti
@@ -73,6 +78,18 @@ Ogni città ha i suoi **abitanti veri**: quelli dell'agglomerato urbano (campo `
 - Ogni villaggio prende nome e abitanti della città vera più popolosa entro poco più di una casella (almeno 25 km).
 - Dalla v71 sulla mappa restano **solo le città da 100.000 abitanti in su e le capitali** (anche più piccole: Podgorica, La Valletta...). I villaggi sotto i 100.000 abitanti, e quelli senza una città vera vicina, non ci sono più; ogni capitale vera che non aveva un villaggio ne ha uno (Lubiana, Zagabria, Sarajevo, Tirana...). Quando la capitale di un impero sorge accanto al villaggio della sua città, il villaggio si fonde nella capitale.
 - La rendita cresce con gli abitanti, a scaglioni: sotto 5.000 abitanti 1⭐, da 5.000 2⭐, da 50.000 3⭐, da 200.000 4⭐, da 700.000 5⭐, da 2 milioni 6⭐, da 5 milioni 7⭐. La capitale rende 1⭐ in più (almeno 3⭐), e ogni livello di crescita portato dai cittadini aggiunge 1⭐.
+
+
+### Gli abitanti nell'anno della partita (v81)
+
+Dalla v81 gli abitanti delle città sono **quelli dell'anno scelto**: nel 1000 Costantinopoli ha circa 326.000 abitanti, Cordova 346.000, Roma 30.000 e Parigi 20.000; nel 1600 Roma ne ha 100.000 e Istanbul 688.000; nel 1900 Londra 5,4 milioni. Le città sulla mappa restano le stesse (quelle che oggi hanno almeno 100.000 abitanti, più le capitali): cambia solo quanta gente ci vive. Mosca, Madrid e Berlino nel 1000 non sono ancora nate e sono villaggi da 1.000 abitanti.
+
+- Fonti, per ogni città la più vicina con i dati: [World City Populations](http://www.worldcitypop.com) di Andrea Biguzzi (serie degli agglomerati urbani, citata come chiede il sito); E. Buringh, *The Population of European Cities from 700 to 2000* (2021, CC BY 4.0), 2.262 città europee; Reba, Reitsma e Seto, *Spatializing 6,000 years of global urbanization* (Scientific Data 2016, CC BY 4.0, dai dati di Chandler e Modelski). Le prime due nella copia pulita e geolocalizzata di [Stadestér](https://github.com/ConfoederatioVF/Stadester) (MIT). Dal 2020 valgono gli abitanti di Natural Earth.
+- Fra un anno noto e l'altro si interpola (in scala logaritmica), anno per anno. Prima del primo dato di una città, e per le città senza dati (circa 500 su 1.366, quasi tutte piccole o nate di recente), si segue l'andamento delle 10 città vicine che hanno dati. Mai meno di 1.000 abitanti.
+- Dal 1850 al 2000 le serie si avvicinano piano piano agli abitanti di oggi, perché le fonti contano la città o l'agglomerato in modo diverso.
+- I villaggi senza città vera (quelli fondati in partita) hanno la stima di oggi ridotta come le 5 città vere più vicine.
+- **Le stelle sono relative all'epoca** (scelta di Riccardo da confermare): per la rendita gli abitanti contano come se fossero divisi per la frazione di gente che viveva nelle città vere quell'anno rispetto a oggi (circa 1/50 nel 1000, 1/20 nel 1200, 1/18 nel 1800, 1/5 nel 1900). Così le città più grandi di allora rendono come le grandi di oggi (Costantinopoli 7⭐ nel 1200, Parigi 6⭐, Madrid 3⭐) e in media una città rende quanto oggi: il gioco resta bilanciato anche per il computer.
+- In `piccoli_imperi.html` la lista `POP_STORICA` (fra `POP_STORICA_INIZIO` e `POP_STORICA_FINE`) ha, per ogni città di `CITTA_REALI` e nello stesso ordine, gli abitanti in centinaia negli anni di `POP_ANNI`. Va rifatta con `build_popolazione_storica.py` ogni volta che si rifà `CITTA_REALI` (istruzioni in testa allo script).
 
 ## Le epoche
 
@@ -87,7 +104,7 @@ Ogni modifica alla mappa va verificata con `mappatest.js`, che controlla anche c
 
 ## Versione
 
-v82 (formato di salvataggio invariato, v18; le partite salvate prima si caricano ancora): **tutto il Medio Oriente**.
+v83 (formato di salvataggio invariato, v18; le partite salvate prima si caricano ancora): **tutto il Medio Oriente**.
 
 - La mappa scende fino a 11,5° nord (lo Yemen, il Sahel) e va a est fino a 63,5° (tutto l'Iran): circa il 40% di caselle in più. Le righe nuove sono in fondo e le colonne nuove a destra, quindi l'Europa di prima resta identica, casella per casella (piccola 282×298, media 567×597, gigante 851×896).
 - 37 paesi nuovi, ognuno con il suo impero IA e la sua capitale vera: Siria, Libano, Israele, Palestina, Giordania, Iraq, Iran, Kuwait, Arabia Saudita, Bahrein, Qatar, Emirati Arabi Uniti, Oman e Yemen; e, perché il rettangolo della mappa li prende per forza, il Sahara e il Sahel (Mauritania, Mali, Niger, Ciad, Sudan, Eritrea, Gibuti, Senegal, Gambia, Guinea-Bissau, Burkina Faso, Capo Verde e la parte nord di Etiopia, Nigeria, Guinea, Camerun, Benin, Sudan del Sud e Somalia) e l'Asia centrale (Turkmenistan e la parte ovest di Uzbekistan, Afghanistan e Pakistan). Dove la capitale vera è fuori mappa, il paese comincia da una sua città del nord (Macallè, Kano, Herat, Nukus, Turbat...). Egitto, Libia, Algeria e Marocco si completano a sud, Russia e Kazakistan a est.
@@ -95,7 +112,17 @@ v82 (formato di salvataggio invariato, v18; le partite salvate prima si caricano
 - Biomi OpenStreetMap anche qui: il Sahara e il deserto arabico (dune e pietra), i monti dell'Iran e dello Yemen, la Mesopotamia coltivata, la savana del Sahel.
 - Fiumi: il Nilo intero da Khartum (con il Nilo Azzurro e il Nilo Bianco), il Tigri e l'Eufrate fino allo Shatt al-Arab, il Niger, il Senegal, l'Amu Darya. Laghi: Nasser, Ciad, Tana, il Mar Morto, Urmia. Stretti sempre navigabili: Hormuz e Bab el-Mandeb; il golfo di Aqaba resta mare.
 - Le epoche (dal 1000 al 1960) coprono anche le terre nuove: Buyidi, Selgiuchidi, Ghaznavidi, Ilkhanato, Timuridi, Impero safavide, Impero del Mali e Songhai, Kanem-Bornu, Africa Occidentale Francese, Arabia Saudita...
-- I paesi di prima tengono il loro colore. Le partite salvate prima della v82 si aprono sulla mappa nuova: le terre nuove compaiono con i loro villaggi liberi, senza imperi.
+- I paesi di prima tengono il loro colore. Le partite salvate prima della v83 si aprono sulla mappa nuova: le terre nuove compaiono con i loro villaggi liberi, senza imperi.
+
+v82: **i biomi controllati e corretti con i dati da satellite**. OpenStreetMap in molte zone è incompleto: ogni casella delle tre mappe è stata confrontata con le immagini da satellite ESA WorldCover 2021 e con il modello del terreno Copernicus, e circa una casella di terra su quattro è cambiata (gigante: 65.499 su 265.157).
+
+- **Boschi**: la taiga di Russia, Finlandia e Svezia, che OSM lasciava a prato, ora è bosco (24.000 caselle sulla gigante); in Lapponia il bosco non è più tundra.
+- **Campi**: le pianure coltivate di Russia, Ucraina, Turchia, Spagna e Polonia ora sono campi (16.600 caselle), quindi le loro città rendono di più.
+- **Rilievi**: colline e montagne vengono dal dislivello vero del terreno e non più solo dalle cime segnate: Turchia, Norvegia, Atlante, Appennini, Grecia e Caucaso hanno i loro monti (3.700 montagne e 6.600 colline in più).
+- **Deserti**: la costa verde del Maghreb e la valle del Nilo non sono più deserto; il deserto vero del Kazakistan sì. Paludi del nord della Russia aggiunte; tolte paludi, città e ghiacciai che i satelliti non vedono.
+- Sulla mappa piccola cambiano alcuni villaggi (via Palma di Maiorca, Losanna, Oviedo, Blida, Mataró; arrivano Verona, Clermont-Ferrand, Besançon), sulla media arriva Besançon. I salvataggi di prima si caricano ancora (il terreno si salva nella partita).
+
+v81 (formato di salvataggio v18, invariato): **gli abitanti delle città cambiano con l'anno scelto**. Ogni città ha gli abitanti veri di quell'anno, dal 1000 a oggi (vedi «Gli abitanti nell'anno della partita»); anche la rendita in stelle li segue. Cambiare anno nella scelta del paese aggiorna subito gli abitanti. Le stelle sono relative all'epoca: le città più grandi di allora rendono come le grandi di oggi. I salvataggi tengono gli abitanti della partita.
 
 v80 (formato di salvataggio v18, con il campo facoltativo `anno`; i salvataggi di prima si caricano ancora): **si sceglie l'anno, anno per anno, dal 1000 a oggi**, non più solo sei date.
 

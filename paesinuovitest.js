@@ -55,11 +55,11 @@ assert(current === 'p' && !gameOver, 'tre giri di turni con 55 imperi IA, senza 
 const nuovo = serialize();
 const tagliaR = EXTN - EXTN_V63, tagliaC = EXTC;
 const v63 = comeSalvataggioV17(nuovo);
-// (v82: la v63 non aveva neppure le righe in fondo e le colonne a destra del Medio Oriente)
+// (v83: la v63 non aveva neppure le righe in fondo e le colonne a destra del Medio Oriente)
 const R80 = ROWS - (EXTR - EXTR_V80), C80 = COLS - (EXTE - EXTE_V80), g80 = geoSetup();
 v63.rows = R80 - tagliaR; v63.cols = C80 - tagliaC;
-v63.imperi = v63.imperi.filter(o => !PAESI_V82[o]);
-for (const o of Object.keys(PAESI_V82)) { delete v63.stars[o]; delete v63.paesi[o]; }
+v63.imperi = v63.imperi.filter(o => !PAESI_V83[o]);
+for (const o of Object.keys(PAESI_V83)) { delete v63.stars[o]; delete v63.paesi[o]; }
 v63.imperi = v63.imperi.filter(o => !PAESI_V65[o]);
 for (const o of NUOVI) { delete v63.stars[o]; delete v63.paesi[o]; }
 v63.paesi.p = 'DE'; v63.diplomazia = { rel: {}, fiducia: {}, rifiuto: {} };
@@ -67,7 +67,7 @@ const terraNuova = new Set();
 v63.tiles = v63.tiles.filter(s => s.r >= tagliaR && s.c >= tagliaC && s.r < R80 && s.c < C80).map(s => {
   const t = map[s.r][s.c], s2 = Object.assign({}, s, { r: s.r - tagliaR, c: s.c - tagliaC });
   const q = tileLonLat(t, g80);
-  if (terraNuovaV82(t.country, q.lon, q.lat)) return { r: s2.r, c: s2.c, g: 'water', b: 0, y: 0, u: 0, s: 0, q: 0 };
+  if (terraNuovaV83(t.country, q.lon, q.lat)) return { r: s2.r, c: s2.c, g: 'water', b: 0, y: 0, u: 0, s: 0, q: 0 };
   if (t.country && PAESI_V65[t.country]) { // nella v63 qui c'era il mare
     terraNuova.add(key(t));
     return { r: s2.r, c: s2.c, g: 'water', b: 0, y: 0, u: 0, s: 0, q: 0 };

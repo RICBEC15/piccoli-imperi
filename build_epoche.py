@@ -720,9 +720,9 @@ EPOCHE = {
     'correzioni': {},
   },
 }
-# v82: gli stati del Medio Oriente, del Sahara, del Sahel e dell'Asia centrale (le terre nuove).
-# Un nome dei dati vale in ogni epoca in cui non e' gia' tradotto; OVERRIDE_V82 lo cambia per epoca.
-NOMI_V82 = {
+# v83: gli stati del Medio Oriente, del Sahara, del Sahel e dell'Asia centrale (le terre nuove).
+# Un nome dei dati vale in ogni epoca in cui non e' gia' tradotto; OVERRIDE_V83 lo cambia per epoca.
+NOMI_V83 = {
     'Ghaznavid Emirate': ('GAZ', 'Emirato ghaznavide', '🌙'), 'Makkura': ('MAK', 'Regno di Makuria', '🏰'),
     'West African cereal farmers': ('AGR', "Agricoltori dell'Africa occidentale", '⛺'),
     'Alwa': ('ALW', 'Regno di Alodia', '🏰'), 'Yemen': ('YEM', 'Yemen', '🌙'), 'Yemen (UK)': ('YEM', 'Yemen', '🌙'),
@@ -782,7 +782,7 @@ NOMI_V82 = {
     'Kong Empire': ('KON', 'Impero di Kong', '🌙'), 'Kong': ('KON', 'Impero di Kong', '🌙'),
     'Arma': ('TIB', 'Pascialato di Timbuctù', '🌙'),
 }
-OVERRIDE_V82 = {
+OVERRIDE_V83 = {
     '1715': {'Senegal': ('SEN', 'Regni wolof', '🏰')},
     '1783': {'Senegal': ('SEN', 'Regni wolof', '🏰')},
     '1800': {'Senegal': ('SEN', 'Regni wolof', '🏰')},
@@ -817,15 +817,15 @@ OVERRIDE_V82 = {
              'Israel': ('ISR', 'Israele', '🏛️'), 'Nigeria': ('NIG', 'Nigeria', '🏛️'),
              'Cameroon': ('CAM', 'Camerun', '🏛️'), 'Benin': ('DAH', 'Dahomey', '🏛️')},
 }
-ITALIANO_V82 = {}  # (anno, nome dei dati) -> (codice, nome italiano, emblema): lo stato si scrive solo se c'e'
+ITALIANO_V83 = {}  # (anno, nome dei dati) -> (codice, nome italiano, emblema): lo stato si scrive solo se c'e'
 for _anno, _E in EPOCHE.items():
-    for _nome, (_cod, _it, _emb) in {**NOMI_V82, **OVERRIDE_V82.get(_anno, {})}.items():
-        if _nome in _E['nomi'] and _nome not in OVERRIDE_V82.get(_anno, {}):
+    for _nome, (_cod, _it, _emb) in {**NOMI_V83, **OVERRIDE_V83.get(_anno, {})}.items():
+        if _nome in _E['nomi'] and _nome not in OVERRIDE_V83.get(_anno, {}):
             continue  # gia' tradotto dalle epoche di prima: resta com'era
         if _cod in _E['stati']:
             continue  # il codice e' gia' di uno stato di quest'epoca: il nome resta senza traduzione
         _E['nomi'][_nome] = _cod
-        ITALIANO_V82[(_anno, _nome)] = (_cod, _it, _emb)
+        ITALIANO_V83[(_anno, _nome)] = (_cod, _it, _emb)
 
 # in ordine di anno: il gioco cerca l'ultima istantanea non successiva all'anno scelto
 EPOCHE = dict(sorted(EPOCHE.items(), key=lambda kv: int(kv[0])))
@@ -946,12 +946,12 @@ def main():
                 else:
                     codici.append('?' + n)
             per_taglia[taglia] = codici
-        # v82: gli stati delle terre nuove presenti sulla mappa (con lo stesso codice vince il nome piu' esteso)
+        # v83: gli stati delle terre nuove presenti sulla mappa (con lo stesso codice vince il nome piu' esteso)
         quanti = {}
         for n in assegna(T['piccola']['tiles'], geoms, nomi):
-            if (anno, n) in ITALIANO_V82: quanti[n] = quanti.get(n, 0) + 1
+            if (anno, n) in ITALIANO_V83: quanti[n] = quanti.get(n, 0) + 1
         for n in sorted(quanti, key=lambda n: quanti[n]):
-            cod, it, emb = ITALIANO_V82[(anno, n)]
+            cod, it, emb = ITALIANO_V83[(anno, n)]
             E['stati'][cod] = (it, emb)
         # gli stati sconosciuti o troppo piccoli (sulla mappa piccola) si uniscono al vicino
         tp, cp = T['piccola']['tiles'], per_taglia['piccola']
