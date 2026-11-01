@@ -17,13 +17,13 @@ function partita(size = 'piccola') {
 function setModalitaTest(size) {
   setMapSize(size);
   newGame();
-  cambiaPaese('IT');
+  cambiaPaese('FR'); // v81: con i rilievi veri l'Italia della mappa piccola non ha più 7 caselle di prato attaccate
   tutorial = false;
   if (placing && placeSet.length) placePlayerCapital(placeSet[0]);
   deselect();
 }
-// una casella di prato in Italia, libera, con almeno 6 vicini di prato liberi
-function pratoLibero(cond = () => true, paese = 'IT') {
+// una casella di prato in Francia, libera, con almeno 6 vicini di prato liberi
+function pratoLibero(cond = () => true, paese = 'FR') {
   for (const t of map.flat()) {
     if (t.terrain !== 'grass' || t.unit || t.city || t.port || t.hosp || t.bridge) continue;
     if ((paese && t.country !== paese) || bioma(t) === 'u' || bioma(t) === 'p') continue;
@@ -33,7 +33,7 @@ function pratoLibero(cond = () => true, paese = 'IT') {
   }
   throw new Error('nessuna casella di prato libera trovata');
 }
-const nemico = () => imperiIA().find(o => players[o].country !== 'IT');
+const nemico = () => imperiIA().find(o => players[o].country !== 'FR');
 
 partita();
 

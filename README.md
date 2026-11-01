@@ -16,6 +16,7 @@ In locale: apri `piccoli_imperi.html` nel browser con un doppio clic. Non serve 
 - `build_russia.js`: script che ha estratto il confine della Russia dal dataset Natural Earth.
 - `build_paesi_nord.py`: estrae da Natural Earth i confini dei paesi aggiunti nella v65 (`POLY_NORD`, `SEMI_NORD`).
 - `build_biomi.py`, `export_tiles.js`: costruiscono i biomi fissi dai dati di OpenStreetMap.
+- `correggi_biomi.py` (v81): controlla e corregge i biomi con i dati da satellite (ESA WorldCover) e il modello del terreno (Copernicus DEM).
 - `build_mappe.js`: scrive la mappa già pronta di ogni grandezza (`const MAPPE_FISSE = ...`), così una partita nuova non la ricalcola.
 - `build_popolazione.js`: costruisce la lista delle città vere con i loro abitanti (Natural Earth).
 - `build_epoche.py`: costruisce gli stati storici di ogni epoca (con `export_tiles.js`).
@@ -59,7 +60,8 @@ C'è **una sola mappa per ogni grandezza** (piccola, media, gigante), uguale a o
 
 - Confini e coste: Natural Earth (poligoni dentro `piccoli_imperi.html`).
 - Biomi: **OpenStreetMap**, precalcolati casella per casella e scritti nella riga `const BIOMI = ...` del gioco. Prato, bosco, collina, montagna, ghiacciaio, deserto di dune o di pietra, salina, tundra, e dalla v66 palude, campi coltivati, vigneti e frutteti, città (zone costruite), macchia, brughiera e prateria. Si leggono i poligoni `natural=*` (boschi, rocce, ghiacciai, sabbie, zone umide, macchie, brughiere, praterie), i `landuse=*` (campi, vigneti, frutteti, zone residenziali e industriali, saline) e le quote delle cime. Dati © OpenStreetMap contributors (ODbL), letti tramite il tema `base` di Overture Maps.
-- Per rifare i biomi (per esempio dopo aver cambiato la forma della mappa) si usano `build_biomi.py` ed `export_tiles.js`: le istruzioni sono in testa a `build_biomi.py`. Fiumi, laghi, stretti e villaggi li calcola il gioco (`calcolaMappa`) in modo fisso.
+- Dalla v81 i biomi di OpenStreetMap sono **controllati casella per casella con dati da satellite**: © ESA WorldCover 2021 (10 m, CC BY 4.0) per boschi, campi, città, deserti, paludi e ghiacci, e Copernicus DEM GLO-90 (© DLR e Airbus, fornito dall'ESA) per colline e montagne. Dove i dati veri smentiscono chiaramente OSM, `correggi_biomi.py` corregge (le regole sono nella sua funzione `correggi`).
+- Per rifare i biomi (per esempio dopo aver cambiato la forma della mappa) si usano `build_biomi.py` ed `export_tiles.js`, poi `correggi_biomi.py` (che riparte dai biomi già scritti), poi `node build_mappe.js`: le istruzioni sono in testa ai due script Python. Fiumi, laghi, stretti e villaggi li calcola il gioco (`calcolaMappa`) in modo fisso.
 - **Dalla v74 la mappa di ogni grandezza è già pronta dentro il file** (riga `const MAPPE_FISSE = ...`: terreno, paesi e villaggi in RLE, circa 100 KB compressi in tutto), invece di ricalcolarla a ogni partita. **Dopo ogni modifica alla mappa** (confini, fiumi, laghi, biomi, città vere, villaggi) va rilanciato `node build_mappe.js`; `mappefissetest.js` fallisce se la mappa pronta non è più uguale a quella calcolata.
 
 ## Città e abitanti
@@ -83,6 +85,14 @@ Nella schermata iniziale (e nella scelta del paese, prima di fondare la capitale
 Ogni modifica alla mappa va verificata con `mappatest.js`, che controlla anche che due partite abbiano la stessa mappa.
 
 ## Versione
+
+v81: **i biomi controllati e corretti con i dati da satellite**. OpenStreetMap in molte zone è incompleto: ogni casella delle tre mappe è stata confrontata con le immagini da satellite ESA WorldCover 2021 e con il modello del terreno Copernicus, e circa una casella di terra su quattro è cambiata (gigante: 65.499 su 265.157).
+
+- **Boschi**: la taiga di Russia, Finlandia e Svezia, che OSM lasciava a prato, ora è bosco (24.000 caselle sulla gigante); in Lapponia il bosco non è più tundra.
+- **Campi**: le pianure coltivate di Russia, Ucraina, Turchia, Spagna e Polonia ora sono campi (16.600 caselle), quindi le loro città rendono di più.
+- **Rilievi**: colline e montagne vengono dal dislivello vero del terreno e non più solo dalle cime segnate: Turchia, Norvegia, Atlante, Appennini, Grecia e Caucaso hanno i loro monti (3.700 montagne e 6.600 colline in più).
+- **Deserti**: la costa verde del Maghreb e la valle del Nilo non sono più deserto; il deserto vero del Kazakistan sì. Paludi del nord della Russia aggiunte; tolte paludi, città e ghiacciai che i satelliti non vedono.
+- Sulla mappa piccola cambiano alcuni villaggi (via Palma di Maiorca, Losanna, Oviedo, Blida, Mataró; arrivano Verona, Clermont-Ferrand, Besançon), sulla media arriva Besançon. I salvataggi di prima si caricano ancora (il terreno si salva nella partita).
 
 v80 (formato di salvataggio v18, con il campo facoltativo `anno`; i salvataggi di prima si caricano ancora): **si sceglie l'anno, anno per anno, dal 1000 a oggi**, non più solo sei date.
 
