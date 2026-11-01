@@ -17,6 +17,8 @@
 #   3) python3 correggi_biomi.py correggi DIR tiles.json piccoli_imperi.html
 #        riscrive la riga "const BIOMI = ..." partendo da quella che c'e'
 #   4) node build_mappe.js
+# Con SOLO_NUOVE=vecchio.html davanti al passo 3 si correggono solo le terre che nel file vecchio non
+# c'erano (cosi' e' stato fatto per il Medio Oriente nella v85, a partire dal piccoli_imperi.html della v83).
 # Va rilanciato anche dopo build_biomi.py (che riparte da OSM e cancellerebbe le correzioni).
 # Dipendenze: pip install rasterio numpy
 import sys, os, re, json
@@ -131,7 +133,7 @@ def misure(dirn, taglie):
 # ---------------------------------------------------------------- 3) correzione
 PIANI = set('gakbi')  # prato, prateria, macchia, brughiera, tundra: i biomi "vuoti" che OSM lascia dove non sa
 
-def correggi(bio, f, lat):
+def correggi(bio, f, lat, capitale=None):
     """bio: biomi OSM (array di lettere); f: misure; ritorna i biomi corretti e il motivo di ogni cambio"""
     b = bio.copy(); perche = np.full(len(b), '', object)
     al, ca, co, nu, ne, um, mu, er = (f[k] for k in ('alberi', 'campi', 'costruito', 'nudo', 'neve', 'umido', 'muschio', 'erba'))
@@ -167,7 +169,11 @@ def correggi(bio, f, lat):
     collina = dem & (dl >= 110)
     metti(collina & rilievo_ok & ~((b == 'f') & (al >= 0.7)), 'h', 'collina mancante')
     monte = dem & ((dl >= 250) | ((q >= 2200) & (dl >= 120)))
-    metti(monte & (rilievo_ok | (b == 'h')), 'm', 'montagna mancante')
+    if capitale is None: capitale = np.zeros(len(b), bool)
+    metti(monte & (rilievo_ok | (b == 'h')) & ~capitale, 'm', 'montagna mancante')
+    # v85: attorno alle capitali vere al massimo collina, perche' la capitale non resti chiusa fra i monti
+    # (Beirut sotto il Monte Libano, sulla mappa piccola)
+    metti(monte & rilievo_ok & capitale, 'h', 'collina mancante')
     metti(dem & (b == 'm') & (dl < 60) & (q < 700), P, 'montagna piatta')
     metti(dem & (b == 'h') & (dl < 30) & (q < 400), P, 'collina piatta')
     # 4) ghiacci
@@ -189,12 +195,20 @@ def unrle(s, n):
     for k, ch in re.findall(r'(\d*)(\D)', s): out.extend(ch * int(k or 1))
     return np.array(out[:n] + ['.'] * (n - len(out)))
 
-def correggi_tutto(dirn, tiles_json, html, solo=None):
+def correggi_tutto(dirn, tiles_json, html, solo=None, vecchio=None):
     s = open(html, encoding='utf-8').read()
     riga = re.search(r'^const BIOMI = (.*);$', s, re.M)
     BIOMI = json.loads(riga.group(1))
     taglie = json.load(open(tiles_json))
+    VB = VM = None
+    if vecchio:  # v85: solo le caselle che nel file vecchio erano fuori dalla mappa o mare (le terre nuove)
+        sv = open(vecchio, encoding='utf-8').read()
+        VB = json.loads(re.search(r'^const BIOMI = (.*);$', sv, re.M).group(1))
+        VM = json.loads(re.search(r'^const MAPPE_FISSE = (.*);$', sv, re.M).group(1))
     F = misure(dirn, taglie)
+    blocco = s[s.index('const CAPITALI_REALI = {'):]
+    blocco = blocco[:blocco.index('};')]
+    CAP = [(float(a), float(b)) for a, b in re.findall(r"\[\s*(?:'[^']*'|\"[^\"]*\"),\s*(-?[\d.]+),\s*(-?[\d.]+)", blocco)]
     rapporto = {}
     for m, d in taglie.items():
         r = np.array([x[0] for x in d['tiles']]); c = np.array([x[1] for x in d['tiles']])
@@ -202,11 +216,22 @@ def correggi_tutto(dirn, tiles_json, html, solo=None):
         grid = unrle(BIOMI[m], d['rows'] * d['cols'])
         idx = r * d['cols'] + c
         bio = grid[idx]
-        nuovo, perche = correggi(bio, F[m], lat)
+        lon = np.array([x[2] for x in d['tiles']])
+        vicino = np.zeros(len(bio), bool)  # entro 1,6 caselle dal punto vero di una capitale
+        for clon, clat in CAP:
+            vicino |= np.hypot((lon - clon) * KM_LON, (lat - clat) * KM_LAT) <= 1.6 * d['hexKm']
+        nuovo, perche = correggi(bio, F[m], lat, vicino)
         if solo is not None:  # solo le caselle nella zona indicata (lon0, lon1, lat0, lat1)
             lon = np.array([x[2] for x in d['tiles']])
             fuori = ~((lon >= solo[0]) & (lon <= solo[1]) & (lat >= solo[2]) & (lat <= solo[3]))
             nuovo[fuori] = bio[fuori]; perche[fuori] = ''
+        if VB is not None:  # le caselle vecchie tengono r,c (la mappa si e' allargata in basso e a destra)
+            vc, vr = VM[m]['cols'], VM[m]['rows']
+            vg = unrle(VB[m], vr * vc)
+            dentro = (r < vr) & (c < vc)
+            gia = np.zeros(len(r), bool)
+            gia[dentro] = vg[r[dentro] * vc + c[dentro]] != '.'
+            nuovo[gia] = bio[gia]; perche[gia] = ''
         nuovo[bio == '.'] = '.'; perche[bio == '.'] = ''  # caselle senza bioma (non dovrebbero esserci)
         grid[idx] = nuovo
         BIOMI[m] = rle(grid)
@@ -229,5 +254,6 @@ if __name__ == '__main__':
         scarica(sys.argv[2], *[float(x) for x in sys.argv[3:7]])
     elif sys.argv[1] == 'correggi':
         solo = [float(x) for x in sys.argv[5:9]] if len(sys.argv) >= 9 else None
-        rep = correggi_tutto(sys.argv[2], sys.argv[3], sys.argv[4], solo)
+        # SOLO_NUOVE=vecchio.html: corregge solo le terre che nel file vecchio non c'erano
+        rep = correggi_tutto(sys.argv[2], sys.argv[3], sys.argv[4], solo, os.environ.get('SOLO_NUOVE'))
         if os.environ.get('RAPPORTO'): json.dump(rep, open(os.environ['RAPPORTO'], 'w'), indent=1)

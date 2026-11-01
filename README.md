@@ -104,6 +104,15 @@ Ogni modifica alla mappa va verificata con `mappatest.js`, che controlla anche c
 
 ## Versione
 
+v85: **i biomi del Medio Oriente controllati e corretti con i dati da satellite**, come la v82 per l'Europa. `correggi_biomi.py` è passato solo sulle terre nuove della v84 (opzione `SOLO_NUOVE`): l'Europa di prima resta identica. Sulla gigante cambiano 36.982 caselle su 479.453.
+
+- **Rilievi**: l'altopiano iraniano, Zagros ed Elburz, lo Yemen, l'Hegiaz e l'acrocoro etiopico hanno colline e montagne vere (9.000 colline e 3.200 montagne in più). La lunga striscia di bosco lungo gli Zagros, che OSM esagerava, ora è collina.
+- **Sahel**: il confine fra deserto e savana non è più una riga dritta: segue quello vero. Ci sono campi in Nigeria, Sudan, Niger e Burkina Faso, e deserto vero in Sudan, Ciad e Niger.
+- **Deserto verde**: le steppe dell'Iran, del Turkmenistan e della Siria, la Mezzaluna fertile in Iraq e il sud della Mauritania non sono più deserto.
+- **Boschi** in Guinea, Guinea-Bissau e Senegal e nella taiga a est degli Urali.
+- Attorno alle capitali vere le montagne nuove diventano colline, perché nessuna capitale resti chiusa fra monti e mare (Beirut sulla mappa piccola).
+- Sulla mappa piccola Doha non è più un villaggio a parte; sulla gigante arriva Manama. `difficoltatest.js` ora accetta che l'IA difficile arrivi entro 30 turni: con il seme del test la Tunisia pesca come nemico l'Italia, oltre il mare, invece della Libia.
+
 v84 (formato di salvataggio invariato, v18; le partite salvate prima si caricano ancora): **tutto il Medio Oriente**.
 
 - La mappa scende fino a 11,5° nord (lo Yemen, il Sahel) e va a est fino a 63,5° (tutto l'Iran): circa il 40% di caselle in più. Le righe nuove sono in fondo e le colonne nuove a destra, quindi l'Europa di prima resta identica, casella per casella (piccola 282×298, media 567×597, gigante 851×896).
