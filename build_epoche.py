@@ -519,11 +519,118 @@ EPOCHE = {
     'correzioni': {},
   },
 }
+# v84: gli stati del Medio Oriente, del Sahara, del Sahel e dell'Asia centrale (le terre nuove).
+# Un nome dei dati vale in ogni epoca in cui non e' gia' tradotto; OVERRIDE_V84 lo cambia per epoca.
+NOMI_V84 = {
+    'Ghaznavid Emirate': ('GAZ', 'Emirato ghaznavide', '🌙'), 'Makkura': ('MAK', 'Regno di Makuria', '🏰'),
+    'West African cereal farmers': ('AGR', "Agricoltori dell'Africa occidentale", '⛺'),
+    'Alwa': ('ALW', 'Regno di Alodia', '🏰'), 'Yemen': ('YEM', 'Yemen', '🌙'), 'Yemen (UK)': ('YEM', 'Yemen', '🌙'),
+    'Hadramaut': ('HAD', 'Hadramawt', '🌙'), 'Kanem': ('KAN', 'Impero del Kanem', '👑'),
+    'Kanem-Bornu': ('KAN', 'Impero del Kanem-Bornu', '👑'), 'Ghana': ('GHN', 'Impero del Ghana', '👑'),
+    'Mali': ('MLI', 'Impero del Mali', '👑'), 'Muscat': ('OMA', "Imamato dell'Oman", '🌙'),
+    'Oman': ('OMA', "Imamato dell'Oman", '🌙'), 'Muscat and Oman': ('OMA', 'Sultanato di Mascate e Oman', '🌙'),
+    'Oman (British Raj)': ('OMA', 'Sultanato di Mascate e Oman', '🌙'),
+    'Takrur': ('TAK', 'Regno del Takrur', '🏰'), 'Tekrur': ('TAK', 'Regno del Takrur', '🏰'),
+    'Ifat': ('IFA', 'Sultanato di Ifat', '🌙'), 'Chagatai Khanate': ('CHA', 'Khanato Chagatai', '⛺'),
+    'Ethiopia': ('ETI', "Impero d'Etiopia", '👑'), 'Abyssinia': ('ETI', "Impero d'Etiopia", '👑'),
+    'Shoa': ('ETI', "Impero d'Etiopia", '👑'), 'Arabs': ('ARB', 'Tribù arabe', '⛺'),
+    'Arabia': ('ARB', "Emirati dell'Arabia", '⛺'), 'Timurid Emirates': ('TIM', 'Emirati timuridi', '🌙'),
+    'Songhai': ('SON', 'Impero songhai', '👑'), 'Hausa States': ('HAU', 'Città-stato hausa', '🏰'),
+    'Funj': ('FUN', 'Sultanato di Funj', '🌙'), 'Mossi States': ('MOX', 'Regni mossi', '🏰'),
+    'Islamic states': ('ISM', 'Sultanati islamici', '🌙'), 'Islamic and Hindu states': ('ISM', 'Sultanati del Belucistan', '🌙'),
+    'Adal': ('ADA', 'Sultanato di Adal', '🌙'), 'Safavid Empire': ('SAF', 'Impero safavide', '🌙'),
+    'Darfur': ('DAR', 'Sultanato del Darfur', '🌙'), 'Senegal': ('SEN', 'Impero jolof', '🏰'),
+    'Mahra': ('MAH', 'Sultanato di Mahra', '🌙'), 'Wadai': ('WAD', 'Sultanato del Wadai', '🌙'),
+    'Wadai Empire': ('WAD', 'Sultanato del Wadai', '🌙'), 'Bagirmi': ('BAG', 'Sultanato di Baguirmi', '🌙'),
+    'Awsa': ('AWS', "Imamato di Aussa", '🌙'), 'Portuguese Guinea': ('GPO', 'Guinea portoghese', '🏰'),
+    'Guinea-Bissau': ('GPO', 'Guinea portoghese', '🏰'), 'Guinea-Bissau (Portugal)': ('GPO', 'Guinea portoghese', '🏰'),
+    'Segu': ('SEG', 'Impero bambara di Ségou', '👑'), 'Air': ('AIR', "Sultanato dell'Aïr", '🌙'),
+    'central Asian khanates': ('KAZ', "Khanati dell'Asia centrale", '⛺'), 'Nejd': ('NEJ', 'Emirato del Najd', '🌙'),
+    'Arabia (Nejd)': ('NEJ', 'Emirato del Najd', '🌙'), 'Afghanistan': ('AFG', 'Impero durrani', '👑'),
+    'Kaarta': ('KAA', 'Regno del Kaarta', '🏰'), 'Fulani Empire': ('FUL', 'Califfato di Sokoto', '🌙'),
+    'Sokoto Caliphate': ('FUL', 'Califfato di Sokoto', '🌙'), 'Somalia': ('SOM', 'Sultanati somali', '🌙'),
+    'Tukular Caliphate': ('TUK', 'Impero tukulor', '🌙'), 'Bokhara Khanate': ('BUK', 'Emirato di Bukhara', '🌙'),
+    'Dendi Kingdom': ('DEN', 'Regno dendi', '🏰'), 'British Raj': ('RAJ', 'Raj britannico', '👑'),
+    'India': ('RAJ', 'Raj britannico', '👑'), 'Trucial Oman': ('TRU', 'Stati della Tregua', '🏰'),
+    'Futa Toro': ('FTO', 'Imamato del Futa Toro', '🌙'), 'Futa Jalon': ('FJA', 'Imamato del Futa Jallon', '🌙'),
+    'Sultanate of Damagaram': ('DAM', 'Sultanato di Damagaram', '🌙'), 'Borgu States': ('BOG', 'Regni del Borgu', '🏰'),
+    'Qatar': ('QAT', 'Qatar', '🌙'), 'Wassoulou Empire': ('WAS', 'Impero wassoulou', '👑'),
+    'First Samori Empire': ('WAS', 'Impero wassoulou', '👑'), 'Gambia': ('GAM', 'Gambia britannica', '🏰'),
+    'Gambia, The': ('GAM', 'Gambia britannica', '🏰'), 'Senegal (FR)': ('SEN', 'Senegal francese', '🏰'),
+    'French West Africa': ('AOF', 'Africa Occidentale Francese', '🏰'),
+    'French Equatorial Africa': ('AEF', 'Africa Equatoriale Francese', '🏰'),
+    'Anglo-Egyptian Sudan': ('SUD', 'Sudan anglo-egiziano', '🏰'), 'Sudan': ('SUD', 'Sudan anglo-egiziano', '🏰'),
+    'British Protectorate': ('PBR', 'Protettorati britannici in Arabia', '🏰'),
+    'Nigeria': ('NIG', 'Nigeria britannica', '🏰'), 'Rio De Oro': ('RDO', 'Río de Oro spagnolo', '🏰'),
+    'Eritrea': ('ERI', 'Eritrea italiana', '🏰'), 'Kuwait': ('KUW', 'Kuwait', '🌙'),
+    'Kamerun': ('CAM', 'Camerun tedesco', '🏰'), 'French Cameroons': ('CAM', 'Camerun francese', '🏰'),
+    'Cameroon': ('CAM', 'Camerun francese', '🏰'), 'Djibouti': ('GIB', 'Somalia francese', '🏰'),
+    'French Somaliland': ('GIB', 'Somalia francese', '🏰'), 'British Somaliland': ('SBR', 'Somaliland britannico', '🏰'),
+    'Italian Somaliland': ('SOI', 'Somalia italiana', '🏰'), 'Iran': ('PER', 'Persia', '🌙'),
+    "Emirate of Bin Shal'an": ('NEJ', 'Sultanato del Najd', '🌙'), 'Hejaz': ('HEJ', 'Regno del Hegiaz', '🏰'),
+    'Hail': ('HAI', "Emirato di Ha'il", '🌙'), 'Mesopotamia (GB)': ('IRQ', 'Mesopotamia britannica', '🏰'),
+    'Mandatory Palestine (GB)': ('PAL', 'Palestina britannica', '🏰'),
+    'Ethiopia (Italy)': ('AOI', 'Africa Orientale Italiana', '🏰'), 'Eritrea (Italy)': ('AOI', 'Africa Orientale Italiana', '🏰'),
+    'Saudi Arabia': ('SAU', 'Arabia Saudita', '🏰'), 'Niger': ('NGR', 'Niger francese', '🏰'),
+    'Mauritania': ('MRT', 'Mauritania francese', '🏰'), 'Chad': ('CIA', 'Ciad francese', '🏰'),
+    'Iraq': ('IRQ', "Regno dell'Iraq", '🏰'), 'Syria': ('SIR', 'Siria', '🏛️'),
+    'Burkina Faso': ('BFA', 'Alto Volta francese', '🏰'), 'United Arab Emirates': ('TRU', 'Stati della Tregua', '🏰'),
+    'Jordan': ('GIO', 'Transgiordania', '🏰'), 'Pakistan': ('RAJ', 'Raj britannico', '👑'),
+    'Guinea': ('GUI', 'Guinea francese', '🏰'), 'Israel': ('PAL', 'Palestina britannica', '🏰'),
+    'Lebanon': ('LBN', 'Libano', '🏛️'), 'Benin': ('DAH', 'Dahomey francese', '🏰'),
+    'Kong Empire': ('KON', 'Impero di Kong', '🌙'), 'Kong': ('KON', 'Impero di Kong', '🌙'),
+    'Arma': ('TIB', 'Pascialato di Timbuctù', '🌙'),
+}
+OVERRIDE_V84 = {
+    '1715': {'Senegal': ('SEN', 'Regni wolof', '🏰')},
+    '1783': {'Senegal': ('SEN', 'Regni wolof', '🏰')},
+    '1800': {'Senegal': ('SEN', 'Regni wolof', '🏰')},
+    '1815': {'Senegal': ('SEN', 'Regni wolof', '🏰'), 'Afghanistan': ('AFG', "Emirato dell'Afghanistan", '🌙')},
+    '1880': {'Afghanistan': ('AFG', "Emirato dell'Afghanistan", '🌙'), 'Oman': ('OMA', 'Sultanato di Mascate e Oman', '🌙')},
+    '1900': {'Afghanistan': ('AFG', "Emirato dell'Afghanistan", '🌙'), 'Oman': ('OMA', 'Sultanato di Mascate e Oman', '🌙'),
+             'Senegal': ('SEN', 'Senegal francese', '🏰')},
+    '1914': {'Afghanistan': ('AFG', "Emirato dell'Afghanistan", '🌙'), 'Yemen': ('YEM', 'Yemen ottomano', '🌙')},
+    '1920': {'Afghanistan': ('AFG', "Regno dell'Afghanistan", '🏰'), 'Yemen': ('YEM', 'Regno dello Yemen', '🏰'),
+             'Ethiopia': ('ETI', "Impero d'Etiopia", '👑')},
+    '1930': {'Afghanistan': ('AFG', "Regno dell'Afghanistan", '🏰'), 'Yemen': ('YEM', 'Regno dello Yemen', '🏰'),
+             "Emirate of Bin Shal'an": ('NEJ', 'Regno del Hegiaz e del Najd', '🏰'),
+             'Hejaz': ('NEJ', 'Regno del Hegiaz e del Najd', '🏰'), 'Hail': ('NEJ', 'Regno del Hegiaz e del Najd', '🏰'),
+             'Mesopotamia (GB)': ('IRQ', 'Iraq britannico', '🏰')},
+    '1938': {'Afghanistan': ('AFG', "Regno dell'Afghanistan", '🏰'), 'Yemen (UK)': ('YEM', 'Regno dello Yemen', '🏰'),
+             'Iran': ('PER', 'Iran', '🏰'), "Emirate of Bin Shal'an": ('SAU', 'Arabia Saudita', '🏰'),
+             'Hejaz': ('SAU', 'Arabia Saudita', '🏰'), 'Hail': ('SAU', 'Arabia Saudita', '🏰'),
+             'Mesopotamia (GB)': ('IRQ', "Regno dell'Iraq", '🏰')},
+    '1945': {'Afghanistan': ('AFG', "Regno dell'Afghanistan", '🏰'), 'Yemen': ('YEM', 'Regno dello Yemen', '🏰'),
+             'Iran': ('PER', 'Iran', '🏰'), 'Mali': ('MLI', 'Sudan francese', '🏰'),
+             'Senegal': ('SEN', 'Senegal francese', '🏰'), 'Ethiopia': ('ETI', "Impero d'Etiopia", '👑'),
+             'Eritrea': ('ERI', 'Eritrea britannica', '🏰'), 'Somalia': ('SOI', 'Somalia italiana', '🏰'),
+             'Oman': ('OMA', 'Sultanato di Mascate e Oman', '🌙')},
+    '1960': {'Afghanistan': ('AFG', "Regno dell'Afghanistan", '🏰'), 'Yemen': ('YEM', 'Regno dello Yemen', '🏰'),
+             'Iran': ('PER', 'Iran', '🏰'), 'Mali': ('MLI', 'Mali', '🏛️'), 'Senegal': ('SEN', 'Senegal', '🏛️'),
+             'Ethiopia': ('ETI', "Impero d'Etiopia", '👑'), 'Eritrea': ('ERI', "Eritrea (federata all'Etiopia)", '🏰'),
+             'Somalia': ('SOM', 'Somalia', '🏛️'), 'Oman': ('OMA', 'Sultanato di Mascate e Oman', '🌙'),
+             'Sudan': ('SUD', 'Sudan', '🏛️'), 'Niger': ('NGR', 'Niger', '🏛️'), 'Mauritania': ('MRT', 'Mauritania', '🏛️'),
+             'Chad': ('CIA', 'Ciad', '🏛️'), 'Iraq': ('IRQ', "Repubblica dell'Iraq", '🏛️'),
+             'Burkina Faso': ('BFA', 'Alto Volta', '🏛️'), 'Jordan': ('GIO', 'Regno di Giordania', '🏰'),
+             'Pakistan': ('PAK', 'Pakistan', '🏛️'), 'Guinea': ('GUI', 'Guinea', '🏛️'),
+             'Israel': ('ISR', 'Israele', '🏛️'), 'Nigeria': ('NIG', 'Nigeria', '🏛️'),
+             'Cameroon': ('CAM', 'Camerun', '🏛️'), 'Benin': ('DAH', 'Dahomey', '🏛️')},
+}
+ITALIANO_V84 = {}  # (anno, nome dei dati) -> (codice, nome italiano, emblema): lo stato si scrive solo se c'e'
+for _anno, _E in EPOCHE.items():
+    for _nome, (_cod, _it, _emb) in {**NOMI_V84, **OVERRIDE_V84.get(_anno, {})}.items():
+        if _nome in _E['nomi'] and _nome not in OVERRIDE_V84.get(_anno, {}):
+            continue  # gia' tradotto dalle epoche di prima: resta com'era
+        if _cod in _E['stati']:
+            continue  # il codice e' gia' di uno stato di quest'epoca: il nome resta senza traduzione
+        _E['nomi'][_nome] = _cod
+        ITALIANO_V84[(_anno, _nome)] = (_cod, _it, _emb)
+
 # in ordine di anno: il gioco cerca l'ultima istantanea non successiva all'anno scelto
 EPOCHE = dict(sorted(EPOCHE.items(), key=lambda kv: int(kv[0])))
 
 # la lettera dell'i-esimo stato nella griglia (lo stesso alfabeto e' nel gioco)
-ALFABETO = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz!#$%&()*+,-/:;<=>?@[]^_{|}~'
+ALFABETO = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz!#$%&()*+,-/:;<=>?@[]^_{|}~ÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏÐÑÒÓÔÕÖØÙÚÛÜÝÞßàáâãäåæçèéêëìíîïðñòóôõöøùúûüýþÿ'
 
 
 def leggi_poligoni(path):
@@ -703,6 +810,13 @@ def main():
                 else:
                     codici.append('?' + n)
             per_taglia[taglia] = codici
+        # v84: gli stati delle terre nuove presenti sulla mappa (con lo stesso codice vince il nome piu' esteso)
+        quanti = {}
+        for n in assegna(T['piccola']['tiles'], geoms, nomi):
+            if (anno, n) in ITALIANO_V84: quanti[n] = quanti.get(n, 0) + 1
+        for n in sorted(quanti, key=lambda n: quanti[n]):
+            cod, it, emb = ITALIANO_V84[(anno, n)]
+            E['stati'][cod] = (it, emb)
         lavori.append((anno, E['titolo'], E['stati'], per_taglia, False))
     lavori = [l + ('',) for l in lavori]
     lavori += fatti_storici(lavori, T, epoche_cshapes.ANNO_PRIMO)

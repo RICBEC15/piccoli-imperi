@@ -17,7 +17,11 @@ ERE = [(1886, 'La Belle Époque'), (1914, 'La Grande Guerra'), (1919, 'Tra le du
 
 # caselle senza stato nei dati, per paese di oggi: [(fino_all_anno escluso, nome CShapes)]
 # (prima del 1912 la Libia era ottomana, ma CShapes non la disegna)
-SENZA_STATO = {'LY': [(1912, 'Turkey (Ottoman Empire)')]}
+SENZA_STATO = {'LY': [(1912, 'Turkey (Ottoman Empire)')],
+               # v84: le terre nuove fuori dagli stati di CShapes (nomi con '_': stati non disegnati)
+               'SA': [(2100, '_Arabia')], 'YE': [(2100, '_Arabia')], 'OM': [(2100, 'Oman')],
+               'SD': [(1899, '_Mahdi')], 'TD': [(2100, '_Ciad')], 'NE': [(2100, '_Sahel')], 'ML': [(2100, '_Sahel')],
+               'BF': [(2100, '_Sahel')], 'MR': [(2100, '_Sahel')], 'NG': [(2100, '_Nigeria')], 'CM': [(2100, '_Ciad')]}
 
 
 # nomi italiani degli stati di CShapes 2.0, per periodo: [(dal_anno, codice, nome, emblema), ...]
@@ -119,6 +123,44 @@ NOMI = {
   'Uzbekistan': [(1991, 'UZB', 'Uzbekistan', '🏛️')],
   'Yugoslavia': [(1918, 'JUG', 'Regno dei Serbi, Croati e Sloveni', '🏰'), (1929, 'JUG', 'Regno di Jugoslavia', '🏰'),
                  (1945, 'JUG', 'Jugoslavia', '🚩'), (1992, 'JUG', 'Serbia e Montenegro', '🏛️')],
+  # v84: le terre nuove (Medio Oriente, Sahara e Sahel, Asia centrale)
+  'Aden': [(1886, 'ADE', 'Aden britannica', '🏰')],
+  'East Aden Protectorate': [(1886, 'APR', 'Protettorato di Aden', '🏰')],
+  'Federation of South Arabia': [(1962, 'FAS', "Federazione dell'Arabia del Sud", '🏰')],
+  "Yemen, People's Republic of": [(1967, 'YDS', 'Yemen del Sud', '🚩')],
+  'Yemen (Arab Republic of Yemen)': [(1918, 'YEM', 'Regno dello Yemen', '🏰'), (1962, 'YEM', 'Repubblica Araba dello Yemen', '🏛️'), (1990, 'YEM', 'Yemen', '🏛️')],
+  'Oman': [(1886, 'OMA', 'Sultanato di Mascate e Oman', '🌙'), (1970, 'OMA', 'Oman', '🌙')],
+  'United Arab Emirates': [(1886, 'EAU', 'Stati della Tregua', '🌙'), (1971, 'EAU', 'Emirati Arabi Uniti', '🌙')],
+  'Qatar': [(1886, 'QAT', 'Qatar britannico', '🌙'), (1971, 'QAT', 'Qatar', '🌙')],
+  'Bahrain': [(1886, 'BAH', 'Bahrein', '🌙')],
+  'Kuwait': [(1886, 'KUW', 'Kuwait', '🌙')],
+  '_Arabia': [(1886, 'NEG', 'Emirati del Neged', '🌙'), (1926, 'NEG', 'Regno del Hegiaz e Neged', '🌙')],
+  '_Mahdi': [(1886, 'MAH', 'Stato mahdista', '🌙')],
+  '_Ciad': [(1886, 'WAD', 'Sultanati del Ciad', '🌙')],
+  '_Sahel': [(1886, 'TOU', 'Regni del Sahel', '🏰')],
+  '_Nigeria': [(1886, 'SOK', 'Califfato di Sokoto', '🌙')],
+  'Pakistan': [(1947, 'PAK', 'Pakistan', '🌙')],
+  'Eritrea': [(1886, 'ERI', 'Eritrea italiana', '🏰'), (1941, 'ERI', 'Eritrea britannica', '🏰'), (1993, 'ERI', 'Eritrea', '🏛️')],
+  'Ethiopia': [(1886, 'ETI', 'Impero etiope', '👑'), (1974, 'ETI', 'Etiopia', '🚩'), (1991, 'ETI', 'Etiopia', '🏛️')],
+  'Djibouti': [(1886, 'GIB', 'Somalia francese', '🏰'), (1967, 'GIB', 'Territorio degli Afar e degli Issa', '🏰'), (1977, 'GIB', 'Gibuti', '🏛️')],
+  'British Somaliland (Somaliland Republic)': [(1886, 'SOB', 'Somalia britannica', '🏰')],
+  'Italian Somaliland': [(1886, 'SOI', 'Somalia italiana', '🏰')],
+  'Somalia': [(1960, 'SOM', 'Somalia', '🏛️')],
+  'South Sudan': [(2011, 'SSU', 'Sudan del Sud', '🏛️')],
+  'Senegal': [(1886, 'SEN', 'Senegal francese', '🏰'), (1960, 'SEN', 'Senegal', '🏛️')],
+  'Gambia': [(1886, 'GAM', 'Gambia britannico', '🏰'), (1965, 'GAM', 'Gambia', '🏛️')],
+  'Guinea': [(1886, 'GUI', 'Guinea francese', '🏰'), (1958, 'GUI', 'Guinea', '🏛️')],
+  'Guinea-Bissau': [(1886, 'GBI', 'Guinea portoghese', '🏰'), (1974, 'GBI', 'Guinea-Bissau', '🏛️')],
+  'Sierra Leone': [(1886, 'SLE', 'Sierra Leone britannica', '🏰')],
+  "Cote D'Ivoire": [(1886, 'CIV', "Costa d'Avorio francese", '🏰')],
+  'Cape Verde': [(1886, 'CVE', 'Capo Verde portoghese', '🏰'), (1975, 'CVE', 'Capo Verde', '🏛️')],
+  'Burkina Faso (Upper Volta)': [(1886, 'VOL', 'Alto Volta francese', '🏰'), (1960, 'VOL', 'Alto Volta', '🏛️'), (1984, 'VOL', 'Burkina Faso', '🏛️')],
+  'Benin': [(1886, 'DAH', 'Dahomey francese', '🏰'), (1960, 'DAH', 'Dahomey', '🏛️'), (1975, 'DAH', 'Benin', '🏛️')],
+  'Northern Nigeria': [(1886, 'NGA', 'Nigeria settentrionale britannica', '🏰')],
+  'Nigeria': [(1914, 'NGA', 'Nigeria britannica', '🏰'), (1960, 'NGA', 'Nigeria', '🏛️')],
+  'Kamerun': [(1886, 'KAM', 'Camerun tedesco', '🏰')],
+  'Cameroon': [(1916, 'CAM', 'Camerun francese', '🏰'), (1960, 'CAM', 'Camerun', '🏛️')],
+  'British Cameroons': [(1916, 'CBR', 'Camerun britannico', '🏰')],
 }
 
 
@@ -163,7 +205,7 @@ def leggi(path):
             a = arcs[i] if i >= 0 else arcs[~i][::-1]
             out.extend(a if not out else a[1:])
         return out
-    B = box(-27, 19, 67, 73)  # la mappa del gioco, larga
+    B = box(-27, 10, 67, 73)  # la mappa del gioco, larga (v84: fino allo Yemen e al Sahel)
     feats = []
     for g in o['geometries']:
         if g['type'] == 'Polygon':
