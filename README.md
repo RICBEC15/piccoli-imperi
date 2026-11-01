@@ -18,7 +18,7 @@ In locale: apri `piccoli_imperi.html` nel browser con un doppio clic. Non serve 
 - `build_biomi.py`, `export_tiles.js`: costruiscono i biomi fissi dai dati di OpenStreetMap.
 - `build_mappe.js`: scrive la mappa già pronta di ogni grandezza (`const MAPPE_FISSE = ...`), così una partita nuova non la ricalcola.
 - `build_popolazione.js`: costruisce la lista delle città vere con i loro abitanti (Natural Earth).
-- `build_epoche.py`: costruisce gli stati storici di ogni epoca (con `export_tiles.js`).
+- `build_epoche.py`: costruisce gli stati storici di ogni epoca (con `export_tiles.js`; dalla v81 anche `epoche_cshapes.py`, i confini esatti dal 1886, e `eventi_epoche.py`, i fatti storici con la data).
 - `ISTRUZIONI_MIGRAZIONE.md`: note di sviluppo, storia delle ultime versioni e istruzioni dettagliate.
 
 ## Test
@@ -30,7 +30,7 @@ cat stub.js game.js savetest.js > _run.js && node _run.js
 cat stub.js game.js playtest.js > _run.js && node _run.js
 cat stub.js game.js paesitest.js > _run.js && node _run.js
 cat stub.js game.js imperitest.js > _run.js && node _run.js   # tutti i paesi contro tutti: circa 30 secondi
-cat stub.js game.js epochetest.js > _run.js && node _run.js   # epoche e scelta dell'anno (v80): circa un minuto
+cat stub.js game.js epochetest.js > _run.js && node _run.js   # epoche e scelta dell'anno (v80, v81): circa due minuti
 node anno_check.js   # la scelta dell'anno nel browser, computer e tablet (v80)
 cat stub.js game.js aitest.js > _run.js && node _run.js   # IA: 150 turni, circa un minuto
 cat stub.js game.js difficoltatest.js > _run.js && node _run.js   # difficoltà IA: circa 40 secondi
@@ -83,6 +83,13 @@ Nella schermata iniziale (e nella scelta del paese, prima di fondare la capitale
 Ogni modifica alla mappa va verificata con `mappatest.js`, che controlla anche che due partite abbiano la stessa mappa.
 
 ## Versione
+
+v81 (formato di salvataggio invariato, v18): **la mappa ha i confini veri dell'anno scelto**, non quelli di una data vicina.
+
+- Dal 1886 al 2007 i confini sono quelli ufficiali di ogni anno, da CShapes 2.0 (colonie comprese; nella Seconda guerra mondiale niente occupazioni, solo i confini ufficiali). Dal 2008 gli stati di oggi.
+- Prima del 1886, sopra le istantanee di historical-basemaps, ci sono 99 fatti storici con la data (`eventi_epoche.py`): 1453 Costantinopoli ottomana, 1492 Granada, 1707 Gran Bretagna, 1772-1795 spartizioni della Polonia, 1861 Regno d'Italia, 1871 Impero tedesco... I loro confini sono per zone intere, quindi approssimativi. Sotto l'anno si legge l'ultimo cambio: «Anno 1856 · Il Congresso di Vienna (ultimo cambio nel 1852: nasce il Secondo Impero francese)».
+- Il file resta leggero (2,4 MB): per i fatti e per molti anni si scrivono solo le caselle che cambiano.
+- Per rifare i dati: istruzioni in testa a `build_epoche.py` (con `epoche_cshapes.py` e `eventi_epoche.py`).
 
 v80 (formato di salvataggio v18, con il campo facoltativo `anno`; i salvataggi di prima si caricano ancora): **si sceglie l'anno, anno per anno, dal 1000 a oggi**, non più solo sei date.
 
