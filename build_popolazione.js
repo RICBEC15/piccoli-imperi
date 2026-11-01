@@ -16,7 +16,7 @@
     for (const f of NE) {
       const p = f.properties, [lon, lat] = f.geometry.coordinates;
       const ab = Math.round(p.POP_MAX || 0);
-      if (ab < 1000 || lon < -26 || lon > 62 || lat < 24 || lat > 72) continue;
+      if (ab < 1000 || lon < -26 || lon > 64.5 || lat < 11 || lat > 72) continue;
       const q = geoToPx(lon, lat, g);
       if (q.x < 0 || q.y < 0 || q.x > W || q.y > H) continue;
       const t = tileAtGeo(lon, lat, g);

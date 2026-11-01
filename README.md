@@ -1,6 +1,6 @@
 # Piccoli Imperi
 
-Gioco di strategia a turni su esagoni, in stile Polytopia, su una mappa geografica reale dell'Europa, dall'Islanda e dalle Canarie agli Urali. A inizio partita scegli l'anno, uno qualsiasi dal 1000 a oggi, e tocchi sulla mappa il paese da guidare: il suo territorio è la tua patria. **Ogni altro paese è un impero guidato dall'IA**, in guerra con tutti. Un impero cade quando perde la capitale; vinci quando sono caduti tutti. Nella schermata iniziale si può scegliere anche il duello: un solo nemico, l'"Impero Cremisi", in un paese vicino.
+Gioco di strategia a turni su esagoni, in stile Polytopia, su una mappa geografica reale dell'Europa, del Medio Oriente e del Nord Africa: dall'Islanda e dalle Canarie agli Urali e all'Iran, fino allo Yemen e al Sahel. A inizio partita scegli l'anno, uno qualsiasi dal 1000 a oggi, e tocchi sulla mappa il paese da guidare: il suo territorio è la tua patria. **Ogni altro paese è un impero guidato dall'IA**, in guerra con tutti. Un impero cade quando perde la capitale; vinci quando sono caduti tutti. Nella schermata iniziale si può scegliere anche il duello: un solo nemico, l'"Impero Cremisi", in un paese vicino.
 
 ## Come giocare
 
@@ -12,9 +12,11 @@ In locale: apri `piccoli_imperi.html` nel browser con un doppio clic. Non serve 
 
 - `piccoli_imperi.html`: il gioco completo (HTML, CSS e JavaScript in un unico file).
 - `index.html`: pagina d'ingresso per GitHub Pages, rimanda subito a `piccoli_imperi.html`.
-- `stub.js`, `shiptest.js`, `savetest.js`, `playtest.js`, `aitest.js`, `paesitest.js`, `imperitest.js`, `difficoltatest.js`, `mappatest.js`, `diplotest.js`, `conquistatest.js`, `capitalitest.js`, `paesinuovitest.js`, `microstatitest.js`, `vaticanotest.js`, `popolazionetest.js`, `biomitest.js`, `epochetest.js`, `browser_check.js`, `mobile_check.js`, `pantest.js`, `conquista_check.js`, `citta_check.js`, `unitatest.js`, `stabilita_check.js`, `mappefissetest.js`, `caricamento_check.js`, `cheattest.js`, `cheat_check.js`, `capitaletest.js`, `capitale_check.js`, `anno_check.js`: test automatici (`mobile_check.js` prova il gioco su un iPhone emulato con Playwright, `pantest.js` lo spostamento nella mappa col mouse, le frecce e il dito).
+- `stub.js`, `shiptest.js`, `savetest.js`, `playtest.js`, `aitest.js`, `paesitest.js`, `imperitest.js`, `difficoltatest.js`, `mappatest.js`, `diplotest.js`, `conquistatest.js`, `capitalitest.js`, `paesinuovitest.js`, `microstatitest.js`, `vaticanotest.js`, `popolazionetest.js`, `biomitest.js`, `epochetest.js`, `browser_check.js`, `mobile_check.js`, `pantest.js`, `conquista_check.js`, `citta_check.js`, `unitatest.js`, `stabilita_check.js`, `mappefissetest.js`, `caricamento_check.js`, `cheattest.js`, `cheat_check.js`, `capitaletest.js`, `capitale_check.js`, `anno_check.js`, `medioorientetest.js`: test automatici (`mobile_check.js` prova il gioco su un iPhone emulato con Playwright, `pantest.js` lo spostamento nella mappa col mouse, le frecce e il dito).
 - `build_russia.js`: script che ha estratto il confine della Russia dal dataset Natural Earth.
 - `build_paesi_nord.py`: estrae da Natural Earth i confini dei paesi aggiunti nella v65 (`POLY_NORD`, `SEMI_NORD`).
+- `build_paesi_est.py`: estrae da Natural Earth i confini del Medio Oriente, del Sahel e dell'Asia centrale (v82: `POLY_EST`, `SEMI_EST`).
+- `build_biomi_est.py`: i biomi OpenStreetMap delle terre aggiunte nella v82, senza toccare quelli di prima.
 - `build_biomi.py`, `export_tiles.js`: costruiscono i biomi fissi dai dati di OpenStreetMap.
 - `build_mappe.js`: scrive la mappa già pronta di ogni grandezza (`const MAPPE_FISSE = ...`), così una partita nuova non la ricalcola.
 - `build_popolazione.js`: costruisce la lista delle città vere con i loro abitanti (Natural Earth).
@@ -50,6 +52,7 @@ cat stub.js game.js biomitest.js > _run.js && node _run.js   # i biomi OSM
 cat stub.js game.js mappefissetest.js > _run.js && node _run.js   # la mappa pronta = la mappa calcolata: circa 10 secondi
 cat stub.js game.js cheattest.js > _run.js && node _run.js   # i cheat (v77): circa 10 secondi
 cat stub.js game.js cittaunicatest.js > _run.js && node _run.js   # la città come area unica, fiume compreso (v78): pochi secondi
+cat stub.js game.js medioorientetest.js > _run.js && node _run.js   # il Medio Oriente (v82): pochi secondi
 node cheat_check.js   # il pannello dei cheat nel browser, computer e tablet col tocco (Playwright)
 ```
 
@@ -83,6 +86,16 @@ Nella schermata iniziale (e nella scelta del paese, prima di fondare la capitale
 Ogni modifica alla mappa va verificata con `mappatest.js`, che controlla anche che due partite abbiano la stessa mappa.
 
 ## Versione
+
+v82 (formato di salvataggio invariato, v18; le partite salvate prima si caricano ancora): **tutto il Medio Oriente**.
+
+- La mappa scende fino a 11,5° nord (lo Yemen, il Sahel) e va a est fino a 63,5° (tutto l'Iran): circa il 40% di caselle in più. Le righe nuove sono in fondo e le colonne nuove a destra, quindi l'Europa di prima resta identica, casella per casella (piccola 282×298, media 567×597, gigante 851×896).
+- 37 paesi nuovi, ognuno con il suo impero IA e la sua capitale vera: Siria, Libano, Israele, Palestina, Giordania, Iraq, Iran, Kuwait, Arabia Saudita, Bahrein, Qatar, Emirati Arabi Uniti, Oman e Yemen; e, perché il rettangolo della mappa li prende per forza, il Sahara e il Sahel (Mauritania, Mali, Niger, Ciad, Sudan, Eritrea, Gibuti, Senegal, Gambia, Guinea-Bissau, Burkina Faso, Capo Verde e la parte nord di Etiopia, Nigeria, Guinea, Camerun, Benin, Sudan del Sud e Somalia) e l'Asia centrale (Turkmenistan e la parte ovest di Uzbekistan, Afghanistan e Pakistan). Dove la capitale vera è fuori mappa, il paese comincia da una sua città del nord (Macallè, Kano, Herat, Nukus, Turbat...). Egitto, Libia, Algeria e Marocco si completano a sud, Russia e Kazakistan a est.
+- Città vere da 100.000 abitanti in su (Natural Earth), una ogni sei caselle circa sulla mappa piccola: Teheran, Baghdad, Riad, Gedda, La Mecca, Damasco, Aleppo, Khartum, Mashhad...
+- Biomi OpenStreetMap anche qui: il Sahara e il deserto arabico (dune e pietra), i monti dell'Iran e dello Yemen, la Mesopotamia coltivata, la savana del Sahel.
+- Fiumi: il Nilo intero da Khartum (con il Nilo Azzurro e il Nilo Bianco), il Tigri e l'Eufrate fino allo Shatt al-Arab, il Niger, il Senegal, l'Amu Darya. Laghi: Nasser, Ciad, Tana, il Mar Morto, Urmia. Stretti sempre navigabili: Hormuz e Bab el-Mandeb; il golfo di Aqaba resta mare.
+- Le epoche (dal 1000 al 1960) coprono anche le terre nuove: Buyidi, Selgiuchidi, Ghaznavidi, Ilkhanato, Timuridi, Impero safavide, Impero del Mali e Songhai, Kanem-Bornu, Africa Occidentale Francese, Arabia Saudita...
+- I paesi di prima tengono il loro colore. Le partite salvate prima della v82 si aprono sulla mappa nuova: le terre nuove compaiono con i loro villaggi liberi, senza imperi.
 
 v80 (formato di salvataggio v18, con il campo facoltativo `anno`; i salvataggi di prima si caricano ancora): **si sceglie l'anno, anno per anno, dal 1000 a oggi**, non più solo sei date.
 
