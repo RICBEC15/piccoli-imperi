@@ -1,4 +1,4 @@
-# v83: i biomi delle terre nuove (Medio Oriente, Sahara sotto i 27°, Sahel, Asia centrale), con le
+# v84: i biomi delle terre nuove (Medio Oriente, Sahara sotto i 27°, Sahel, Asia centrale), con le
 # stesse regole di build_biomi.py e gli stessi dati (OpenStreetMap tramite Overture). Le caselle che
 # hanno gia' un bioma in BIOMI non cambiano: si classificano solo quelle che erano mare ('.').
 #

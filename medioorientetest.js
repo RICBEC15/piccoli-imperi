@@ -1,4 +1,4 @@
-// Test del Medio Oriente (v83): la mappa scende fino allo Yemen e al Sahel e va a est fino all'Iran;
+// Test del Medio Oriente (v84): la mappa scende fino allo Yemen e al Sahel e va a est fino all'Iran;
 // 37 paesi nuovi, ognuno con la sua capitale; le partite salvate prima si caricano ancora.
 // uso: cat stub.js game.js medioorientetest.js > _run.js && node _run.js   (circa un minuto)
 function assert(cond, msg) { if (!cond) { console.error('ASSERT FAIL:', msg); process.exit(1); } else console.log('OK:', msg); }
@@ -6,9 +6,9 @@ let seme = 82;
 Math.random = () => { seme = (seme * 1103515245 + 12345) & 0x7fffffff; return seme / 0x7fffffff; };
 
 const MEDIO_ORIENTE = ['SY', 'LB', 'IL', 'PS', 'JO', 'IQ', 'IR', 'KW', 'SA', 'BH', 'QA', 'AE', 'OM', 'YE'];
-const NUOVI = Object.keys(PAESI_V83);
+const NUOVI = Object.keys(PAESI_V84);
 assert(NUOVI.length === 37 && NUOVI.every(cc => COUNTRY_NAMES[cc] && CAPITALI_REALI[cc]), '37 paesi nuovi, tutti con nome e capitale');
-assert(MEDIO_ORIENTE.every(cc => PAESI_V83[cc]), 'ci sono tutti i paesi del Medio Oriente');
+assert(MEDIO_ORIENTE.every(cc => PAESI_V84[cc]), 'ci sono tutti i paesi del Medio Oriente');
 
 setAvversari('tutti');
 for (const taglia of ['piccola', 'media']) {
@@ -77,15 +77,15 @@ const R80 = ROWS - (EXTR - EXTR_V80), C80 = COLS - (EXTE - EXTE_V80);
 const T = rleGriglia(nuovo.terreno, ROWS * COLS);
 const vecchio = JSON.parse(JSON.stringify(nuovo));
 const g = geoSetup(), terr = [];
-const terraNuova = (r, c) => { const t = map[r][c], q = tileLonLat(t, g); return r >= R80 || c >= C80 || terraNuovaV83(t.paeseOggi || t.country, q.lon, q.lat); };
+const terraNuova = (r, c) => { const t = map[r][c], q = tileLonLat(t, g); return r >= R80 || c >= C80 || terraNuovaV84(t.paeseOggi || t.country, q.lon, q.lat); };
 for (let r = 0; r < R80; r++) for (let c = 0; c < C80; c++) terr.push(terraNuova(r, c) ? 'w' : String.fromCharCode(T[r * COLS + c]));
 vecchio.rows = R80; vecchio.cols = C80; vecchio.terreno = rleCodifica(terr);
 vecchio.ponti = vecchio.ponti.filter(([r, c]) => !terraNuova(r, c));
-const diNuovi = s => [s.y && s.y.o, s.u && s.u.o, s.s && s.s.o, s.q && s.q.o].some(o => o && PAESI_V83[o]);
+const diNuovi = s => [s.y && s.y.o, s.u && s.u.o, s.s && s.s.o, s.q && s.q.o].some(o => o && PAESI_V84[o]);
 vecchio.caselle = vecchio.caselle.filter(s => !terraNuova(s.r, s.c) && !diNuovi(s));
-vecchio.imperi = vecchio.imperi.filter(o => !PAESI_V83[o]);
+vecchio.imperi = vecchio.imperi.filter(o => !PAESI_V84[o]);
 for (const o of NUOVI) { delete vecchio.stars[o]; delete vecchio.paesi[o]; }
-vecchio.conquiste = vecchio.conquiste.filter(([r, c, o]) => !terraNuova(r, c) && !PAESI_V83[o]);
+vecchio.conquiste = vecchio.conquiste.filter(([r, c, o]) => !terraNuova(r, c) && !PAESI_V84[o]);
 vecchio.diplomazia = { base: 'pace', rel: {}, fiducia: {}, rifiuto: {} };
 setMapSize('media'); // si parte da un'altra taglia: il caricamento deve ritrovare quella giusta
 assert(applySave(JSON.parse(JSON.stringify(vecchio))), 'un salvataggio della v82 (senza Medio Oriente) si carica');

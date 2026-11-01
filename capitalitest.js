@@ -21,7 +21,7 @@ for (const taglia of ['piccola', 'gigante']) {
   const scarti = tutti.map(cc => [cc, scarto(cc)]).sort((a, b) => b[1] - a[1]);
   console.log(`  ${taglia}: le capitali più lontane dal punto vero (in caselle):`, scarti.slice(0, 5).map(([cc, d]) => `${cc} ${d.toFixed(1)}`).join(', '));
   // il punto vero può cadere su un fiume, in mare o su un villaggio: si sposta di poco
-  // v83: Gibuti sta proprio sul bordo sud della mappa (11,6° N): li' si concede una casella in piu'
+  // v84: Gibuti sta proprio sul bordo sud della mappa (11,6° N): li' si concede una casella in piu'
   const troppo = scarti.filter(([cc, d]) => d > (cc === 'DJ' ? 4 : 3));
   assert(!troppo.length, `${taglia}: tutte le ${tutti.length} capitali entro 3 caselle dal punto vero (Gibuti, sul bordo, entro 4)`);
   // i microstati (Monaco, San Marino, Malta e il Liechtenstein sulla mappa piccola)

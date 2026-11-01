@@ -15,14 +15,14 @@ In locale: apri `piccoli_imperi.html` nel browser con un doppio clic. Non serve 
 - `stub.js`, `shiptest.js`, `savetest.js`, `playtest.js`, `aitest.js`, `paesitest.js`, `imperitest.js`, `difficoltatest.js`, `mappatest.js`, `diplotest.js`, `conquistatest.js`, `capitalitest.js`, `paesinuovitest.js`, `microstatitest.js`, `vaticanotest.js`, `popolazionetest.js`, `biomitest.js`, `epochetest.js`, `browser_check.js`, `mobile_check.js`, `pantest.js`, `conquista_check.js`, `citta_check.js`, `unitatest.js`, `stabilita_check.js`, `mappefissetest.js`, `caricamento_check.js`, `cheattest.js`, `cheat_check.js`, `capitaletest.js`, `capitale_check.js`, `anno_check.js`, `popstoricatest.js`, `popstorica_check.js`, `medioorientetest.js`: test automatici (`mobile_check.js` prova il gioco su un iPhone emulato con Playwright, `pantest.js` lo spostamento nella mappa col mouse, le frecce e il dito).
 - `build_russia.js`: script che ha estratto il confine della Russia dal dataset Natural Earth.
 - `build_paesi_nord.py`: estrae da Natural Earth i confini dei paesi aggiunti nella v65 (`POLY_NORD`, `SEMI_NORD`).
-- `build_paesi_est.py`: estrae da Natural Earth i confini del Medio Oriente, del Sahel e dell'Asia centrale (v83: `POLY_EST`, `SEMI_EST`).
-- `build_biomi_est.py`: i biomi OpenStreetMap delle terre aggiunte nella v83, senza toccare quelli di prima.
+- `build_paesi_est.py`: estrae da Natural Earth i confini del Medio Oriente, del Sahel e dell'Asia centrale (v84: `POLY_EST`, `SEMI_EST`).
+- `build_biomi_est.py`: i biomi OpenStreetMap delle terre aggiunte nella v84, senza toccare quelli di prima.
 - `build_biomi.py`, `export_tiles.js`: costruiscono i biomi fissi dai dati di OpenStreetMap.
 - `correggi_biomi.py` (v82): controlla e corregge i biomi con i dati da satellite (ESA WorldCover) e il modello del terreno (Copernicus DEM).
 - `build_mappe.js`: scrive la mappa già pronta di ogni grandezza (`const MAPPE_FISSE = ...`), così una partita nuova non la ricalcola.
 - `build_popolazione.js`: costruisce la lista delle città vere con i loro abitanti (Natural Earth).
 - `build_popolazione_storica.py`: costruisce gli abitanti di ogni città negli anni dal 1000 a oggi (`POP_STORICA`, v81).
-- `build_epoche.py`: costruisce gli stati storici di ogni epoca (con `export_tiles.js`).
+- `build_epoche.py`: costruisce gli stati storici di ogni epoca (con `export_tiles.js`; dalla v81 anche `epoche_cshapes.py`, i confini esatti dal 1886, e `eventi_epoche.py`, i fatti storici con la data).
 - `ISTRUZIONI_MIGRAZIONE.md`: note di sviluppo, storia delle ultime versioni e istruzioni dettagliate.
 
 ## Test
@@ -34,7 +34,7 @@ cat stub.js game.js savetest.js > _run.js && node _run.js
 cat stub.js game.js playtest.js > _run.js && node _run.js
 cat stub.js game.js paesitest.js > _run.js && node _run.js
 cat stub.js game.js imperitest.js > _run.js && node _run.js   # tutti i paesi contro tutti: circa 30 secondi
-cat stub.js game.js epochetest.js > _run.js && node _run.js   # epoche e scelta dell'anno (v80): circa un minuto
+cat stub.js game.js epochetest.js > _run.js && node _run.js   # epoche e scelta dell'anno (v80, v81): circa due minuti
 node anno_check.js   # la scelta dell'anno nel browser, computer e tablet (v80)
 cat stub.js game.js aitest.js > _run.js && node _run.js   # IA: 150 turni, circa un minuto
 cat stub.js game.js difficoltatest.js > _run.js && node _run.js   # difficoltà IA: circa 40 secondi
@@ -56,7 +56,7 @@ cat stub.js game.js biomitest.js > _run.js && node _run.js   # i biomi OSM
 cat stub.js game.js mappefissetest.js > _run.js && node _run.js   # la mappa pronta = la mappa calcolata: circa 10 secondi
 cat stub.js game.js cheattest.js > _run.js && node _run.js   # i cheat (v77): circa 10 secondi
 cat stub.js game.js cittaunicatest.js > _run.js && node _run.js   # la città come area unica, fiume compreso (v78): pochi secondi
-cat stub.js game.js medioorientetest.js > _run.js && node _run.js   # il Medio Oriente (v83): pochi secondi
+cat stub.js game.js medioorientetest.js > _run.js && node _run.js   # il Medio Oriente (v84): pochi secondi
 node cheat_check.js   # il pannello dei cheat nel browser, computer e tablet col tocco (Playwright)
 ```
 
@@ -104,15 +104,22 @@ Ogni modifica alla mappa va verificata con `mappatest.js`, che controlla anche c
 
 ## Versione
 
-v83 (formato di salvataggio invariato, v18; le partite salvate prima si caricano ancora): **tutto il Medio Oriente**.
+v84 (formato di salvataggio invariato, v18; le partite salvate prima si caricano ancora): **tutto il Medio Oriente**.
 
 - La mappa scende fino a 11,5° nord (lo Yemen, il Sahel) e va a est fino a 63,5° (tutto l'Iran): circa il 40% di caselle in più. Le righe nuove sono in fondo e le colonne nuove a destra, quindi l'Europa di prima resta identica, casella per casella (piccola 282×298, media 567×597, gigante 851×896).
 - 37 paesi nuovi, ognuno con il suo impero IA e la sua capitale vera: Siria, Libano, Israele, Palestina, Giordania, Iraq, Iran, Kuwait, Arabia Saudita, Bahrein, Qatar, Emirati Arabi Uniti, Oman e Yemen; e, perché il rettangolo della mappa li prende per forza, il Sahara e il Sahel (Mauritania, Mali, Niger, Ciad, Sudan, Eritrea, Gibuti, Senegal, Gambia, Guinea-Bissau, Burkina Faso, Capo Verde e la parte nord di Etiopia, Nigeria, Guinea, Camerun, Benin, Sudan del Sud e Somalia) e l'Asia centrale (Turkmenistan e la parte ovest di Uzbekistan, Afghanistan e Pakistan). Dove la capitale vera è fuori mappa, il paese comincia da una sua città del nord (Macallè, Kano, Herat, Nukus, Turbat...). Egitto, Libia, Algeria e Marocco si completano a sud, Russia e Kazakistan a est.
 - Città vere da 100.000 abitanti in su (Natural Earth), una ogni sei caselle circa sulla mappa piccola: Teheran, Baghdad, Riad, Gedda, La Mecca, Damasco, Aleppo, Khartum, Mashhad...
 - Biomi OpenStreetMap anche qui: il Sahara e il deserto arabico (dune e pietra), i monti dell'Iran e dello Yemen, la Mesopotamia coltivata, la savana del Sahel.
 - Fiumi: il Nilo intero da Khartum (con il Nilo Azzurro e il Nilo Bianco), il Tigri e l'Eufrate fino allo Shatt al-Arab, il Niger, il Senegal, l'Amu Darya. Laghi: Nasser, Ciad, Tana, il Mar Morto, Urmia. Stretti sempre navigabili: Hormuz e Bab el-Mandeb; il golfo di Aqaba resta mare.
-- Le epoche (dal 1000 al 1960) coprono anche le terre nuove: Buyidi, Selgiuchidi, Ghaznavidi, Ilkhanato, Timuridi, Impero safavide, Impero del Mali e Songhai, Kanem-Bornu, Africa Occidentale Francese, Arabia Saudita...
-- I paesi di prima tengono il loro colore. Le partite salvate prima della v83 si aprono sulla mappa nuova: le terre nuove compaiono con i loro villaggi liberi, senza imperi.
+- Le epoche coprono anche le terre nuove: fino al 1885 Buyidi, Selgiuchidi, Ghaznavidi, Ilkhanato, Timuridi, Impero safavide, Impero del Mali e Songhai, Kanem-Bornu...; dal 1886 i confini esatti di CShapes (Persia, Iraq britannico, Arabia Saudita, Yemen, Africa occidentale francese, Nigeria britannica...).
+- I paesi di prima tengono il loro colore. Le partite salvate prima della v84 si aprono sulla mappa nuova: le terre nuove compaiono con i loro villaggi liberi, senza imperi.
+
+v83 (formato di salvataggio invariato, v18): **la mappa ha i confini veri dell'anno scelto**, non quelli di una data vicina.
+
+- Dal 1886 al 2007 i confini sono quelli ufficiali di ogni anno, da CShapes 2.0 (colonie comprese; nella Seconda guerra mondiale niente occupazioni, solo i confini ufficiali). Dal 2008 gli stati di oggi.
+- Prima del 1886, sopra le istantanee di historical-basemaps, ci sono 99 fatti storici con la data (`eventi_epoche.py`): 1453 Costantinopoli ottomana, 1492 Granada, 1707 Gran Bretagna, 1772-1795 spartizioni della Polonia, 1861 Regno d'Italia, 1871 Impero tedesco... I loro confini sono per zone intere, quindi approssimativi. Sotto l'anno si legge l'ultimo cambio: «Anno 1856 · Il Congresso di Vienna (ultimo cambio nel 1852: nasce il Secondo Impero francese)».
+- Il file resta leggero (2,4 MB): per i fatti e per molti anni si scrivono solo le caselle che cambiano.
+- Per rifare i dati: istruzioni in testa a `build_epoche.py` (con `epoche_cshapes.py` e `eventi_epoche.py`).
 
 v82: **i biomi controllati e corretti con i dati da satellite**. OpenStreetMap in molte zone è incompleto: ogni casella delle tre mappe è stata confrontata con le immagini da satellite ESA WorldCover 2021 e con il modello del terreno Copernicus, e circa una casella di terra su quattro è cambiata (gigante: 65.499 su 265.157).
 

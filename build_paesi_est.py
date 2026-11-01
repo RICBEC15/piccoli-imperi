@@ -1,4 +1,4 @@
-# Costruisce i confini del Medio Oriente e delle terre intorno (v83): la mappa si allarga a sud
+# Costruisce i confini del Medio Oriente e delle terre intorno (v84): la mappa si allarga a sud
 # fino a 11,5° N (lo Yemen, il Sahel) e a est fino a 63,5° E (l'Iran, l'Asia centrale).
 # Scrive nel gioco "const POLY_EST = ..." e "const SEMI_EST = ...".
 #

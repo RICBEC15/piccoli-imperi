@@ -1,6 +1,7 @@
-# Costruisce gli stati storici delle epoche di Piccoli Imperi: istantanee dal 1000 al 1960
-# (v80: 1000 1100 1200 1300 1400 1500 1530 1600 1650 1700 1715 1783 1800 1815 1880 1900 1914 1920
-# 1930 1938 1945 1960); nel gioco si sceglie un anno qualsiasi e vale l'istantanea precedente.
+# Costruisce gli stati storici delle epoche di Piccoli Imperi. Fino al 1885: istantanee di
+# historical-basemaps (1000 1100 1200 1300 1400 1500 1530 1600 1650 1700 1715 1783 1800 1815 1880),
+# nel gioco vale l'ultima non successiva all'anno scelto. Dal 1886 al 2007 (v83): i confini
+# ufficiali di CShapes 2.0, anno per anno (vedi epoche_cshapes.py); dal 2008 gli stati di oggi.
 #
 # Fonte: historical-basemaps di Andre Ourednik (https://github.com/aourednik/historical-basemaps),
 # un GeoJSON per anno con i confini degli stati del mondo. Licenza GPL-3.0: i dati derivati
@@ -8,8 +9,11 @@
 #
 # Passi:
 #   1) scarica i GeoJSON in una cartella DIR:
-#        for y in 1000 1100 1200 1300 1400 1500 1530 1600 1650 1700 1715 1783 1800 1815 1880 1900 1914 1920 1930 1938 1945 1960; do curl -s -o DIR/world_$y.geojson \
+#        for y in 1000 1100 1200 1300 1400 1500 1530 1600 1650 1700 1715 1783 1800 1815 1880; do curl -s -o DIR/world_$y.geojson \
 #          https://raw.githubusercontent.com/aourednik/historical-basemaps/master/geojson/world_$y.geojson; done
+#      e nella stessa cartella CShapes (dal 1886):
+#        curl -s -o DIR/cshapes_2_gw.topojson.xz \
+#          https://raw.githubusercontent.com/cran/cshapes/master/inst/extdata/cshapes_2_gw.topojson.xz
 #   2) esporta le caselle di terra (fiumi compresi) di ogni taglia:
 #        cat stub.js game.js export_tiles.js > _run.js && FIUMI=1 OUT=tiles.json node _run.js
 #   3) python3 build_epoche.py DIR tiles.json piccoli_imperi.html [ANTEPRIME]
@@ -140,67 +144,6 @@ EPOCHE = {
       'Hohenzollern': 'GER', 'Persia': 'PER', 'Finnmark': 'DAN',
     },
     'correzioni': {},
-  },
-  '1914': {
-    'titolo': 'La vigilia della Grande Guerra',
-    'stati': {
-      'RUS': ('Impero russo', '👑'), 'ALG': ('Algeria francese', '🏰'), 'OTT': ('Impero ottomano', '🌙'),
-      'LIB': ('Libia italiana', '🏰'), 'FRA': ('Repubblica francese', '🏛️'),
-      'AUH': ('Impero austro-ungarico', '👑'), 'SPA': ('Regno di Spagna', '🏰'),
-      'GER': ('Impero tedesco', '👑'), 'GBR': ('Regno Unito', '👑'), 'EGI': ("Sultanato d'Egitto", '🌙'),
-      'MAR': ('Marocco francese', '🌙'), 'ITA': ("Regno d'Italia", '🏰'), 'ROM': ('Regno di Romania', '🏰'),
-      'BUL': ('Regno di Bulgaria', '🏰'), 'TUN': ('Tunisia francese', '🌙'), 'SER': ('Regno di Serbia', '🏰'),
-      'GRE': ('Regno di Grecia', '🏰'), 'POR': ('Repubblica portoghese', '🏛️'), 'SVI': ('Svizzera', '🏛️'),
-      'OLA': ('Regno dei Paesi Bassi', '🏰'), 'BEL': ('Regno del Belgio', '🏰'),
-      'MSP': ('Marocco spagnolo', '🏰'), 'ALB': ("Principato d'Albania", '🏰'),
-      'MON': ('Regno del Montenegro', '🏰'), 'NOR': ('Regno di Norvegia', '🏰'),
-      'LUX': ('Granducato di Lussemburgo', '🏰'), 'PER': ('Persia', '🌙'),
-      'SWE': ('Regno di Svezia', '🏰'), 'DAN': ('Regno di Danimarca', '🏰'),
-    },
-    'nomi': {
-      # Georgia, Finlandia e Azerbaigian nel 1914 erano parte dell'Impero russo
-      'Russian Empire': 'RUS', 'Georgia': 'RUS', 'Finland': 'RUS', 'Azerbaijan': 'RUS',
-      'Algeria': 'ALG', 'Ottoman Empire': 'OTT', 'Libya': 'LIB', 'France': 'FRA',
-      'Austro-Hungarian Empire': 'AUH', 'Spain': 'SPA', 'German Empire': 'GER',
-      'United Kingdom of Great Britain and Ireland': 'GBR', 'Egypt': 'EGI', 'Morocco': 'MAR',
-      'Kingdom of Italy': 'ITA', 'Romania': 'ROM', 'Bulgaria': 'BUL', 'Tunisia': 'TUN', 'Serbia': 'SER',
-      'Greece': 'GRE', 'Portugal': 'POR', 'Switzerland': 'SVI', 'Netherlands': 'OLA', 'Belgium': 'BEL',
-      'Spanish Morocco': 'MSP', 'Spanish Sahara': 'MSP', 'Albania': 'ALB', 'Montenegro': 'MON',
-      'Norway': 'NOR', 'Luxembourg': 'LUX', 'Persia': 'PER',
-      # l'Islanda nel 1914 era parte del Regno di Danimarca, Malta dell'Impero britannico
-      'Sweden': 'SWE', 'Denmark': 'DAN', 'Iceland': 'DAN', 'Armenia': 'RUS', 'Malta': 'GBR',
-    },
-    'correzioni': {},
-  },
-  '1938': {
-    'titolo': 'La vigilia della Seconda guerra mondiale',
-    'stati': {
-      'URS': ('Unione Sovietica', '🚩'), 'ALG': ('Algeria francese', '🏰'), 'LIB': ('Libia italiana', '🏰'),
-      'FRA': ('Repubblica francese', '🏛️'), 'GER': ('Germania', '🏰'), 'SPA': ('Spagna', '🏰'),
-      'TUR': ('Repubblica di Turchia', '🏛️'), 'MAR': ('Marocco francese', '🌙'),
-      'EGI': ("Regno d'Egitto", '🏰'), 'ROM': ('Regno di Romania', '🏰'), 'ITA': ("Regno d'Italia", '🏰'),
-      'GBR': ('Regno Unito', '👑'), 'JUG': ('Regno di Jugoslavia', '🏰'), 'TUN': ('Tunisia francese', '🌙'),
-      'GRE': ('Regno di Grecia', '🏰'), 'BUL': ('Regno di Bulgaria', '🏰'), 'POL': ('Polonia', '🏛️'),
-      'SIR': ('Siria francese', '🏰'), 'UNG': ("Regno d'Ungheria", '🏰'), 'POR': ('Portogallo', '🏛️'),
-      'IRL': ('Irlanda', '🏛️'), 'FIN': ('Finlandia', '🏛️'), 'OLA': ('Regno dei Paesi Bassi', '🏰'),
-      'SVI': ('Svizzera', '🏛️'), 'BEL': ('Regno del Belgio', '🏰'), 'ALB': ("Regno d'Albania", '🏰'),
-      'CEC': ('Cecoslovacchia', '🏛️'), 'NOR': ('Regno di Norvegia', '🏰'),
-      'LUX': ('Granducato di Lussemburgo', '🏰'),
-      'SWE': ('Regno di Svezia', '🏰'), 'DAN': ('Regno di Danimarca', '🏰'), 'EST': ('Estonia', '🏛️'),
-      'LET': ('Lettonia', '🏛️'), 'LIT': ('Lituania', '🏛️'),
-    },
-    'nomi': {
-      'USSR': 'URS', 'Armenia': 'URS', 'Algeria (France)': 'ALG', 'Libya': 'LIB', 'France': 'FRA',
-      'Germany': 'GER', 'Spain': 'SPA', 'Spanish Sahara': 'SPA', 'Turkey': 'TUR',
-      'Morocco (France)': 'MAR', 'Egypt': 'EGI', 'Romania': 'ROM', 'Italy': 'ITA', 'United Kingdom': 'GBR',
-      'Yugoslavia': 'JUG', 'Tunisia': 'TUN', 'Greece': 'GRE', 'Bulgaria': 'BUL', 'Poland': 'POL',
-      'Syria (France)': 'SIR', 'Hungary': 'UNG', 'Portugal': 'POR', 'Ireland': 'IRL', 'Finland': 'FIN',
-      'Netherlands': 'OLA', 'Switzerland': 'SVI', 'Belgium': 'BEL', 'Albania': 'ALB',
-      'Czechoslovakia': 'CEC', 'Norway': 'NOR', 'Luxembourg': 'LUX',
-      'Sweden': 'SWE', 'Denmark': 'DAN', 'Estonia': 'EST', 'Latvia': 'LET', 'Lithuania': 'LIT',
-    },
-    # nei dati la Turchia si ferma a 39.4°E: il resto e' "Armenia" sovietica o "Siria"
-    'correzioni': {'TR': 'TUR'},
   },
   # v80: altre istantanee, cosi' ogni anno scelto nel menu ha i confini piu' vicini
   '1100': {
@@ -575,154 +518,10 @@ EPOCHE = {
     },
     'correzioni': {},
   },
-  '1900': {
-    'titolo': 'La Belle Époque',
-    'stati': {
-      'RUS': ('Impero russo', '👑'), 'OTT': ('Impero ottomano', '🌙'), 'SVN': ('Svezia e Norvegia', '🏰'),
-      'AUH': ('Impero austro-ungarico', '👑'), 'GER': ('Impero tedesco', '👑'), 'FRA': ('Repubblica francese', '🏛️'),
-      'SPA': ('Regno di Spagna', '🏰'), 'GBR': ('Regno Unito', '👑'), 'ALG': ('Algeria francese', '🏰'),
-      'MAR': ('Sultanato del Marocco', '🌙'), 'EGI': ("Chedivato d'Egitto", '🌙'), 'ITA': ("Regno d'Italia", '🏰'),
-      'ROM': ('Regno di Romania', '🏰'), 'ISL': ('Islanda danese', '🏰'), 'PER': ('Persia', '🌙'),
-      'TUN': ('Tunisia francese', '🌙'), 'POR': ('Regno di Portogallo', '🏰'), 'BUL': ('Principato di Bulgaria', '🏰'),
-      'GRE': ('Regno di Grecia', '🏰'), 'DAN': ('Regno di Danimarca', '🏰'), 'SER': ('Regno di Serbia', '🏰'),
-      'BOS': ('Bosnia-Erzegovina', '🏰'), 'OLA': ('Regno dei Paesi Bassi', '🏰'), 'SVI': ('Svizzera', '🏛️'),
-      'BEL': ('Regno del Belgio', '🏰'), 'MON': ('Principato del Montenegro', '🏰'),
-    },
-    'nomi': {
-      'Malta': 'GBR',
-      'Russian Empire': 'RUS', 'Ottoman Empire': 'OTT', 'Sweden–Norway': 'SVN', 'Austria Hungary': 'AUH',
-      'Germany': 'GER', 'France': 'FRA', 'Spain': 'SPA', 'Guanches': 'SPA',
-      'United Kingdom of Great Britain and Ireland': 'GBR', 'Algeria': 'ALG', 'Morocco': 'MAR', 'Egypt': 'EGI',
-      'Italy': 'ITA', 'Romania': 'ROM', 'Iceland': 'ISL', 'Persia': 'PER', 'Tunisia': 'TUN', 'Portugal': 'POR',
-      'Bulgaria': 'BUL', 'Greece': 'GRE', 'Denmark': 'DAN', 'Serbia': 'SER', 'Bosnia-Herzegovina': 'BOS',
-      'Netherlands': 'OLA', 'Switzerland': 'SVI', 'Belgium': 'BEL', 'Montenegro': 'MON', 'Luxembourg': 'OLA',
-    },
-    'correzioni': {},
-  },
-  '1920': {
-    'titolo': 'Il primo dopoguerra',
-    'stati': {
-      'RSS': ('Russia sovietica', '🚩'), 'ALG': ('Algeria francese', '🏰'), 'SWE': ('Regno di Svezia', '🏰'),
-      'LIB': ('Libia italiana', '🏰'), 'FRA': ('Repubblica francese', '🏛️'), 'FIN': ('Finlandia', '🏛️'),
-      'NOR': ('Regno di Norvegia', '🏰'), 'GER': ('Repubblica di Weimar', '🏛️'), 'ITA': ("Regno d'Italia", '🏰'),
-      'UCR': ('Ucraina', '🏛️'), 'SPA': ('Regno di Spagna', '🏰'), 'POL': ('Polonia', '🏛️'),
-      'GBR': ('Regno Unito', '👑'), 'MAR': ('Marocco francese', '🌙'), 'EGI': ("Sultanato d'Egitto", '🌙'),
-      'ROM': ('Regno di Romania', '🏰'), 'JUG': ('Regno dei Serbi, Croati e Sloveni', '🏰'),
-      'OTT': ('Sultanato ottomano', '🌙'), 'ISL': ("Regno d'Islanda", '🏰'), 'BIE': ('Bielorussia', '🏛️'),
-      'GRE': ('Regno di Grecia', '🏰'), 'CEC': ('Cecoslovacchia', '🏛️'), 'TUN': ('Tunisia francese', '🌙'),
-      'ARM': ('Repubblica di Armenia', '🏛️'), 'BUL': ('Regno di Bulgaria', '🏰'), 'AZE': ('Azerbaigian', '🏛️'),
-      'SIR': ('Siria francese', '🏰'), 'UNG': ("Regno d'Ungheria", '🏰'), 'AUT': ('Repubblica d\'Austria', '🏛️'),
-      'LET': ('Lettonia', '🏛️'), 'POR': ('Repubblica portoghese', '🏛️'), 'LIT': ('Lituania', '🏛️'),
-      'GEO': ('Georgia', '🏛️'), 'EST': ('Estonia', '🏛️'), 'DAN': ('Regno di Danimarca', '🏰'),
-      'OLA': ('Regno dei Paesi Bassi', '🏰'), 'SVI': ('Svizzera', '🏛️'), 'BEL': ('Regno del Belgio', '🏰'),
-      'RSU': ('Russia del Sud (i Bianchi)', '🏰'), 'ALB': ("Principato d'Albania", '🏰'),
-      'LUX': ('Granducato di Lussemburgo', '🏰'),
-    },
-    'nomi': {
-      'USSR': 'RSS', 'Algeria': 'ALG', 'Sweden': 'SWE', 'Libya (IT)': 'LIB', 'France': 'FRA', 'Finland': 'FIN',
-      'Norway': 'NOR', 'Germany': 'GER', 'East Prussia': 'GER', 'Italy': 'ITA', 'Ukraine': 'UCR',
-      'Spain': 'SPA', 'Spanish Sahara': 'SPA', 'Guanches': 'SPA', 'Poland': 'POL',
-      'United Kingdom of Great Britain and Ireland': 'GBR', 'Morocco': 'MAR', 'Egypt': 'EGI', 'Romania': 'ROM',
-      'Yugoslavia': 'JUG', 'Ottoman Sultanate': 'OTT', 'Iceland': 'ISL', 'White Russia': 'BIE', 'Greece': 'GRE',
-      'Czechoslovakia': 'CEC', 'Tunisia': 'TUN', 'Armenia': 'ARM', 'Bulgaria': 'BUL', 'Azerbaijan': 'AZE',
-      'Syria (France)': 'SIR', 'Hungary': 'UNG', 'Austria': 'AUT', 'Latvia': 'LET', 'Portugal': 'POR',
-      'Lithuania': 'LIT', 'Georgia': 'GEO', 'Estonia': 'EST', 'Denmark': 'DAN', 'Netherlands': 'OLA',
-      'Switzerland': 'SVI', 'Belgium': 'BEL', 'South Russia': 'RSU', 'Albania': 'ALB', 'Luxembourg': 'LUX',
-    },
-    'correzioni': {},
-  },
-  '1930': {
-    'titolo': 'Tra le due guerre',
-    'stati': {
-      'URS': ('Unione Sovietica', '🚩'), 'ALG': ('Algeria francese', '🏰'), 'SWE': ('Regno di Svezia', '🏰'),
-      'LIB': ('Libia italiana', '🏰'), 'FRA': ('Repubblica francese', '🏛️'), 'FIN': ('Finlandia', '🏛️'),
-      'NOR': ('Regno di Norvegia', '🏰'), 'GER': ('Repubblica di Weimar', '🏛️'), 'TUR': ('Repubblica di Turchia', '🏛️'),
-      'SPA': ('Regno di Spagna', '🏰'), 'POL': ('Polonia', '🏛️'), 'GBR': ('Regno Unito', '👑'),
-      'IRL': ('Stato libero d\'Irlanda', '🏛️'), 'MAR': ('Marocco francese', '🌙'), 'EGI': ("Regno d'Egitto", '🏰'),
-      'ITA': ("Regno d'Italia", '🏰'), 'ROM': ('Regno di Romania', '🏰'), 'JUG': ('Regno di Jugoslavia', '🏰'),
-      'ISL': ("Regno d'Islanda", '🏰'), 'CEC': ('Cecoslovacchia', '🏛️'), 'TUN': ('Tunisia francese', '🌙'),
-      'GRE': ('Repubblica ellenica', '🏛️'), 'BUL': ('Regno di Bulgaria', '🏰'), 'UNG': ("Regno d'Ungheria", '🏰'),
-      'AUT': ("Repubblica d'Austria", '🏛️'), 'LET': ('Lettonia', '🏛️'), 'POR': ('Portogallo', '🏛️'),
-      'LIT': ('Lituania', '🏛️'), 'EST': ('Estonia', '🏛️'), 'DAN': ('Regno di Danimarca', '🏰'),
-      'OLA': ('Regno dei Paesi Bassi', '🏰'), 'SVI': ('Svizzera', '🏛️'), 'BEL': ('Regno del Belgio', '🏰'),
-      'ALB': ("Regno d'Albania", '🏰'), 'LUX': ('Granducato di Lussemburgo', '🏰'),
-    },
-    'nomi': {
-      'Dodecanese Islands': 'ITA', 'Danzig': 'POL',
-      # nei dati del 1930 l'Unione Sovietica si chiama "White Russia" e la Turchia orientale "Armenia"
-      'White Russia': 'URS', 'USSR': 'URS', 'Azerbaijan': 'URS', 'Georgia': 'URS', 'Algeria': 'ALG',
-      'Sweden': 'SWE', 'Libya (IT)': 'LIB', 'France': 'FRA', 'Finland': 'FIN', 'Norway': 'NOR',
-      'Germany': 'GER', 'East Prussia': 'GER', 'Republic of Turkey': 'TUR', 'Armenia': 'TUR',
-      'Syria (France)': 'TUR', 'Spain': 'SPA', 'Spanish Sahara': 'SPA', 'Guanches': 'SPA', 'Poland': 'POL',
-      'United Kingdom of Great Britain and Ireland': 'GBR', 'Morocco': 'MAR', 'Egypt': 'EGI', 'Italy': 'ITA',
-      'Romania': 'ROM', 'Yugoslavia': 'JUG', 'Iceland': 'ISL', 'Czechoslovakia': 'CEC', 'Tunisia': 'TUN',
-      'Greece': 'GRE', 'Bulgaria': 'BUL', 'Hungary': 'UNG', 'Austria': 'AUT', 'Latvia': 'LET',
-      'Portugal': 'POR', 'Lithuania': 'LIT', 'Estonia': 'EST', 'Denmark': 'DAN', 'Netherlands': 'OLA',
-      'Switzerland': 'SVI', 'Belgium': 'BEL', 'Albania': 'ALB', 'Luxembourg': 'LUX',
-    },
-    # l'Irlanda dal 1922 e' lo Stato libero; nel 1930 Siria e Armenia dei dati sono Turchia
-    'correzioni': {'IE': 'IRL', 'TR': 'TUR'},
-  },
-  '1945': {
-    'titolo': 'La fine della Seconda guerra mondiale',
-    'stati': {
-      'URS': ('Unione Sovietica', '🚩'), 'ALG': ('Algeria francese', '🏰'), 'TUR': ('Repubblica di Turchia', '🏛️'),
-      'SWE': ('Regno di Svezia', '🏰'), 'FRA': ('Repubblica francese', '🏛️'), 'FIN': ('Finlandia', '🏛️'),
-      'NOR': ('Regno di Norvegia', '🏰'), 'SPA': ('Spagna', '🏰'), 'POL': ('Polonia', '🏛️'),
-      'MAR': ('Marocco francese', '🌙'), 'EGI': ("Regno d'Egitto", '🏰'), 'ITA': ("Regno d'Italia", '🏰'),
-      'LIB': ('Libia sotto gli Alleati', '🏰'), 'GBR': ('Regno Unito', '👑'), 'JUG': ('Jugoslavia', '🚩'),
-      'ROM': ('Regno di Romania', '🏰'), 'ISL': ('Islanda', '🏛️'), 'CEC': ('Cecoslovacchia', '🏛️'),
-      'GSO': ('Germania, zona sovietica', '🚩'), 'TUN': ('Tunisia francese', '🌙'),
-      'GUK': ('Germania, zona britannica', '🏰'), 'BUL': ('Regno di Bulgaria', '🏰'),
-      'GUS': ('Germania, zona americana', '🏛️'), 'GRE': ('Regno di Grecia', '🏰'), 'UNG': ('Ungheria', '🏛️'),
-      'AUT': ('Austria', '🏛️'), 'POR': ('Portogallo', '🏛️'), 'IRL': ('Irlanda', '🏛️'),
-      'DAN': ('Regno di Danimarca', '🏰'), 'OLA': ('Regno dei Paesi Bassi', '🏰'), 'SVI': ('Svizzera', '🏛️'),
-      'GFR': ('Germania, zona francese', '🏛️'), 'BEL': ('Regno del Belgio', '🏰'), 'ALB': ('Albania', '🚩'),
-      'LUX': ('Granducato di Lussemburgo', '🏰'),
-    },
-    'nomi': {
-      'USSR': 'URS', 'Algeria': 'ALG', 'Turkey': 'TUR', 'Sweden': 'SWE', 'France': 'FRA', 'Finland': 'FIN',
-      'Norway': 'NOR', 'Spain': 'SPA', 'Western Sahara': 'SPA', 'Guanches': 'SPA', 'Poland': 'POL',
-      'Morocco': 'MAR', 'Egypt': 'EGI', 'Italy': 'ITA', 'Cyraneica (UK Lybia)': 'LIB',
-      'Tripolitana (UK Lybia)': 'LIB', 'Fezzan (Frech Lybia)': 'LIB', 'United Kingdom': 'GBR',
-      'Yugoslavia': 'JUG', 'Romania': 'ROM', 'Iceland': 'ISL', 'Czechoslovakia': 'CEC',
-      'Germany (Soviet)': 'GSO', 'Tunisia': 'TUN', 'Germany (UK)': 'GUK', 'Bulgaria': 'BUL',
-      'Germany (USA)': 'GUS', 'Greece': 'GRE', 'Hungary': 'UNG', 'Austria': 'AUT', 'Portugal': 'POR',
-      'Ireland': 'IRL', 'Denmark': 'DAN', 'Netherlands': 'OLA', 'Switzerland': 'SVI',
-      'Germany (France)': 'GFR', 'Belgium': 'BEL', 'Albania': 'ALB', 'Luxembourg': 'LUX',
-    },
-    'correzioni': {},
-  },
-  '1960': {
-    'titolo': 'La guerra fredda',
-    'stati': {
-      'URS': ('Unione Sovietica', '🚩'), 'ALG': ('Algeria francese', '🏰'), 'TUR': ('Repubblica di Turchia', '🏛️'),
-      'SWE': ('Regno di Svezia', '🏰'), 'LIB': ('Regno di Libia', '🏰'), 'FRA': ('Repubblica francese', '🏛️'),
-      'FIN': ('Finlandia', '🏛️'), 'NOR': ('Regno di Norvegia', '🏰'), 'SPA': ('Spagna', '🏰'),
-      'POL': ('Polonia', '🚩'), 'MAR': ('Regno del Marocco', '🌙'), 'EGI': ('Repubblica Araba Unita', '🏛️'),
-      'ITA': ('Repubblica italiana', '🏛️'), 'GBR': ('Regno Unito', '👑'), 'RFT': ('Germania Ovest', '🏛️'),
-      'JUG': ('Jugoslavia', '🚩'), 'ROM': ('Romania', '🚩'), 'ISL': ('Islanda', '🏛️'), 'CEC': ('Cecoslovacchia', '🚩'),
-      'DDR': ('Germania Est', '🚩'), 'TUN': ('Tunisia', '🏛️'), 'BUL': ('Bulgaria', '🚩'), 'GRE': ('Regno di Grecia', '🏰'),
-      'UNG': ('Ungheria', '🚩'), 'AUT': ('Austria', '🏛️'), 'POR': ('Portogallo', '🏛️'), 'IRL': ('Irlanda', '🏛️'),
-      'DAN': ('Regno di Danimarca', '🏰'), 'OLA': ('Regno dei Paesi Bassi', '🏰'), 'SVI': ('Svizzera', '🏛️'),
-      'BEL': ('Regno del Belgio', '🏰'), 'ALB': ('Albania', '🚩'), 'CIP': ('Cipro', '🏛️'),
-      'LUX': ('Granducato di Lussemburgo', '🏰'),
-    },
-    'nomi': {
-      'USSR': 'URS', 'Algeria': 'ALG', 'Turkey': 'TUR', 'Sweden': 'SWE', 'Libya': 'LIB', 'France': 'FRA',
-      'Finland': 'FIN', 'Norway': 'NOR', 'Spain': 'SPA', 'Western Sahara': 'SPA', 'Guanches': 'SPA',
-      'Poland': 'POL', 'Morocco': 'MAR', 'Egypt': 'EGI', 'Italy': 'ITA', 'United Kingdom': 'GBR',
-      'West Germany': 'RFT', 'Yugoslavia': 'JUG', 'Romania': 'ROM', 'Iceland': 'ISL', 'Czechoslovakia': 'CEC',
-      'East Germany': 'DDR', 'Tunisia': 'TUN', 'Bulgaria': 'BUL', 'Greece': 'GRE', 'Hungary': 'UNG',
-      'Austria': 'AUT', 'Portugal': 'POR', 'Ireland': 'IRL', 'Denmark': 'DAN', 'Netherlands': 'OLA',
-      'Switzerland': 'SVI', 'Belgium': 'BEL', 'Albania': 'ALB', 'Cyprus': 'CIP', 'Luxembourg': 'LUX',
-    },
-    'correzioni': {},
-  },
 }
-# v83: gli stati del Medio Oriente, del Sahara, del Sahel e dell'Asia centrale (le terre nuove).
-# Un nome dei dati vale in ogni epoca in cui non e' gia' tradotto; OVERRIDE_V83 lo cambia per epoca.
-NOMI_V83 = {
+# v84: gli stati del Medio Oriente, del Sahara, del Sahel e dell'Asia centrale (le terre nuove).
+# Un nome dei dati vale in ogni epoca in cui non e' gia' tradotto; OVERRIDE_V84 lo cambia per epoca.
+NOMI_V84 = {
     'Ghaznavid Emirate': ('GAZ', 'Emirato ghaznavide', '🌙'), 'Makkura': ('MAK', 'Regno di Makuria', '🏰'),
     'West African cereal farmers': ('AGR', "Agricoltori dell'Africa occidentale", '⛺'),
     'Alwa': ('ALW', 'Regno di Alodia', '🏰'), 'Yemen': ('YEM', 'Yemen', '🌙'), 'Yemen (UK)': ('YEM', 'Yemen', '🌙'),
@@ -782,7 +581,7 @@ NOMI_V83 = {
     'Kong Empire': ('KON', 'Impero di Kong', '🌙'), 'Kong': ('KON', 'Impero di Kong', '🌙'),
     'Arma': ('TIB', 'Pascialato di Timbuctù', '🌙'),
 }
-OVERRIDE_V83 = {
+OVERRIDE_V84 = {
     '1715': {'Senegal': ('SEN', 'Regni wolof', '🏰')},
     '1783': {'Senegal': ('SEN', 'Regni wolof', '🏰')},
     '1800': {'Senegal': ('SEN', 'Regni wolof', '🏰')},
@@ -817,15 +616,15 @@ OVERRIDE_V83 = {
              'Israel': ('ISR', 'Israele', '🏛️'), 'Nigeria': ('NIG', 'Nigeria', '🏛️'),
              'Cameroon': ('CAM', 'Camerun', '🏛️'), 'Benin': ('DAH', 'Dahomey', '🏛️')},
 }
-ITALIANO_V83 = {}  # (anno, nome dei dati) -> (codice, nome italiano, emblema): lo stato si scrive solo se c'e'
+ITALIANO_V84 = {}  # (anno, nome dei dati) -> (codice, nome italiano, emblema): lo stato si scrive solo se c'e'
 for _anno, _E in EPOCHE.items():
-    for _nome, (_cod, _it, _emb) in {**NOMI_V83, **OVERRIDE_V83.get(_anno, {})}.items():
-        if _nome in _E['nomi'] and _nome not in OVERRIDE_V83.get(_anno, {}):
+    for _nome, (_cod, _it, _emb) in {**NOMI_V84, **OVERRIDE_V84.get(_anno, {})}.items():
+        if _nome in _E['nomi'] and _nome not in OVERRIDE_V84.get(_anno, {}):
             continue  # gia' tradotto dalle epoche di prima: resta com'era
         if _cod in _E['stati']:
             continue  # il codice e' gia' di uno stato di quest'epoca: il nome resta senza traduzione
         _E['nomi'][_nome] = _cod
-        ITALIANO_V83[(_anno, _nome)] = (_cod, _it, _emb)
+        ITALIANO_V84[(_anno, _nome)] = (_cod, _it, _emb)
 
 # in ordine di anno: il gioco cerca l'ultima istantanea non successiva all'anno scelto
 EPOCHE = dict(sorted(EPOCHE.items(), key=lambda kv: int(kv[0])))
@@ -883,11 +682,16 @@ def vicino_prevalente(tiles, codici, idx_stato, validi):
     return max(voti, key=voti.get) if voti else None
 
 
-def codifica(rows, cols, tiles, codici, alfabeto):
-    """RLE riga per riga come BIOMI; le caselle di mare non contano (allungano il tratto corrente)"""
+UGUALE = '`'  # v83: "come nella griglia di base" (non e' nell'alfabeto)
+
+
+def codifica(rows, cols, tiles, codici, alfabeto, base=None):
+    """RLE riga per riga come BIOMI; le caselle di mare non contano (allungano il tratto corrente).
+    Con base (i codici di un'altra istantanea) le caselle uguali diventano UGUALE: si scrive
+    solo quello che cambia"""
     grid = [None] * (rows * cols)  # None = mare, non conta
-    for t, c in zip(tiles, codici):
-        grid[t[0] * cols + t[1]] = alfabeto.get(c, '.')
+    for i, (t, c) in enumerate(zip(tiles, codici)):
+        grid[t[0] * cols + t[1]] = UGUALE if base is not None and base[i] == c else alfabeto.get(c, '.')
     out, cur, n = [], None, 0
     for v in grid:
         if v is None:
@@ -924,12 +728,72 @@ def anteprima(path, rows, cols, tiles, codici, stati):
     img.save(path)
 
 
+def fatti_storici(basi, T, fine):
+    """v83: un'istantanea per ogni anno con un fatto storico (eventi_epoche.py), costruita sulla
+    precedente istantanea di historical-basemaps piu' i fatti venuti dopo"""
+    from eventi_epoche import EVENTI
+    anni_base = sorted(int(b[0]) for b in basi)
+    out = []
+    for i, (anno, tit, stati, per_taglia, esatto, _) in enumerate(sorted(basi, key=lambda b: int(b[0]))):
+        a0 = int(anno)
+        a1 = anni_base[i + 1] if i + 1 < len(anni_base) else fine
+        fatti = sorted((e for e in EVENTI if a0 < e[0] < a1), key=lambda e: e[0])
+        codici = {t: list(c) for t, c in per_taglia.items()}
+        stati = dict(stati)
+        per_anno = {}
+        for e in fatti:
+            per_anno.setdefault(e[0], []).append(e)
+        for y in sorted(per_anno):
+            note = []
+            for _, nota, azioni, nuovi in per_anno[y]:
+                stati.update(nuovi)
+                note.append(nota)
+                for az in azioni:
+                    if az[0] == 'nome':
+                        if az[1] in stati:
+                            stati[az[1]] = (az[2], az[3])
+                        continue
+                    _, cod, sc = az
+                    if cod not in stati:
+                        sys.exit(f'{y}: {cod} senza nome')
+                    cambiate = 0
+                    for taglia, M in T.items():
+                        cs = codici[taglia]
+                        for j, t in enumerate(M['tiles']):
+                            if 'paesi' in sc and t[4] not in sc['paesi']:
+                                continue
+                            if 'da' in sc and cs[j] not in sc['da']:
+                                continue
+                            if 'box' in sc:
+                                x0, y0, x1, y1 = sc['box']
+                                if not (x0 <= t[2] <= x1 and y0 <= t[3] <= y1):
+                                    continue
+                            if 'fuori' in sc:
+                                x0, y0, x1, y1 = sc['fuori']
+                                if x0 <= t[2] <= x1 and y0 <= t[3] <= y1:
+                                    continue
+                            if cs[j] != cod:
+                                cs[j] = cod
+                                if taglia == 'piccola':
+                                    cambiate += 1
+                    print(f'{y}: {cambiate} caselle a {cod} ({nota})', file=sys.stderr)
+                    if not cambiate:
+                        print(f'ATTENZIONE {y}: nessuna casella a {cod}', file=sys.stderr)
+            out.append((str(y), tit, dict(stati), {t: list(c) for t, c in codici.items()}, False, '; '.join(note)))
+    return out
+
+
 def main():
+    import os
+    import epoche_cshapes
     src, tiles_path, html_path = sys.argv[1:4]
     prev = sys.argv[4] if len(sys.argv) > 4 else None
     T = json.load(open(tiles_path))
     out = {}
+    lavori = []  # (anno, titolo, stati, codici per taglia, esatto)
     for anno, E in EPOCHE.items():
+        if int(anno) >= epoche_cshapes.ANNO_PRIMO:
+            continue  # v83: dal 1886 i confini esatti di CShapes
         geoms, nomi = leggi_poligoni(f'{src}/world_{anno}.geojson')
         per_taglia = {}
         for taglia, M in T.items():
@@ -946,13 +810,30 @@ def main():
                 else:
                     codici.append('?' + n)
             per_taglia[taglia] = codici
-        # v83: gli stati delle terre nuove presenti sulla mappa (con lo stesso codice vince il nome piu' esteso)
+        # v84: gli stati delle terre nuove presenti sulla mappa (con lo stesso codice vince il nome piu' esteso)
         quanti = {}
         for n in assegna(T['piccola']['tiles'], geoms, nomi):
-            if (anno, n) in ITALIANO_V83: quanti[n] = quanti.get(n, 0) + 1
+            if (anno, n) in ITALIANO_V84: quanti[n] = quanti.get(n, 0) + 1
         for n in sorted(quanti, key=lambda n: quanti[n]):
-            cod, it, emb = ITALIANO_V83[(anno, n)]
+            cod, it, emb = ITALIANO_V84[(anno, n)]
             E['stati'][cod] = (it, emb)
+        lavori.append((anno, E['titolo'], E['stati'], per_taglia, False))
+    lavori = [l + ('',) for l in lavori]
+    lavori += fatti_storici(lavori, T, epoche_cshapes.ANNO_PRIMO)
+    cache = os.environ.get('CSHAPES_CACHE')  # per le prove: i conti di CShapes (lunghi) salvati
+    if cache and os.path.exists(cache):
+        import pickle
+        cs = pickle.load(open(cache, 'rb'))
+    else:
+        cs = epoche_cshapes.istantanee(f'{src}/cshapes_2_gw.topojson.xz', T, assegna)
+        if cache:
+            import pickle
+            pickle.dump(cs, open(cache, 'wb'))
+    lavori += [l + ('',) for l in cs]
+    lavori.sort(key=lambda l: int(l[0]))
+    griglie_viste = {}  # stesse griglie (stessi stati, stesse caselle): si scrivono una volta sola
+    finali, base_storica, base_esatta = {}, None, None
+    for anno, tit, stati, per_taglia, esatto, nota in lavori:
         # gli stati sconosciuti o troppo piccoli (sulla mappa piccola) si uniscono al vicino
         tp, cp = T['piccola']['tiles'], per_taglia['piccola']
         conta = {}
@@ -973,18 +854,49 @@ def main():
                 cs = [dove if x == c else x for x in cs]
             per_taglia[taglia] = cs
             for c in cs:
-                if c and c not in E['stati']:
+                if c and c not in stati:
                     sys.exit(f'{anno}/{taglia}: stato senza nome italiano: {c}')
-        usati = [c for c in E['stati'] if c in set(per_taglia['piccola'])]
+        presenti = set(per_taglia['piccola'])
+        usati = sorted(c for c in stati if c in presenti) if esatto else [c for c in stati if c in presenti]
         alf = {c: ALFABETO[i] for i, c in enumerate(usati)}
+        griglia = {t: codifica(T[t]['rows'], T[t]['cols'], T[t]['tiles'], per_taglia[t], alf) for t in T}
         out[anno] = {
-            'titolo': E['titolo'],
-            'stati': {c: {'nome': E['stati'][c][0], 'emblema': E['stati'][c][1]} for c in usati},
-            'griglia': {t: codifica(T[t]['rows'], T[t]['cols'], T[t]['tiles'], per_taglia[t], alf) for t in T},
+            'titolo': tit,
+            'stati': {c: {'nome': stati[c][0], 'emblema': stati[c][1]} for c in usati},
         }
-        n_stati = len(usati)
-        print(f'{anno}: {n_stati} stati, ' + ', '.join(f'{t} {len(out[anno]["griglia"][t]) // 1024} KB' for t in T),
-              file=sys.stderr)
+        finali[anno] = per_taglia
+        # v83: i fatti storici si scrivono come differenza dalla loro istantanea, gli anni di CShapes
+        # dall'ultimo anno scritto per intero (se conviene): il file resta leggero
+        base = None
+        if nota:
+            base = base_storica
+        elif esatto and base_esatta:
+            base = base_esatta
+        diff = None
+        if base:
+            diff = {t: codifica(T[t]['rows'], T[t]['cols'], T[t]['tiles'], per_taglia[t], alf, finali[base][t]) for t in T}
+            if sum(map(len, diff.values())) > 0.6 * sum(map(len, griglia.values())):
+                diff = None
+        if not nota and not diff:
+            if esatto:
+                base_esatta = anno
+            else:
+                base_storica = anno
+        if esatto:
+            out[anno]['esatto'] = True  # confini di quell'anno preciso (CShapes)
+        if nota:
+            out[anno]['evento'] = nota  # il fatto storico di quell'anno (eventi_epoche.py)
+        firma = json.dumps([usati, griglia])
+        if firma in griglie_viste:
+            out[anno]['come'] = griglie_viste[firma]  # cambiano solo i nomi: la griglia di quell'anno
+        else:
+            griglie_viste[firma] = anno
+            if diff:
+                out[anno]['base'] = base
+                griglia = diff
+            out[anno]['griglia'] = griglia
+        print(f'{anno}: {len(usati)} stati, ' + ('griglia come il ' + out[anno]['come'] if 'come' in out[anno] else
+              ('cambi dal ' + base + ': ' if diff else '') + ', '.join(f'{t} {len(griglia[t]) // 1024} KB' for t in T)), file=sys.stderr)
         if prev:
             anteprima(f'{prev}/epoca_{anno}.png', T['piccola']['rows'], T['piccola']['cols'],
                       T['piccola']['tiles'], per_taglia['piccola'], usati)
