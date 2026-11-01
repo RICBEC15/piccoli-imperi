@@ -60,6 +60,45 @@ assert(statoA('1000', 28.9, 41.0) === 'Impero bizantino', "Costantinopoli nel 10
 assert(statoA('1500', 12.3, 45.4) === 'Repubblica di Venezia', 'Venezia nel 1500: Repubblica di Venezia');
 assert(statoA('1800', 12.5, 41.9) === 'Stato della Chiesa', 'Roma nel 1800: Stato della Chiesa');
 assert(statoA('oggi', 12.5, 41.9) === 'Italia', 'Roma oggi: Italia');
+// v80: le nuove istantanee
+assert(statoA('1960', 13.4, 52.5) === 'Germania Est', 'Berlino nel 1960: Germania Est');
+assert(statoA('1945', 11.6, 48.1) === 'Germania, zona americana', 'Monaco nel 1945: zona americana');
+assert(statoA('1815', 9.2, 45.5) === 'Regno Lombardo-Veneto', 'Milano nel 1815: Regno Lombardo-Veneto');
+assert(statoA('1300', 30.5, 50.4) !== 'Italia' && statoA('1100', 30.5, 50.4) === "Rus' di Kiev", "Kiev nel 1100: Rus' di Kiev");
+assert(statoA('1600', 11.25, 43.78) === 'Granducato di Toscana', 'Firenze nel 1600: Granducato di Toscana');
+
+// v80: si sceglie un anno qualsiasi, anno per anno; vale l'ultima istantanea non successiva
+const casi = [[1000, '1000'], [1099, '1000'], [1100, '1100'], [1492, '1400'], [1856, '1815'], [1914, '1914'],
+  [1919, '1914'], [1941, '1938'], [1989, '1960'], [1991, '1960'], [1992, 'oggi'], [2026, 'oggi']];
+for (const [a, k] of casi) assert(epocaDellAnno(a) === k, `anno ${a}: confini ${k}`);
+setAnno(1856);
+assert(annoScelto === 1856 && epocaScelta === '1815', "setAnno(1856): l'anno resta 1856, i confini sono del 1815");
+assert(descriviAnno(1856) === 'Anno 1856 · Il Congresso di Vienna (confini del 1815)', 'descrizione: ' + descriviAnno(1856));
+setAnno(500); assert(annoScelto === 1000, "prima del 1000 si ferma al 1000");
+setAnno(99999); assert(annoScelto === ANNO_MAX && epocaScelta === 'oggi', 'dopo oggi si ferma a oggi');
+setAnno('abc'); assert(annoScelto === ANNO_MAX, 'un anno non valido non cambia nulla');
+setAnno(1856); passoAnno(1); assert(annoScelto === 1857, 'il passo di un anno: 1857');
+passoAnno(-10); assert(annoScelto === 1847, 'il passo di dieci anni: 1847');
+setEpoca('1914'); assert(annoScelto === 1914 && epocaScelta === '1914', 'setEpoca porta al suo anno');
+setEpoca('oggi'); assert(annoScelto === ANNO_MAX, "setEpoca('oggi') porta a oggi");
+
+// durante il piazzamento: cambiare anno nella stessa istantanea non cambia gli stati
+setAnno(1820); newGame();
+{
+  const paese = players.p.country, cap = placeSet.map(t => t.r + ',' + t.c).join();
+  setAnno(1870);
+  assert(annoPartita === 1870 && epocaPartita === '1815' && players.p.country === paese && placeSet.map(t => t.r + ',' + t.c).join() === cap,
+    'dal 1820 al 1870 (stessi confini del 1815): stesso paese, stessa capitale, anno 1870');
+  setAnno(1885);
+  assert(annoPartita === 1885 && epocaPartita === '1880' && statoStorico(players.p.country), "nel 1885 i confini del 1880");
+  cambiaPaese('ITA'); placePlayerCapital(placeSet[0]);
+  const d = JSON.parse(JSON.stringify(serialize()));
+  assert(d.anno === 1885 && d.epoca === '1880', "il salvataggio ricorda l'anno 1885");
+  setEpoca('oggi'); newGame();
+  assert(applySave(d) && annoPartita === 1885 && epocaPartita === '1880' && players.p.country === 'ITA', "si ricarica nel 1885, Regno d'Italia");
+  delete d.anno; setEpoca('oggi'); newGame();
+  assert(applySave(d) && annoPartita === 1880, "un salvataggio senza anno prende l'anno dei suoi confini");
+}
 
 // cambio di epoca durante la scelta del paese: la stessa mappa, nuovi stati
 setEpoca('oggi'); newGame();

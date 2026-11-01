@@ -1,6 +1,6 @@
 # Piccoli Imperi
 
-Gioco di strategia a turni su esagoni, in stile Polytopia, su una mappa geografica reale dell'Europa, dall'Islanda e dalle Canarie agli Urali. A inizio partita scegli l'epoca (oggi, 1938, 1914, 1800, 1500 o l'anno Mille) e tocchi sulla mappa il paese da guidare: il suo territorio è la tua patria. **Ogni altro paese è un impero guidato dall'IA**, in guerra con tutti. Un impero cade quando perde la capitale; vinci quando sono caduti tutti. Nella schermata iniziale si può scegliere anche il duello: un solo nemico, l'"Impero Cremisi", in un paese vicino.
+Gioco di strategia a turni su esagoni, in stile Polytopia, su una mappa geografica reale dell'Europa, dall'Islanda e dalle Canarie agli Urali. A inizio partita scegli l'anno, uno qualsiasi dal 1000 a oggi, e tocchi sulla mappa il paese da guidare: il suo territorio è la tua patria. **Ogni altro paese è un impero guidato dall'IA**, in guerra con tutti. Un impero cade quando perde la capitale; vinci quando sono caduti tutti. Nella schermata iniziale si può scegliere anche il duello: un solo nemico, l'"Impero Cremisi", in un paese vicino.
 
 ## Come giocare
 
@@ -12,7 +12,7 @@ In locale: apri `piccoli_imperi.html` nel browser con un doppio clic. Non serve 
 
 - `piccoli_imperi.html`: il gioco completo (HTML, CSS e JavaScript in un unico file).
 - `index.html`: pagina d'ingresso per GitHub Pages, rimanda subito a `piccoli_imperi.html`.
-- `stub.js`, `shiptest.js`, `savetest.js`, `playtest.js`, `aitest.js`, `paesitest.js`, `imperitest.js`, `difficoltatest.js`, `mappatest.js`, `diplotest.js`, `conquistatest.js`, `capitalitest.js`, `paesinuovitest.js`, `microstatitest.js`, `vaticanotest.js`, `popolazionetest.js`, `biomitest.js`, `epochetest.js`, `browser_check.js`, `mobile_check.js`, `pantest.js`, `conquista_check.js`, `citta_check.js`, `unitatest.js`, `stabilita_check.js`, `mappefissetest.js`, `caricamento_check.js`, `cheattest.js`, `cheat_check.js`, `capitaletest.js`, `capitale_check.js`: test automatici (`mobile_check.js` prova il gioco su un iPhone emulato con Playwright, `pantest.js` lo spostamento nella mappa col mouse, le frecce e il dito).
+- `stub.js`, `shiptest.js`, `savetest.js`, `playtest.js`, `aitest.js`, `paesitest.js`, `imperitest.js`, `difficoltatest.js`, `mappatest.js`, `diplotest.js`, `conquistatest.js`, `capitalitest.js`, `paesinuovitest.js`, `microstatitest.js`, `vaticanotest.js`, `popolazionetest.js`, `biomitest.js`, `epochetest.js`, `browser_check.js`, `mobile_check.js`, `pantest.js`, `conquista_check.js`, `citta_check.js`, `unitatest.js`, `stabilita_check.js`, `mappefissetest.js`, `caricamento_check.js`, `cheattest.js`, `cheat_check.js`, `capitaletest.js`, `capitale_check.js`, `anno_check.js`: test automatici (`mobile_check.js` prova il gioco su un iPhone emulato con Playwright, `pantest.js` lo spostamento nella mappa col mouse, le frecce e il dito).
 - `build_russia.js`: script che ha estratto il confine della Russia dal dataset Natural Earth.
 - `build_paesi_nord.py`: estrae da Natural Earth i confini dei paesi aggiunti nella v65 (`POLY_NORD`, `SEMI_NORD`).
 - `build_biomi.py`, `export_tiles.js`: costruiscono i biomi fissi dai dati di OpenStreetMap.
@@ -30,7 +30,8 @@ cat stub.js game.js savetest.js > _run.js && node _run.js
 cat stub.js game.js playtest.js > _run.js && node _run.js
 cat stub.js game.js paesitest.js > _run.js && node _run.js
 cat stub.js game.js imperitest.js > _run.js && node _run.js   # tutti i paesi contro tutti: circa 30 secondi
-cat stub.js game.js epochetest.js > _run.js && node _run.js   # epoche: circa 3 minuti (anche la mappa gigante)
+cat stub.js game.js epochetest.js > _run.js && node _run.js   # epoche e scelta dell'anno (v80): circa un minuto
+node anno_check.js   # la scelta dell'anno nel browser, computer e tablet (v80)
 cat stub.js game.js aitest.js > _run.js && node _run.js   # IA: 150 turni, circa un minuto
 cat stub.js game.js difficoltatest.js > _run.js && node _run.js   # difficoltà IA: circa 40 secondi
 cat stub.js game.js ricchezzatest.js > _run.js && node _run.js   # l'IA punta alle città ricche: circa 30 secondi
@@ -72,7 +73,7 @@ Ogni città ha i suoi **abitanti veri**: quelli dell'agglomerato urbano (campo `
 
 ## Le epoche
 
-Nella schermata iniziale (e nella scelta del paese, prima di fondare la capitale) si sceglie l'epoca: **oggi** (come prima), **1938**, **1914**, **1800**, **1500** o **l'anno Mille**. La mappa resta la stessa (terre, biomi, fiumi, villaggi): cambiano gli stati, con i confini e i nomi italiani di quell'anno, da 29 a 44 secondo l'epoca. Ogni stato storico ha un emblema al posto della bandiera (👑 impero, 🏰 regno, 🌙 stato islamico, ⛺ popoli e orde, 🏛️ repubblica). Il Sahara, senza stati nei dati, è terra di nessuno: ci sono villaggi ma non si può giocare. Il tutorial è sempre ai giorni nostri. Ogni stato storico è un impero (o, nel duello, il tuo avversario) e la sua capitale sorge nella sua città più popolosa. L'epoca si salva nel file della partita (i salvataggi precedenti si caricano a oggi).
+Nella schermata iniziale (e nella scelta del paese, prima di fondare la capitale) si sceglie l'anno, uno qualsiasi dal 1000 a oggi (dalla v80; prima solo oggi, 1938, 1914, 1800, 1500 e 1000): valgono i confini dell'ultima delle 22 istantanee (1000, 1100, 1200, 1300, 1400, 1500, 1530, 1600, 1650, 1700, 1715, 1783, 1800, 1815, 1880, 1900, 1914, 1920, 1930, 1938, 1945, 1960) non successiva all'anno, e dal 1992 gli stati di oggi. La mappa resta la stessa (terre, biomi, fiumi, villaggi): cambiano gli stati, con i confini e i nomi italiani di quell'anno, da 25 a 44 secondo l'epoca. Ogni stato storico ha un emblema al posto della bandiera (👑 impero, 🏰 regno, 🌙 stato islamico, ⛺ popoli e orde, 🏛️ repubblica). Il Sahara, senza stati nei dati, è terra di nessuno: ci sono villaggi ma non si può giocare. Il tutorial è sempre ai giorni nostri. Ogni stato storico è un impero (o, nel duello, il tuo avversario) e la sua capitale sorge nella sua città più popolosa. L'epoca si salva nel file della partita (i salvataggi precedenti si caricano a oggi).
 
 - Fonte dei confini: **historical-basemaps** di André Ourednik (https://github.com/aourednik/historical-basemaps), licenza **GPL-3.0**. I dati derivati (la riga `const EPOCHE = ...` del gioco, circa 100 KB) restano sotto GPL-3.0.
 - Gli altri siti consultabili (OpenHistoricalMap, historiqly, backthen.world, Running Reality, GeaCron) non si possono scaricare dal server di sviluppo o non offrono dati scaricabili: OpenHistoricalMap (dati CC0) resta la fonte migliore se in futuro si potrà leggerla.
@@ -82,6 +83,12 @@ Nella schermata iniziale (e nella scelta del paese, prima di fondare la capitale
 Ogni modifica alla mappa va verificata con `mappatest.js`, che controlla anche che due partite abbiano la stessa mappa.
 
 ## Versione
+
+v80 (formato di salvataggio v18, con il campo facoltativo `anno`; i salvataggi di prima si caricano ancora): **si sceglie l'anno, anno per anno, dal 1000 a oggi**, non più solo sei date.
+
+- Nella schermata iniziale e nella scelta del paese c'è l'anno: si scrive, si cambia con ◀ ▶ (un anno) e ⏪ ⏩ (dieci anni), con la barra, o si salta con «Vai a:» a un anno che ha confini propri. Sotto si legge quali confini valgono: «Anno 1856 · Il Congresso di Vienna (confini del 1815)».
+- I confini storici sono ora 22 istantanee invece di 5: 1000, 1100, 1200, 1300, 1400, 1500, 1530, 1600, 1650, 1700, 1715, 1783, 1800, 1815, 1880, 1900, 1914, 1920, 1930, 1938, 1945 e 1960. Per l'anno scelto valgono i confini dell'ultima istantanea che non viene dopo; dal 1992 (finita l'URSS) gli stati di oggi.
+- Nella scelta del paese, cambiare anno dentro la stessa istantanea non cambia paese né capitale; il messaggio di inizio dice l'anno scelto. L'anno si salva nella partita (senza, vale l'anno dei confini salvati).
 
 v79 (formato di salvataggio v18, con un campo facoltativo in più; i salvataggi di prima si caricano ancora): **chi tiene la capitale di un paese per 7 turni (una settimana: nel gioco un turno vale un giorno) si prende tutto il paese**.
 
