@@ -12,11 +12,12 @@ In locale: apri `piccoli_imperi.html` nel browser con un doppio clic. Non serve 
 
 - `piccoli_imperi.html`: il gioco completo (HTML, CSS e JavaScript in un unico file).
 - `index.html`: pagina d'ingresso per GitHub Pages, rimanda subito a `piccoli_imperi.html`.
-- `stub.js`, `shiptest.js`, `savetest.js`, `playtest.js`, `aitest.js`, `paesitest.js`, `imperitest.js`, `difficoltatest.js`, `mappatest.js`, `diplotest.js`, `conquistatest.js`, `capitalitest.js`, `paesinuovitest.js`, `microstatitest.js`, `vaticanotest.js`, `popolazionetest.js`, `biomitest.js`, `epochetest.js`, `browser_check.js`, `mobile_check.js`, `pantest.js`, `conquista_check.js`, `citta_check.js`, `unitatest.js`, `stabilita_check.js`, `mappefissetest.js`, `caricamento_check.js`, `cheattest.js`, `cheat_check.js`, `capitaletest.js`, `capitale_check.js`, `anno_check.js`, `popstoricatest.js`, `popstorica_check.js`, `medioorientetest.js`, `madeiratest.js`, `madeira_check.js`: test automatici (`mobile_check.js` prova il gioco su un iPhone emulato con Playwright, `pantest.js` lo spostamento nella mappa col mouse, le frecce e il dito).
+- `stub.js`, `shiptest.js`, `savetest.js`, `playtest.js`, `aitest.js`, `paesitest.js`, `imperitest.js`, `difficoltatest.js`, `mappatest.js`, `diplotest.js`, `conquistatest.js`, `capitalitest.js`, `paesinuovitest.js`, `microstatitest.js`, `vaticanotest.js`, `popolazionetest.js`, `biomitest.js`, `epochetest.js`, `browser_check.js`, `mobile_check.js`, `pantest.js`, `conquista_check.js`, `citta_check.js`, `unitatest.js`, `stabilita_check.js`, `mappefissetest.js`, `caricamento_check.js`, `cheattest.js`, `cheat_check.js`, `capitaletest.js`, `capitale_check.js`, `anno_check.js`, `popstoricatest.js`, `popstorica_check.js`, `medioorientetest.js`, `madeiratest.js`, `madeira_check.js`, `canarie_check.js`: test automatici (`mobile_check.js` prova il gioco su un iPhone emulato con Playwright, `pantest.js` lo spostamento nella mappa col mouse, le frecce e il dito).
 - `build_russia.js`: script che ha estratto il confine della Russia dal dataset Natural Earth.
 - `build_paesi_nord.py`: estrae da Natural Earth i confini dei paesi aggiunti nella v65 (`POLY_NORD`, `SEMI_NORD`).
 - `build_paesi_est.py`: estrae da Natural Earth i confini del Medio Oriente, del Sahel e dell'Asia centrale (v84: `POLY_EST`, `SEMI_EST`).
 - `build_biomi_est.py`: i biomi OpenStreetMap delle terre aggiunte nella v84 (e di Madeira, v86), senza toccare quelli di prima.
+- `build_canarie.py`: i contorni veri delle isole Canarie da Natural Earth 10m (v87: `POLY_CANARIE`) e i biomi delle loro caselle nuove.
 - `build_madeira.py`: estrae da Natural Earth 10m il contorno di Madeira e il seme di Porto Santo (v86: `POLY_MADEIRA`, `SEMI_MADEIRA`).
 - `build_biomi.py`, `export_tiles.js`: costruiscono i biomi fissi dai dati di OpenStreetMap.
 - `correggi_biomi.py` (v82): controlla e corregge i biomi con i dati da satellite (ESA WorldCover) e il modello del terreno (Copernicus DEM).
@@ -60,6 +61,7 @@ cat stub.js game.js cittaunicatest.js > _run.js && node _run.js   # la città co
 cat stub.js game.js medioorientetest.js > _run.js && node _run.js   # il Medio Oriente (v84): pochi secondi
 cat stub.js game.js madeiratest.js > _run.js && node _run.js   # Madeira e Porto Santo (v86): pochi secondi
 node madeira_check.js   # Madeira nel browser, computer e tablet (Playwright)
+node canarie_check.js   # le Canarie nel browser, computer e tablet (Playwright)
 node cheat_check.js   # il pannello dei cheat nel browser, computer e tablet col tocco (Playwright)
 ```
 
@@ -106,6 +108,14 @@ Nella schermata iniziale (e nella scelta del paese, prima di fondare la capitale
 Ogni modifica alla mappa va verificata con `mappatest.js`, che controlla anche che due partite abbiano la stessa mappa.
 
 ## Versione
+
+v87 (formato di salvataggio invariato, v18): **tutte le isole Canarie**.
+
+- Prima c'erano solo Gran Canaria, Fuerteventura e Lanzarote, disegnate a mano come un cerchio e due strisce. Ora ci sono tutte e sette le isole con i contorni veri (Natural Earth 10m): Tenerife, Fuerteventura, Gran Canaria, Lanzarote, La Palma, La Gomera ed El Hierro, più La Graciosa. Ogni isola ha almeno una casella a ogni grandezza: in tutto 13 caselle sulla mappa piccola, 45 sulla media, 100 sulla gigante.
+- Città: Las Palmas de Gran Canaria e, nuova, Santa Cruz de Tenerife (336.000 abitanti), con la sua popolazione storica.
+- Biomi da OpenStreetMap, controllati con i dati da satellite: Tenerife col Teide, La Palma, La Gomera ed El Hierro di montagna, Fuerteventura e Lanzarote aride. Un'isola tutta di montagna ha almeno una collina, dove si può fare un porto.
+- Epoche: ogni isola è dei Guanci (terra senza stato) fino alla sua conquista castigliana (Lanzarote 1402, Fuerteventura ed El Hierro 1405, La Gomera 1450, Gran Canaria 1483, La Palma 1493, Tenerife 1496); da allora segue chi ha Siviglia. Prima le griglie storiche davano le isole agli almoravidi, a Granada e alla Castiglia già dal 1300.
+- Per rifare i dati: istruzioni in testa a `build_canarie.py`. Le partite salvate prima si caricano ancora, con le isole di prima.
 
 v86 (formato di salvataggio invariato, v18): **Madeira e Porto Santo**, portoghesi, a grandezza reale.
 
