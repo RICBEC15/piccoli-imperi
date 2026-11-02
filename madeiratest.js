@@ -1,4 +1,4 @@
-// Test di Madeira (v85): Madeira e Porto Santo sono terra portoghese a ogni taglia, Funchal e' un
+// Test di Madeira (v86): Madeira e Porto Santo sono terra portoghese a ogni taglia, Funchal e' un
 // villaggio vero; nelle epoche storiche l'arcipelago e' disabitato fino al 1420, poi segue Lisbona;
 // la partita salvata si ricarica con Madeira com'era.
 // uso: cat stub.js game.js madeiratest.js > _run.js && node _run.js

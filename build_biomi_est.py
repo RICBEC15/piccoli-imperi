@@ -10,7 +10,7 @@
 #   2) cat stub.js game.js export_tiles.js > _run.js && OUT=tiles.json node _run.js
 #   3) python3 build_biomi_est.py classifica DIR_A DIR_B DIR_C tiles.json piccoli_imperi.html
 #   poi node build_mappe.js
-# v85, Madeira e Porto Santo: un rettangolo piccolo (un minuto), dato come sesto argomento; le
+# v86, Madeira e Porto Santo: un rettangolo piccolo (un minuto), dato come sesto argomento; le
 # cartelle A, B e C non servono (le caselle nuove sono solo quelle di Madeira), basta un nome qualsiasi:
 #        python3 build_biomi_est.py estrai DIR_M -17.5 -16.0 32.3 33.3
 #        python3 build_biomi_est.py classifica - - - tiles.json piccoli_imperi.html DIR_M
