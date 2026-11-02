@@ -12,7 +12,7 @@ In locale: apri `piccoli_imperi.html` nel browser con un doppio clic. Non serve 
 
 - `piccoli_imperi.html`: il gioco completo (HTML, CSS e JavaScript in un unico file).
 - `index.html`: pagina d'ingresso per GitHub Pages, rimanda subito a `piccoli_imperi.html`.
-- `stub.js`, `shiptest.js`, `savetest.js`, `playtest.js`, `aitest.js`, `paesitest.js`, `imperitest.js`, `difficoltatest.js`, `mappatest.js`, `diplotest.js`, `conquistatest.js`, `capitalitest.js`, `paesinuovitest.js`, `microstatitest.js`, `vaticanotest.js`, `popolazionetest.js`, `biomitest.js`, `epochetest.js`, `browser_check.js`, `mobile_check.js`, `pantest.js`, `conquista_check.js`, `citta_check.js`, `unitatest.js`, `stabilita_check.js`, `mappefissetest.js`, `caricamento_check.js`, `cheattest.js`, `cheat_check.js`, `capitaletest.js`, `capitale_check.js`, `anno_check.js`, `popstoricatest.js`, `popstorica_check.js`, `medioorientetest.js`, `madeiratest.js`, `madeira_check.js`, `canarie_check.js`: test automatici (`mobile_check.js` prova il gioco su un iPhone emulato con Playwright, `pantest.js` lo spostamento nella mappa col mouse, le frecce e il dito).
+- `stub.js`, `shiptest.js`, `savetest.js`, `playtest.js`, `aitest.js`, `paesitest.js`, `imperitest.js`, `difficoltatest.js`, `mappatest.js`, `diplotest.js`, `conquistatest.js`, `capitalitest.js`, `paesinuovitest.js`, `microstatitest.js`, `vaticanotest.js`, `popolazionetest.js`, `biomitest.js`, `epochetest.js`, `browser_check.js`, `mobile_check.js`, `pantest.js`, `conquista_check.js`, `citta_check.js`, `unitatest.js`, `stabilita_check.js`, `mappefissetest.js`, `caricamento_check.js`, `cheattest.js`, `cheat_check.js`, `capitaletest.js`, `capitale_check.js`, `anno_check.js`, `popstoricatest.js`, `popstorica_check.js`, `medioorientetest.js`, `madeiratest.js`, `madeira_check.js`, `canarie_check.js`, `bandieretest.js`, `bandiere_check.js`: test automatici (`mobile_check.js` prova il gioco su un iPhone emulato con Playwright, `pantest.js` lo spostamento nella mappa col mouse, le frecce e il dito).
 - `build_russia.js`: script che ha estratto il confine della Russia dal dataset Natural Earth.
 - `build_paesi_nord.py`: estrae da Natural Earth i confini dei paesi aggiunti nella v65 (`POLY_NORD`, `SEMI_NORD`).
 - `build_paesi_est.py`: estrae da Natural Earth i confini del Medio Oriente, del Sahel e dell'Asia centrale (v84: `POLY_EST`, `SEMI_EST`).
@@ -22,6 +22,7 @@ In locale: apri `piccoli_imperi.html` nel browser con un doppio clic. Non serve 
 - `build_biomi.py`, `export_tiles.js`: costruiscono i biomi fissi dai dati di OpenStreetMap.
 - `correggi_biomi.py` (v82): controlla e corregge i biomi con i dati da satellite (ESA WorldCover) e il modello del terreno (Copernicus DEM).
 - `build_mappe.js`: scrive la mappa già pronta di ogni grandezza (`const MAPPE_FISSE = ...`), così una partita nuova non la ricalcola.
+- `build_bandiere.js`: disegna le bandiere di tutti i paesi in un'unica immagine (v88: `const BANDIERE = ...`): quelle di oggi da [flag-icons](https://github.com/lipis/flag-icons) (licenza MIT), quelle degli stati storici dalla sua tabella. Va rilanciato quando cambiano gli stati delle epoche.
 - `build_popolazione.js`: costruisce la lista delle città vere con i loro abitanti (Natural Earth).
 - `build_popolazione_storica.py`: costruisce gli abitanti di ogni città negli anni dal 1000 a oggi (`POP_STORICA`, v81).
 - `build_epoche.py`: costruisce gli stati storici di ogni epoca (con `export_tiles.js`; dalla v81 anche `epoche_cshapes.py`, i confini esatti dal 1886, e `eventi_epoche.py`, i fatti storici con la data).
@@ -60,6 +61,7 @@ cat stub.js game.js cheattest.js > _run.js && node _run.js   # i cheat (v77): ci
 cat stub.js game.js cittaunicatest.js > _run.js && node _run.js   # la città come area unica, fiume compreso (v78): pochi secondi
 cat stub.js game.js medioorientetest.js > _run.js && node _run.js   # il Medio Oriente (v84): pochi secondi
 cat stub.js game.js madeiratest.js > _run.js && node _run.js   # Madeira e Porto Santo (v86): pochi secondi
+cat stub.js game.js bandieretest.js > _run.js && node _run.js   # le bandiere (v88): pochi secondi
 node madeira_check.js   # Madeira nel browser, computer e tablet (Playwright)
 node canarie_check.js   # le Canarie nel browser, computer e tablet (Playwright)
 node cheat_check.js   # il pannello dei cheat nel browser, computer e tablet col tocco (Playwright)
@@ -108,6 +110,14 @@ Nella schermata iniziale (e nella scelta del paese, prima di fondare la capitale
 Ogni modifica alla mappa va verificata con `mappatest.js`, che controlla anche che due partite abbiano la stessa mappa.
 
 ## Versione
+
+v88 (formato di salvataggio invariato, v18): **le bandiere vere di ogni paese**.
+
+- Prima le bandiere erano le emoji: su Windows comparivano come due lettere ("IT", "FR") e gli stati storici avevano tutti lo stesso simbolo (🏰, 🌙, ⛺...). Ora ogni paese ha la sua bandiera disegnata, nella scelta del paese, nella scheda della diplomazia, nei messaggi, nella cronaca e nella barra in basso.
+- I paesi di oggi hanno le bandiere di flag-icons (licenza MIT). Gli stati storici hanno la loro, semplificata, e cambia con l'anno quando è cambiata davvero (la Francia dei gigli, la Spagna con la croce di Borgogna, il Regno d'Italia con lo scudo di Savoia, l'Impero russo, il Sacro Romano Impero...). Chi una bandiera non l'aveva (tribù, popoli, sultanati senza un vessillo noto) ha un drappo col suo simbolo. Della Germania nazista si usa il nero-bianco-rosso.
+- Tutte le bandiere stanno in una sola immagine di circa 110 KB (`build_bandiere.js`). Nelle tendine (dove un disegno non entra) resta l'emoji.
+- Nella scheda di un paese non c'è più l'elenco "I tuoi patti" in fondo: con la pace iniziale (v75) elencava quasi tutti i paesi.
+- Corretto: cambiando anno nella scelta del paese, gli imperi dei paesi che in quell'anno non esistevano restavano in gioco senza terra (nel 1700 si giocava "contro 137 imperi" invece di 45).
 
 v87 (formato di salvataggio invariato, v18): **tutte le isole Canarie**.
 
