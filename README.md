@@ -12,11 +12,12 @@ In locale: apri `piccoli_imperi.html` nel browser con un doppio clic. Non serve 
 
 - `piccoli_imperi.html`: il gioco completo (HTML, CSS e JavaScript in un unico file).
 - `index.html`: pagina d'ingresso per GitHub Pages, rimanda subito a `piccoli_imperi.html`.
-- `stub.js`, `shiptest.js`, `savetest.js`, `playtest.js`, `aitest.js`, `paesitest.js`, `imperitest.js`, `difficoltatest.js`, `mappatest.js`, `diplotest.js`, `conquistatest.js`, `capitalitest.js`, `paesinuovitest.js`, `microstatitest.js`, `vaticanotest.js`, `popolazionetest.js`, `biomitest.js`, `epochetest.js`, `browser_check.js`, `mobile_check.js`, `pantest.js`, `conquista_check.js`, `citta_check.js`, `unitatest.js`, `stabilita_check.js`, `mappefissetest.js`, `caricamento_check.js`, `cheattest.js`, `cheat_check.js`, `capitaletest.js`, `capitale_check.js`, `anno_check.js`, `popstoricatest.js`, `popstorica_check.js`, `medioorientetest.js`: test automatici (`mobile_check.js` prova il gioco su un iPhone emulato con Playwright, `pantest.js` lo spostamento nella mappa col mouse, le frecce e il dito).
+- `stub.js`, `shiptest.js`, `savetest.js`, `playtest.js`, `aitest.js`, `paesitest.js`, `imperitest.js`, `difficoltatest.js`, `mappatest.js`, `diplotest.js`, `conquistatest.js`, `capitalitest.js`, `paesinuovitest.js`, `microstatitest.js`, `vaticanotest.js`, `popolazionetest.js`, `biomitest.js`, `epochetest.js`, `browser_check.js`, `mobile_check.js`, `pantest.js`, `conquista_check.js`, `citta_check.js`, `unitatest.js`, `stabilita_check.js`, `mappefissetest.js`, `caricamento_check.js`, `cheattest.js`, `cheat_check.js`, `capitaletest.js`, `capitale_check.js`, `anno_check.js`, `popstoricatest.js`, `popstorica_check.js`, `medioorientetest.js`, `madeiratest.js`, `madeira_check.js`: test automatici (`mobile_check.js` prova il gioco su un iPhone emulato con Playwright, `pantest.js` lo spostamento nella mappa col mouse, le frecce e il dito).
 - `build_russia.js`: script che ha estratto il confine della Russia dal dataset Natural Earth.
 - `build_paesi_nord.py`: estrae da Natural Earth i confini dei paesi aggiunti nella v65 (`POLY_NORD`, `SEMI_NORD`).
 - `build_paesi_est.py`: estrae da Natural Earth i confini del Medio Oriente, del Sahel e dell'Asia centrale (v84: `POLY_EST`, `SEMI_EST`).
-- `build_biomi_est.py`: i biomi OpenStreetMap delle terre aggiunte nella v84, senza toccare quelli di prima.
+- `build_biomi_est.py`: i biomi OpenStreetMap delle terre aggiunte nella v84 (e di Madeira, v86), senza toccare quelli di prima.
+- `build_madeira.py`: estrae da Natural Earth 10m il contorno di Madeira e il seme di Porto Santo (v86: `POLY_MADEIRA`, `SEMI_MADEIRA`).
 - `build_biomi.py`, `export_tiles.js`: costruiscono i biomi fissi dai dati di OpenStreetMap.
 - `correggi_biomi.py` (v82): controlla e corregge i biomi con i dati da satellite (ESA WorldCover) e il modello del terreno (Copernicus DEM).
 - `build_mappe.js`: scrive la mappa già pronta di ogni grandezza (`const MAPPE_FISSE = ...`), così una partita nuova non la ricalcola.
@@ -57,6 +58,8 @@ cat stub.js game.js mappefissetest.js > _run.js && node _run.js   # la mappa pro
 cat stub.js game.js cheattest.js > _run.js && node _run.js   # i cheat (v77): circa 10 secondi
 cat stub.js game.js cittaunicatest.js > _run.js && node _run.js   # la città come area unica, fiume compreso (v78): pochi secondi
 cat stub.js game.js medioorientetest.js > _run.js && node _run.js   # il Medio Oriente (v84): pochi secondi
+cat stub.js game.js madeiratest.js > _run.js && node _run.js   # Madeira e Porto Santo (v86): pochi secondi
+node madeira_check.js   # Madeira nel browser, computer e tablet (Playwright)
 node cheat_check.js   # il pannello dei cheat nel browser, computer e tablet col tocco (Playwright)
 ```
 
@@ -103,6 +106,14 @@ Nella schermata iniziale (e nella scelta del paese, prima di fondare la capitale
 Ogni modifica alla mappa va verificata con `mappatest.js`, che controlla anche che due partite abbiano la stessa mappa.
 
 ## Versione
+
+v86 (formato di salvataggio invariato, v18): **Madeira e Porto Santo**, portoghesi, a grandezza reale.
+
+- Contorno vero di Madeira (Natural Earth 10m); Porto Santo è una casella sola, come le altre isolette. Le Desertas sono troppo piccole per una casella. Madeira occupa 1 casella sulla mappa piccola, 5 sulla media, 10 sulla gigante.
+- Biomi da OpenStreetMap e satellite, come il resto della mappa: Madeira è quasi tutta montagna (il Pico Ruivo), Porto Santo è prato.
+- **Funchal** (205.000 abitanti) è un villaggio libero sulla costa sud, con la sua popolazione storica.
+- Negli anni passati l'arcipelago è **disabitato fino al 1420** (la scoperta portoghese) e poi segue chi ha Lisbona: il Portogallo, e la Spagna degli Asburgo negli anni dell'Unione iberica.
+- Le partite salvate prima si caricano ancora, ma Madeira lì resta mare.
 
 v85: **i biomi del Medio Oriente controllati e corretti con i dati da satellite**, come la v82 per l'Europa. `correggi_biomi.py` è passato solo sulle terre nuove della v84 (opzione `SOLO_NUOVE`): l'Europa di prima resta identica. Sulla gigante cambiano 36.982 caselle su 479.453.
 
