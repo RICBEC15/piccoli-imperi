@@ -10,6 +10,12 @@
 #   2) cat stub.js game.js export_tiles.js > _run.js && OUT=tiles.json node _run.js
 #   3) python3 build_biomi_est.py classifica DIR_A DIR_B DIR_C tiles.json piccoli_imperi.html
 #   poi node build_mappe.js
+# v85, Madeira e Porto Santo: un rettangolo piccolo (un minuto), dato come sesto argomento; le
+# cartelle A, B e C non servono (le caselle nuove sono solo quelle di Madeira), basta un nome qualsiasi:
+#        python3 build_biomi_est.py estrai DIR_M -17.5 -16.0 32.3 33.3
+#        python3 build_biomi_est.py classifica - - - tiles.json piccoli_imperi.html DIR_M
+#   poi correggi_biomi.py sullo stesso rettangolo (scarica DIR_S ..., correggi DIR_S tiles.json
+#   piccoli_imperi.html -17.5 -16.0 32.3 33.3) e node build_mappe.js
 # Dipendenze: pip install pyarrow shapely rasterio numpy scipy
 import sys, os, re, json
 import numpy as np
@@ -57,7 +63,9 @@ def rettangolo(dirn, box, d, sel):
     np.maximum.at(P, ii[ok], peaks[ok, 2])
     return f, P
 
-def classifica(dir_a, dir_b, dir_c, tiles_json, html):
+MADEIRA = (-17.5, -16.0, 32.3, 33.3)
+
+def classifica(dir_a, dir_b, dir_c, tiles_json, html, dir_m=None):
     B.AFRICA = ARIDI   # la regola del deserto vale per tutte le terre aride nuove
     src = open(html, encoding='utf-8').read()
     m = re.search(r'^const BIOMI = (.*);$', src, re.M)
@@ -66,6 +74,7 @@ def classifica(dir_a, dir_b, dir_c, tiles_json, html):
     # ogni casella usa il primo rettangolo che la contiene; l'ultima riga in fondo (sotto gli 11,5°)
     # usa comunque il rettangolo A, con le coperture calcolate sulla parte che c'e'
     BOXES = [(dir_b, (59.5, 64.5, 44.0, 72.0)), (dir_c, (55.5, 59.6, 44.0, 46.0)), (dir_a, (-25.5, 64.5, 11.5, 44.5))]
+    if dir_m: BOXES.insert(0, (dir_m, MADEIRA))
     for taglia, d in data.items():
         cols, rows = d['cols'], d['rows']
         grid = dec(biomi[taglia], rows * cols)
@@ -100,4 +109,4 @@ if __name__ == '__main__':
         imposta(*map(float, sys.argv[3:7]))
         B.estrai(sys.argv[2]); B.estrai_uso(sys.argv[2])
     elif sys.argv[1] == 'classifica':
-        classifica(*sys.argv[2:7])
+        classifica(*sys.argv[2:8])
