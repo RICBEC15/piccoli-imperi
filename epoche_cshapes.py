@@ -21,7 +21,15 @@ SENZA_STATO = {'LY': [(1912, 'Turkey (Ottoman Empire)')],
                # v84: le terre nuove fuori dagli stati di CShapes (nomi con '_': stati non disegnati)
                'SA': [(2100, '_Arabia')], 'YE': [(2100, '_Arabia')], 'OM': [(2100, 'Oman')],
                'SD': [(1899, '_Mahdi')], 'TD': [(2100, '_Ciad')], 'NE': [(2100, '_Sahel')], 'ML': [(2100, '_Sahel')],
-               'BF': [(2100, '_Sahel')], 'MR': [(2100, '_Sahel')], 'NG': [(2100, '_Nigeria')], 'CM': [(2100, '_Ciad')]}
+               'BF': [(2100, '_Sahel')], 'MR': [(2100, '_Sahel')], 'NG': [(2100, '_Nigeria')], 'CM': [(2100, '_Ciad')],
+               # v89: l'Africa sotto gli 11,5° prima della spartizione coloniale, e le isole che CShapes non disegna
+               'SS': [(1900, '_Mahdi')], 'ET': [(1900, 'Ethiopia')], 'SO': [(1900, '_Somali')],
+               'TZ': [(1900, '_Orientale')], 'KE': [(1900, '_Orientale')], 'UG': [(1900, '_Orientale')], 'MW': [(1900, '_Orientale')],
+               'AO': [(1900, '_Australe')], 'ZM': [(1900, '_Australe')], 'ZW': [(1900, '_Australe')], 'BW': [(1900, '_Australe')],
+               'MZ': [(1900, '_Australe')], 'CF': [(1900, '_Centrale')], 'CD': [(1900, '_Centrale')],
+               'CI': [(1900, '_Occidentale')], 'GH': [(1900, '_Occidentale')], 'BJ': [(1900, '_Occidentale')],
+               'GN': [(1900, '_Occidentale')], 'TG': [(1900, '_Occidentale')],
+               'ST': [(2100, '_SaoTome')], 'SC': [(2100, '_Seychelles')], 'UK': [(2100, '_SantElena')], 'KM': [(1946, 'Comoros')]}
 
 
 # nomi italiani degli stati di CShapes 2.0, per periodo: [(dal_anno, codice, nome, emblema), ...]
@@ -60,7 +68,9 @@ NOMI = {
   'Mali': [(1886, 'AOF', 'Sudan francese', '🏰'), (1960, 'MLI', 'Mali', '🏛️')],
   'Niger': [(1886, 'NIG', 'Niger francese', '🏰'), (1960, 'NIG', 'Niger', '🏛️')],
   'Mauritania': [(1886, 'MAU', 'Mauritania francese', '🏰'), (1960, 'MAU', 'Mauritania', '🌙')],
-  'Congo': [(1886, 'AOF', 'Africa occidentale francese', '🏰')],
+  # v89: il Congo francese (fino alla v88 se ne vedeva solo un pezzetto nel Sahel, chiamato come l'AOF)
+  'Congo': [(1886, 'CFR', 'Congo francese', '🏰'), (1960, 'CFR', 'Repubblica del Congo', '🏛️'),
+            (1970, 'CFR', 'Repubblica Popolare del Congo', '🚩'), (1992, 'CFR', 'Repubblica del Congo', '🏛️')],
   'Georgia': [(1991, 'GEO', 'Georgia', '🏛️')],
   'German Democratic Republic': [(1945, 'DDR', 'Germania, zona sovietica', '🚩'), (1949, 'DDR', 'Germania Est', '🚩')],
   'German Federal Republic': [(1945, 'RFT', 'Germania, zone occidentali', '🏛️'), (1949, 'RFT', 'Germania Ovest', '🏛️'), (1990, 'RFT', 'Germania', '🏛️')],
@@ -151,8 +161,8 @@ NOMI = {
   'Gambia': [(1886, 'GAM', 'Gambia britannico', '🏰'), (1965, 'GAM', 'Gambia', '🏛️')],
   'Guinea': [(1886, 'GUI', 'Guinea francese', '🏰'), (1958, 'GUI', 'Guinea', '🏛️')],
   'Guinea-Bissau': [(1886, 'GBI', 'Guinea portoghese', '🏰'), (1974, 'GBI', 'Guinea-Bissau', '🏛️')],
-  'Sierra Leone': [(1886, 'SLE', 'Sierra Leone britannica', '🏰')],
-  "Cote D'Ivoire": [(1886, 'CIV', "Costa d'Avorio francese", '🏰')],
+  'Sierra Leone': [(1886, 'SLE', 'Sierra Leone britannica', '🏰'), (1961, 'SLE', 'Sierra Leone', '🏛️')],
+  "Cote D'Ivoire": [(1886, 'CIV', "Costa d'Avorio francese", '🏰'), (1960, 'CIV', "Costa d'Avorio", '🏛️')],
   'Cape Verde': [(1886, 'CVE', 'Capo Verde portoghese', '🏰'), (1975, 'CVE', 'Capo Verde', '🏛️')],
   'Burkina Faso (Upper Volta)': [(1886, 'VOL', 'Alto Volta francese', '🏰'), (1960, 'VOL', 'Alto Volta', '🏛️'), (1984, 'VOL', 'Burkina Faso', '🏛️')],
   'Benin': [(1886, 'DAH', 'Dahomey francese', '🏰'), (1960, 'DAH', 'Dahomey', '🏛️'), (1975, 'DAH', 'Benin', '🏛️')],
@@ -161,6 +171,61 @@ NOMI = {
   'Kamerun': [(1886, 'KAM', 'Camerun tedesco', '🏰')],
   'Cameroon': [(1916, 'CAM', 'Camerun francese', '🏰'), (1960, 'CAM', 'Camerun', '🏛️')],
   'British Cameroons': [(1916, 'CBR', 'Camerun britannico', '🏰')],
+  # v89: l'Africa sotto gli 11,5° e il Madagascar
+  '_Somali': [(1886, 'SOM', 'Sultanati somali', '🌙')],
+  '_Orientale': [(1886, 'ORI', "Regni dell'Africa orientale", '⛺')],
+  '_Australe': [(1886, 'AUS', "Regni dell'Africa australe", '🏰')],
+  '_Centrale': [(1886, 'CEN', "Regni dell'Africa centrale", '⛺')],
+  '_Occidentale': [(1886, 'OCC', "Regni dell'Africa occidentale", '🏰')],
+  '_SaoTome': [(1886, 'STP', 'São Tomé portoghese', '🏰'), (1975, 'STP', 'São Tomé e Príncipe', '🏛️')],
+  '_Seychelles': [(1886, 'SEY', 'Seychelles britanniche', '🏰'), (1976, 'SEY', 'Seychelles', '🏛️')],
+  '_SantElena': [(1886, 'SHE', "Sant'Elena britannica", '🏰')],
+  'Angola': [(1886, 'AGO', 'Angola portoghese', '🏰'), (1975, 'AGO', 'Angola', '🚩'), (1992, 'AGO', 'Angola', '🏛️')],
+  'Botswana': [(1886, 'BEC', 'Bechuanaland britannico', '🏰'), (1966, 'BEC', 'Botswana', '🏛️')],
+  'British Bechuanaland': [(1886, 'BBE', 'Colonia del Bechuanaland', '🏰')],
+  'British Togoland': [(1922, 'TBR', 'Togo britannico', '🏰')],
+  'Burundi': [(1962, 'BUR', 'Regno del Burundi', '🏰'), (1966, 'BUR', 'Burundi', '🏛️')],
+  'Cape Colony': [(1886, 'CAP', 'Colonia del Capo', '🏰')],
+  'Central African Republic': [(1886, 'OUB', 'Ubangi-Sciari francese', '🏰'), (1960, 'OUB', 'Repubblica Centrafricana', '🏛️'),
+                               (1976, 'OUB', 'Impero centrafricano', '👑'), (1979, 'OUB', 'Repubblica Centrafricana', '🏛️')],
+  'Comoros': [(1886, 'COM', 'Comore francesi', '🏰'), (1975, 'COM', 'Comore', '🏛️')],
+  'Congo, Democratic Republic of (Zaire)': [(1886, 'CBE', 'Stato Libero del Congo', '👑'), (1908, 'CBE', 'Congo Belga', '🏰'),
+                                            (1960, 'CBE', 'Repubblica del Congo-Léopoldville', '🏛️'), (1971, 'CBE', 'Zaire', '🏛️'),
+                                            (1997, 'CBE', 'Repubblica Democratica del Congo', '🏛️')],
+  'Equatorial Guinea': [(1886, 'GES', 'Guinea spagnola', '🏰'), (1968, 'GES', 'Guinea Equatoriale', '🏛️')],
+  'Federation of Rhodesia and Nyasaland': [(1953, 'FRN', 'Federazione della Rhodesia e del Nyasaland', '🏰')],
+  'Gabon': [(1886, 'GAB', 'Gabon francese', '🏰'), (1960, 'GAB', 'Gabon', '🏛️')],
+  'German Togoland': [(1886, 'TOG', 'Togo tedesco', '🏰'), (1914, 'TOG', 'Togo anglo-francese', '🏰')],
+  'Ghana': [(1886, 'GCO', "Costa d'Oro britannica", '🏰'), (1957, 'GCO', 'Ghana', '🏛️')],
+  'Kenya': [(1886, 'KEN', 'Africa Orientale Britannica', '🏰'), (1920, 'KEN', 'Colonia del Kenya', '🏰'), (1963, 'KEN', 'Kenya', '🏛️')],
+  'Lagos': [(1886, 'LAG', 'Colonia di Lagos', '🏰')],
+  'Lesotho': [(1886, 'BAS', 'Basutoland britannico', '🏰'), (1966, 'BAS', 'Regno del Lesotho', '🏰')],
+  'Liberia': [(1886, 'LBR', 'Liberia', '🏛️')],
+  'Madagascar (Malagasy)': [(1886, 'MAD', 'Regno del Madagascar', '👑'), (1896, 'MAD', 'Madagascar francese', '🏰'), (1960, 'MAD', 'Madagascar', '🏛️')],
+  'Malawi': [(1886, 'NYA', 'Nyasaland britannico', '🏰'), (1964, 'NYA', 'Malawi', '🏛️')],
+  'Mauritius': [(1886, 'MRZ', 'Mauritius britannica', '🏰'), (1968, 'MRZ', 'Mauritius', '🏛️')],
+  'Mozambique': [(1886, 'MOZ', 'Mozambico portoghese', '🏰'), (1975, 'MOZ', 'Mozambico', '🚩'), (1990, 'MOZ', 'Mozambico', '🏛️')],
+  'Namibia': [(1886, 'NAM', 'Africa Tedesca del Sud-Ovest', '🏰'), (1915, 'NAM', 'Africa del Sud-Ovest', '🏰'), (1990, 'NAM', 'Namibia', '🏛️')],
+  'Natal': [(1886, 'NAT', 'Colonia del Natal', '🏰')],
+  'Northeastern Rhodesia': [(1886, 'RNE', 'Rhodesia nord-orientale', '🏰')],
+  'Northwestern Rhodesia': [(1886, 'RNO', 'Rhodesia nord-occidentale', '🏰')],
+  'Oil Rivers Protectorate': [(1886, 'OIL', "Protettorato dei Fiumi dell'Olio", '🏰'), (1893, 'OIL', 'Protettorato della Costa del Niger', '🏰')],
+  'Orange Free State': [(1886, 'ORA', "Stato Libero dell'Orange", '🏛️'), (1900, 'ORA', "Colonia del Fiume Orange", '🏰')],
+  'Reunion': [(1886, 'REU', 'Riunione francese', '🏰')],
+  'Rwanda': [(1962, 'RUA', 'Ruanda', '🏛️')],
+  'Rwanda-Urundi': [(1886, 'RUR', 'Ruanda-Urundi belga', '🏰')],
+  'South Africa': [(1910, 'ZAF', 'Unione Sudafricana', '🏰'), (1961, 'ZAF', 'Sudafrica', '🏛️')],
+  'Southern Nigeria': [(1886, 'NGS', 'Nigeria meridionale britannica', '🏰')],
+  'Swaziland (Eswatini)': [(1886, 'SWZ', 'Regno dello Swaziland', '🏰'), (1902, 'SWZ', 'Swaziland britannico', '🏰'), (1968, 'SWZ', 'Regno dello Swaziland', '🏰')],
+  'Tanzania (Tanganyika)': [(1886, 'TAN', 'Africa Orientale Tedesca', '🏰'), (1916, 'TAN', 'Tanganica britannico', '🏰'),
+                            (1961, 'TAN', 'Tanganica', '🏛️'), (1964, 'TAN', 'Tanzania', '🏛️')],
+  'Togo': [(1886, 'TOF', 'Togo francese', '🏰'), (1960, 'TOF', 'Togo', '🏛️')],
+  'Transvaal': [(1886, 'TRA', 'Repubblica Sudafricana (Transvaal)', '🏛️'), (1900, 'TRA', 'Colonia del Transvaal', '🏰')],
+  'Uganda': [(1886, 'UGA', "Protettorato dell'Uganda", '🏰'), (1962, 'UGA', 'Uganda', '🏛️')],
+  'Zambia': [(1886, 'RHN', 'Rhodesia del Nord', '🏰'), (1964, 'RHN', 'Zambia', '🏛️')],
+  'Zanzibar': [(1886, 'ZAN', 'Sultanato di Zanzibar', '🌙')],
+  'Zimbabwe (Rhodesia)': [(1886, 'RHO', 'Rhodesia', '🏰'), (1923, 'RHO', 'Rhodesia del Sud', '🏰'), (1965, 'RHO', 'Rhodesia', '🏰'),
+                          (1980, 'RHO', 'Zimbabwe', '🏛️')],
 }
 
 
@@ -205,7 +270,7 @@ def leggi(path):
             a = arcs[i] if i >= 0 else arcs[~i][::-1]
             out.extend(a if not out else a[1:])
         return out
-    B = box(-27, 10, 67, 73)  # la mappa del gioco, larga (v84: fino allo Yemen e al Sahel)
+    B = box(-27, -36, 67, 73)  # la mappa del gioco, larga (v84: fino allo Yemen e al Sahel; v89: tutta l'Africa)
     feats = []
     for g in o['geometries']:
         if g['type'] == 'Polygon':

@@ -626,6 +626,71 @@ for _anno, _E in EPOCHE.items():
         _E['nomi'][_nome] = _cod
         ITALIANO_V84[(_anno, _nome)] = (_cod, _it, _emb)
 
+# v89: gli stati dell'Africa sotto gli 11,5° (fino al Capo di Buona Speranza) e del Madagascar.
+# Questi nomi valgono in ogni epoca, anche se un'epoca di prima li traduceva gia' (il "Benin" dei dati
+# fino al 1880 e' il regno di Benin, non il Dahomey francese); OVERRIDE_V89 li cambia per epoca.
+NOMI_V89 = {
+    'Bantu peoples': ('BAN', 'Popoli bantu', '⛺'), 'Khoisan': ('KHO', 'Popoli khoisan', '⛺'),
+    'Madagascar': ('MAD', 'Regni del Madagascar', '🏰'), 'Merina Kingdom': ('MER', 'Regno merina', '🏰'),
+    'Imerina': ('MER', 'Regno di Imerina', '🏰'), 'Islamic city-states': ('SWH', 'Città-stato swahili', '🌙'),
+    'Great Zimbabwe': ('ZIM', 'Regno dello Zimbabwe', '👑'), 'Mwenemutapa': ('MUT', 'Regno del Monomotapa', '👑'),
+    'Rozwi': ('ROZ', 'Impero rozvi', '👑'), 'Congo': ('KGO', 'Regno del Kongo', '🏰'), 'Ndongo': ('NDO', 'Regno di Ndongo', '🏰'),
+    'Oyo': ('OYO', 'Impero di Oyo', '👑'), 'Akan': ('AKA', 'Stati akan', '🏰'), 'Asante': ('ASA', 'Impero ashanti', '👑'),
+    'Benin': ('EDO', 'Regno del Benin', '🏰'), 'Dahomey': ('DAO', 'Regno del Dahomey', '🏰'),
+    'Luba': ('LBA', 'Impero luba', '👑'), 'Lunda': ('LUN', 'Impero lunda', '👑'), 'Oromo': ('ORO', 'Popoli oromo', '⛺'),
+    'Portuguese East Africa': ('MOZ', 'Mozambico portoghese', '🏰'), 'Mozambique': ('MOZ', 'Mozambico portoghese', '🏰'),
+    'Delagoa Bay': ('DEL', 'Baia di Delagoa portoghese', '🏰'), 'Zanzibar': ('ZAN', 'Zanzibar', '🌙'),
+    'Sultanate of Zanzibar': ('ZAN', 'Sultanato di Zanzibar', '🌙'), 'Cape Colony': ('CAP', 'Colonia del Capo', '🏰'),
+    'Dutch East Indies': ('CAP', 'Colonia del Capo', '🏰'), 'Dutch settlements': ('CAP', 'Colonia olandese del Capo', '🏰'),
+    'Rift Valley States': ('RIF', 'Popoli della Rift Valley', '⛺'), 'Zulu': ('ZUL', 'Regno zulu', '👑'),
+    'Zululand': ('ZUL', 'Regno zulu', '👑'), 'Lozi': ('LOZ', 'Regno lozi', '🏰'), 'Barotse': ('BRT', 'Regno di Barotse', '🏰'),
+    'Xhosa': ('XHO', 'Regni xhosa', '🏰'), 'Sotho': ('SOT', 'Popoli sotho', '⛺'), 'Africa': ('YOR', 'Regni yoruba', '🏰'),
+    'Rwanda': ('RUA', 'Regno del Ruanda', '🏰'), 'Burundi': ('BUR', 'Regno del Burundi', '🏰'),
+    'Bunyoro': ('BUN', 'Regno del Bunyoro', '🏰'), 'Buganda': ('BUG', 'Regno del Buganda', '🏰'),
+    'Nkore': ('NKO', 'Regno di Ankole', '🏰'), 'Kazembe': ('KZB', 'Regno di Kazembe', '🏰'),
+    'Angola': ('AGO', 'Angola portoghese', '🏰'), 'Angola (Portugal)': ('AGO', 'Angola portoghese', '🏰'),
+    'Fante': ('FAN', 'Confederazione fante', '🏰'), 'Sierra Leone': ('SLE', 'Sierra Leone britannica', '🏰'),
+    'Imbangala': ('IMB', 'Regno di Kasanje', '🏰'), 'Transvaal': ('TRA', 'Repubblica Sudafricana (Transvaal)', '🏛️'),
+    'Sultanate of Utetera': ('UTE', 'Sultanato di Utetera', '🌙'), 'Yeke': ('YEK', 'Regno yeke del Garanganze', '🏰'),
+    'Mirambo Unyanyembe Ukimbu': ('MIR', 'Regno di Mirambo', '🏰'), 'Shona': ('SHO', 'Popoli shona', '⛺'),
+    'Orange Free State': ('ORA', "Stato Libero dell'Orange", '🏛️'), 'Harer (Egypt)': ('HAR', 'Harar egiziano', '🌙'),
+    'Rabih az-Zubayr': ('RAB', 'Stato di Rabih az-Zubayr', '🌙'), 'Yaka': ('YAK', 'Regno yaka', '🏰'),
+    'Teke': ('TEK', 'Regno teke', '🏰'), 'Mbailundu': ('MBA', 'Regno di Mbailundu', '🏰'),
+    'Ndebele': ('NDE', 'Regno ndebele', '🏰'), 'Natal': ('NAT', 'Colonia del Natal', '🏰'),
+    'Kuba': ('KUB', 'Regno kuba', '🏰'), 'Ovimbundu': ('OVI', 'Regni ovimbundu', '🏰'),
+    'Griqualand West': ('GRI', 'Griqualand occidentale', '🏰'), 'Ibadan': ('IBD', 'Ibadan', '🏰'),
+    'Liberia': ('LBR', 'Liberia', '🏛️'), 'Nguni': ('NGU', 'Popoli nguni', '⛺'), 'Basutoland': ('BAS', 'Basutoland britannico', '🏰'),
+    'Ngwato': ('NGW', 'Regno dei Bamangwato', '🏰'), 'Gabon': ('GAB', 'Gabon francese', '🏰'),
+    'Gold Coast (GB)': ('GCO', "Costa d'Oro britannica", '🏰'), 'Ivory Coast': ('CIV', "Costa d'Avorio francese", '🏰'),
+    'Swaziland': ('SWZ', 'Regno dello Swaziland', '🏰'), 'Ato trading confederacy': ('ARO', 'Confederazione aro', '🏰'),
+    'Spanish Guinea': ('GES', 'Guinea spagnola', '🏰'), 'Calabar': ('CAL', 'Calabar', '🏰'), 'Lagos': ('LAG', 'Colonia di Lagos', '🏰'),
+    'Opobo': ('OPO', 'Regno di Opobo', '🏰'), 'Cotonou': ('COT', 'Cotonou francese', '🏰'),
+}
+OVERRIDE_V89 = {
+    '1715': {'Cape Colony': ('CAP', 'Colonia olandese del Capo', '🏰'), 'Netherlands': ('GOL', "Costa d'Oro olandese", '🏰')},
+    '1783': {'Cape Colony': ('CAP', 'Colonia olandese del Capo', '🏰')},
+    '1800': {'Cape Colony': ('CAP', 'Colonia olandese del Capo', '🏰')},
+}
+for _anno, _E in EPOCHE.items():
+    for _nome, (_cod, _it, _emb) in {**NOMI_V89, **OVERRIDE_V89.get(_anno, {})}.items():
+        _E['nomi'][_nome] = _cod
+        ITALIANO_V84[(_anno, _nome)] = (_cod, _it, _emb)
+
+# v89: dove historical-basemaps non disegna nessuno stato a sud del Sahara (dal 1530 quasi tutta
+# l'Africa interna), la terra non resta "di nessuno": va ai regni della sua regione (gli stessi nomi di
+# epoche_cshapes.py per il 1886-1899). Il Sahara, a nord degli 11,5°, resta terra di nessuno.
+REGIONI_V89 = {}
+for _cc in 'SL LR CI GH TG GN GW BJ NG BF ML SN GM'.split(): REGIONI_V89[_cc] = 'AFW'
+for _cc in 'CF CG CD GA GQ ST CM TD SS SD'.split(): REGIONI_V89[_cc] = 'AFC'
+for _cc in 'UG KE RW BI TZ ET SO DJ MW KM SC ER'.split(): REGIONI_V89[_cc] = 'AFO'
+for _cc in 'AO ZM ZW NA BW ZA LS SZ MZ MG MU FR UK'.split(): REGIONI_V89[_cc] = 'AFA'
+# (codici diversi da quelli di CShapes: AUS qui e' la Monarchia asburgica)
+REGIONI_V89_NOMI = {'AFW': ("Regni dell'Africa occidentale", '🏰'), 'AFC': ("Regni dell'Africa centrale", '⛺'),
+                    'AFO': ("Regni dell'Africa orientale", '⛺'), 'AFA': ("Regni dell'Africa australe", '🏰')}
+
+def regione_v89(t):
+    return REGIONI_V89.get(t[4]) if t[3] < 11.5 else None
+
 # in ordine di anno: il gioco cerca l'ultima istantanea non successiva all'anno scelto
 EPOCHE = dict(sorted(EPOCHE.items(), key=lambda kv: int(kv[0])))
 
@@ -804,7 +869,7 @@ def main():
                 if t[4] in E['correzioni']:
                     codici.append(E['correzioni'][t[4]])
                 elif n is None:
-                    codici.append(None)
+                    codici.append(regione_v89(t))
                 elif n in E['nomi']:
                     codici.append(E['nomi'][n])
                 else:
@@ -817,6 +882,9 @@ def main():
         for n in sorted(quanti, key=lambda n: quanti[n]):
             cod, it, emb = ITALIANO_V84[(anno, n)]
             E['stati'][cod] = (it, emb)
+        usati_reg = {c for c in per_taglia['piccola'] if c in REGIONI_V89_NOMI}
+        for cod in sorted(usati_reg):
+            E['stati'][cod] = REGIONI_V89_NOMI[cod]
         lavori.append((anno, E['titolo'], E['stati'], per_taglia, False))
     lavori = [l + ('',) for l in lavori]
     lavori += fatti_storici(lavori, T, epoche_cshapes.ANNO_PRIMO)

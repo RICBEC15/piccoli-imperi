@@ -81,11 +81,11 @@ const terraNuova = (r, c) => { const t = map[r][c], q = tileLonLat(t, g); return
 for (let r = 0; r < R80; r++) for (let c = 0; c < C80; c++) terr.push(terraNuova(r, c) ? 'w' : String.fromCharCode(T[r * COLS + c]));
 vecchio.rows = R80; vecchio.cols = C80; vecchio.terreno = rleCodifica(terr);
 vecchio.ponti = vecchio.ponti.filter(([r, c]) => !terraNuova(r, c));
-const diNuovi = s => [s.y && s.y.o, s.u && s.u.o, s.s && s.s.o, s.q && s.q.o].some(o => o && PAESI_V84[o]);
+const diNuovi = s => [s.y && s.y.o, s.u && s.u.o, s.s && s.s.o, s.q && s.q.o].some(o => o && PAESI_DOPO_V83[o]);
 vecchio.caselle = vecchio.caselle.filter(s => !terraNuova(s.r, s.c) && !diNuovi(s));
-vecchio.imperi = vecchio.imperi.filter(o => !PAESI_V84[o]);
-for (const o of NUOVI) { delete vecchio.stars[o]; delete vecchio.paesi[o]; }
-vecchio.conquiste = vecchio.conquiste.filter(([r, c, o]) => !terraNuova(r, c) && !PAESI_V84[o]);
+vecchio.imperi = vecchio.imperi.filter(o => !PAESI_DOPO_V83[o]);
+for (const o of Object.keys(PAESI_DOPO_V83)) { delete vecchio.stars[o]; delete vecchio.paesi[o]; }
+vecchio.conquiste = vecchio.conquiste.filter(([r, c, o]) => !terraNuova(r, c) && !PAESI_DOPO_V83[o]);
 vecchio.diplomazia = { base: 'pace', rel: {}, fiducia: {}, rifiuto: {} };
 setMapSize('media'); // si parte da un'altra taglia: il caricamento deve ritrovare quella giusta
 assert(applySave(JSON.parse(JSON.stringify(vecchio))), 'un salvataggio della v82 (senza Medio Oriente) si carica');
@@ -96,7 +96,7 @@ assert(MEDIO_ORIENTE.every(cc => info2[cc]), 'le terre del Medio Oriente tornano
 const intorno = (lon, lat) => [tileAtGeo(lon, lat, g2), ...neighbors(tileAtGeo(lon, lat, g2))];
 assert(intorno(51.42, 35.67).some(t => t.country === 'IR' && t.terrain !== 'water') && intorno(32.9, 24.09).some(t => t.country === 'EG'), 'Teheran e Assuan sono terra, in Iran e in Egitto');
 assert(dallIndice(conCitta, t => t.city.n === 'Baghdad' && t.city.owner === null).length === 1, 'Baghdad è un villaggio libero da conquistare');
-assert(!NUOVI.some(cc => players[cc]), 'nella partita vecchia i paesi nuovi non hanno un impero');
+assert(!Object.keys(PAESI_DOPO_V83).some(cc => players[cc]), 'nella partita vecchia i paesi nuovi non hanno un impero');
 endTurn();
 assert(current === 'p' && !gameOver, 'e la partita vecchia va avanti');
 console.log('TUTTI I TEST MEDIO ORIENTE SUPERATI');
