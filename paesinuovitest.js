@@ -58,8 +58,8 @@ const v63 = comeSalvataggioV17(nuovo);
 // (v84: la v63 non aveva neppure le righe in fondo e le colonne a destra del Medio Oriente)
 const R80 = ROWS - (EXTR - EXTR_V80), C80 = COLS - (EXTE - EXTE_V80), g80 = geoSetup();
 v63.rows = R80 - tagliaR; v63.cols = C80 - tagliaC;
-v63.imperi = v63.imperi.filter(o => !PAESI_V84[o]);
-for (const o of Object.keys(PAESI_V84)) { delete v63.stars[o]; delete v63.paesi[o]; }
+v63.imperi = v63.imperi.filter(o => !PAESI_DOPO_V83[o]);
+for (const o of Object.keys(PAESI_DOPO_V83)) { delete v63.stars[o]; delete v63.paesi[o]; }
 v63.imperi = v63.imperi.filter(o => !PAESI_V65[o]);
 for (const o of NUOVI) { delete v63.stars[o]; delete v63.paesi[o]; }
 v63.paesi.p = 'DE'; v63.diplomazia = { rel: {}, fiducia: {}, rifiuto: {} };

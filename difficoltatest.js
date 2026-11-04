@@ -8,7 +8,8 @@ Math.random = () => { seme = (seme * 1103515245 + 12345) & 0x7fffffff; return se
 // questo test gioca il duello (un solo nemico, come prima) in un paese a caso
 setAvversari('duello');
 const A = () => imperiIA()[0]; // l'impero nemico
-function sceltaACaso() { const l = Object.keys(paesiInfo()); cambiaPaese(l[Math.floor(Math.random() * l.length)]); }
+// (v89: fra i paesi di prima dell'Africa del sud, cosi' il seme pesca le stesse partite di prima)
+function sceltaACaso() { const l = Object.keys(paesiInfo()).filter(cc => !PAESI_V89[cc]); cambiaPaese(l[Math.floor(Math.random() * l.length)]); }
 
 // gioca con il giocatore fermo; cambi = { turno: livello } da applicare durante la partita
 function partita(seed, livello, cambi = {}, maxTurni = 90) {

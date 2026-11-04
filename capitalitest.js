@@ -22,11 +22,14 @@ for (const taglia of ['piccola', 'gigante']) {
   console.log(`  ${taglia}: le capitali più lontane dal punto vero (in caselle):`, scarti.slice(0, 5).map(([cc, d]) => `${cc} ${d.toFixed(1)}`).join(', '));
   // il punto vero può cadere su un fiume, in mare o su un villaggio: si sposta di poco
   // v84: Gibuti sta proprio sul bordo sud della mappa (11,6° N): li' si concede una casella in piu'
-  const troppo = scarti.filter(([cc, d]) => d > (cc === 'DJ' ? 4 : 3));
+  // v89: la Guinea Equatoriale e São Tomé hanno la capitale vera su un'isola di poche caselle: l'impero
+  // nasce dove c'e' spazio (sul continente, a Príncipe), a qualche casella
+  const troppo = scarti.filter(([cc, d]) => d > (cc === 'DJ' ? 4 : cc === 'GQ' || cc === 'ST' ? 10 * tileScale() : 3));
   assert(!troppo.length, `${taglia}: tutte le ${tutti.length} capitali entro 3 caselle dal punto vero (Gibuti, sul bordo, entro 4)`);
   // i microstati (Monaco, San Marino, Malta e il Liechtenstein sulla mappa piccola)
   // hanno poche caselle (meno di due della mappa piccola): la loro capitale sta dove sta
-  assert(tutti.every(cc => paesiInfo()[cc].caselle <= 2 * tileScale() ** 2 || neighbors(capitaleDi(cc)).filter(n => passable(n)).length >= 3),
+  // (v89: e le Comore, tre isolette di una casella l'una)
+  assert(tutti.every(cc => paesiInfo()[cc].caselle <= (cc === 'KM' ? 3 : 2) * tileScale() ** 2 || neighbors(capitaleDi(cc)).filter(n => passable(n)).length >= 3),
     `${taglia}: ogni capitale ha spazio per uscire (non chiusa fra monti e mare)`);
   const madrid = capitaleDi('ES');
   assert(madrid && madrid.country === 'ES' && scarto('ES') <= 1.5, `${taglia}: la Spagna comincia a Madrid`);

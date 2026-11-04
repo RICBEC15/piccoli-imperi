@@ -1,6 +1,6 @@
 # Piccoli Imperi
 
-Gioco di strategia a turni su esagoni, in stile Polytopia, su una mappa geografica reale dell'Europa, del Medio Oriente e del Nord Africa: dall'Islanda e dalle Canarie agli Urali e all'Iran, fino allo Yemen e al Sahel. A inizio partita scegli l'anno, uno qualsiasi dal 1000 a oggi, e tocchi sulla mappa il paese da guidare: il suo territorio è la tua patria. **Ogni altro paese è un impero guidato dall'IA**, in guerra con tutti. Un impero cade quando perde la capitale; vinci quando sono caduti tutti. Nella schermata iniziale si può scegliere anche il duello: un solo nemico, l'"Impero Cremisi", in un paese vicino.
+Gioco di strategia a turni su esagoni, in stile Polytopia, su una mappa geografica reale dell'Europa, del Medio Oriente e di tutta l'Africa: dall'Islanda e dalle Canarie agli Urali e all'Iran, fino al Capo di Buona Speranza e al Madagascar. A inizio partita scegli l'anno, uno qualsiasi dal 1000 a oggi, e tocchi sulla mappa il paese da guidare: il suo territorio è la tua patria. **Ogni altro paese è un impero guidato dall'IA**, in guerra con tutti. Un impero cade quando perde la capitale; vinci quando sono caduti tutti. Nella schermata iniziale si può scegliere anche il duello: un solo nemico, l'"Impero Cremisi", in un paese vicino.
 
 ## Come giocare
 
@@ -12,10 +12,12 @@ In locale: apri `piccoli_imperi.html` nel browser con un doppio clic. Non serve 
 
 - `piccoli_imperi.html`: il gioco completo (HTML, CSS e JavaScript in un unico file).
 - `index.html`: pagina d'ingresso per GitHub Pages, rimanda subito a `piccoli_imperi.html`.
-- `stub.js`, `shiptest.js`, `savetest.js`, `playtest.js`, `aitest.js`, `paesitest.js`, `imperitest.js`, `difficoltatest.js`, `mappatest.js`, `diplotest.js`, `conquistatest.js`, `capitalitest.js`, `paesinuovitest.js`, `microstatitest.js`, `vaticanotest.js`, `popolazionetest.js`, `biomitest.js`, `epochetest.js`, `browser_check.js`, `mobile_check.js`, `pantest.js`, `conquista_check.js`, `citta_check.js`, `unitatest.js`, `stabilita_check.js`, `mappefissetest.js`, `caricamento_check.js`, `cheattest.js`, `cheat_check.js`, `capitaletest.js`, `capitale_check.js`, `anno_check.js`, `popstoricatest.js`, `popstorica_check.js`, `medioorientetest.js`, `madeiratest.js`, `madeira_check.js`, `canarie_check.js`, `bandieretest.js`, `bandiere_check.js`: test automatici (`mobile_check.js` prova il gioco su un iPhone emulato con Playwright, `pantest.js` lo spostamento nella mappa col mouse, le frecce e il dito).
+- `stub.js`, `shiptest.js`, `savetest.js`, `playtest.js`, `aitest.js`, `paesitest.js`, `imperitest.js`, `difficoltatest.js`, `mappatest.js`, `diplotest.js`, `conquistatest.js`, `capitalitest.js`, `paesinuovitest.js`, `microstatitest.js`, `vaticanotest.js`, `popolazionetest.js`, `biomitest.js`, `epochetest.js`, `browser_check.js`, `mobile_check.js`, `pantest.js`, `conquista_check.js`, `citta_check.js`, `unitatest.js`, `stabilita_check.js`, `mappefissetest.js`, `caricamento_check.js`, `cheattest.js`, `cheat_check.js`, `capitaletest.js`, `capitale_check.js`, `anno_check.js`, `popstoricatest.js`, `popstorica_check.js`, `medioorientetest.js`, `madeiratest.js`, `madeira_check.js`, `canarie_check.js`, `bandieretest.js`, `bandiere_check.js`, `africatest.js`, `africa_check.js`: test automatici (`mobile_check.js` prova il gioco su un iPhone emulato con Playwright, `pantest.js` lo spostamento nella mappa col mouse, le frecce e il dito).
 - `build_russia.js`: script che ha estratto il confine della Russia dal dataset Natural Earth.
 - `build_paesi_nord.py`: estrae da Natural Earth i confini dei paesi aggiunti nella v65 (`POLY_NORD`, `SEMI_NORD`).
 - `build_paesi_est.py`: estrae da Natural Earth i confini del Medio Oriente, del Sahel e dell'Asia centrale (v84: `POLY_EST`, `SEMI_EST`).
+- `build_paesi_africa.py`: estrae da Natural Earth (versione con i laghi) i confini dell'Africa sotto gli 11,5° N, del Madagascar e delle isole, e i grandi laghi (v89: `POLY_AFRICA`, `SEMI_AFRICA`, `LAGHI_AFRICA`).
+- `build_biomi_africa.py`: i biomi dell'Africa aggiunta nella v89, direttamente dai dati da satellite (ESA WorldCover e Copernicus DEM).
 - `build_biomi_est.py`: i biomi OpenStreetMap delle terre aggiunte nella v84 (e di Madeira, v86), senza toccare quelli di prima.
 - `build_canarie.py`: i contorni veri delle isole Canarie da Natural Earth 10m (v87: `POLY_CANARIE`) e i biomi delle loro caselle nuove.
 - `build_madeira.py`: estrae da Natural Earth 10m il contorno di Madeira e il seme di Porto Santo (v86: `POLY_MADEIRA`, `SEMI_MADEIRA`).
@@ -62,6 +64,8 @@ cat stub.js game.js cittaunicatest.js > _run.js && node _run.js   # la città co
 cat stub.js game.js medioorientetest.js > _run.js && node _run.js   # il Medio Oriente (v84): pochi secondi
 cat stub.js game.js madeiratest.js > _run.js && node _run.js   # Madeira e Porto Santo (v86): pochi secondi
 cat stub.js game.js bandieretest.js > _run.js && node _run.js   # le bandiere (v88): pochi secondi
+cat stub.js game.js africatest.js > _run.js && node _run.js   # tutta l'Africa (v89): circa un minuto
+node africa_check.js   # l'Africa nel browser, solo computer (v89)
 node madeira_check.js   # Madeira nel browser, computer e tablet (Playwright)
 node canarie_check.js   # le Canarie nel browser, computer e tablet (Playwright)
 node cheat_check.js   # il pannello dei cheat nel browser, computer e tablet col tocco (Playwright)
@@ -110,6 +114,19 @@ Nella schermata iniziale (e nella scelta del paese, prima di fondare la capitale
 Ogni modifica alla mappa va verificata con `mappatest.js`, che controlla anche che due partite abbiano la stessa mappa.
 
 ## Versione
+
+v89 (formato di salvataggio invariato, v18; le partite salvate prima si caricano ancora): **tutta l'Africa**.
+
+- La mappa scende da 11,5° nord fino al Capo Agulhas (35° sud), con il Madagascar, le Comore, Mauritius, le Seychelles, la Riunione e Sant'Elena. Le righe nuove sono tutte in fondo, quindi la mappa di prima resta identica, casella per casella. Nuove dimensioni: piccola 282×529, media 567×1063, gigante 851×1598 (sulla gigante 1,36 milioni di caselle, quasi il doppio di prima).
+- 30 paesi nuovi, ognuno con il suo impero IA e la sua capitale vera: Sierra Leone, Liberia, Costa d'Avorio, Ghana, Togo, Guinea Equatoriale, São Tomé e Príncipe, Gabon, Repubblica Centrafricana, Congo, Repubblica Democratica del Congo, Uganda, Kenya, Ruanda, Burundi, Tanzania, Angola, Zambia, Malawi, Mozambico, Zimbabwe, Namibia, Botswana, Sudafrica, Lesotho, eSwatini, Madagascar, Comore, Mauritius, Seychelles. I paesi del Sahel si completano a sud e hanno finalmente la loro capitale vera: Addis Abeba, Abuja, Giuba, Mogadiscio, Conakry, Yaoundé, Porto-Novo (prima Macallè, Kano, Renk, Alula...).
+- I grandi laghi sono acqua (Vittoria, Tanganica, Malawi, Turkana, Alberto, Kivu, Volta, Kariba, Mweru...). Fiumi nuovi: il Congo dal Lualaba all'Atlantico con l'Ubangi e il Kasai, il Niger fino al delta con il Benue, il Nilo Bianco dal lago Vittoria e il Nilo Azzurro dal lago Tana, lo Zambesi con le cascate Vittoria, il Limpopo, l'Orange con il Vaal, l'Okavango che finisce nel Kalahari, il Cuanza, l'Ogooué, il Giuba e lo Uebi Scebeli.
+- Città vere da 100.000 abitanti in su anche qui (le città della lista passano da 1.823 a 2.699), con gli abitanti dell'anno scelto: Lagos, Kinshasa, Johannesburg, Luanda, Nairobi, Dar es Salaam, Abidjan...
+- Biomi: in Africa OpenStreetMap disegna poco, quindi le caselle nuove vengono direttamente dai dati da satellite (ESA WorldCover e Copernicus DEM, `build_biomi_africa.py`): la foresta del Congo e del golfo di Guinea, la savana e la boscaglia, il deserto del Namib, le paludi del Sudd e dell'Okavango, gli altopiani d'Etiopia e dell'Africa orientale, il Drakensberg.
+- Le epoche coprono anche l'Africa: fino al 1885 i popoli bantu e khoisan, lo Zimbabwe, il Monomotapa, il Kongo, Oyo, l'impero ashanti, il Dahomey, il Benin, i Luba e i Lunda, le città-stato swahili, i Merina, gli Zulu, la Colonia del Capo...; dal 1886 i confini esatti di CShapes con la spartizione coloniale (Stato Libero del Congo e Congo Belga, Africa Orientale Tedesca, Rhodesia, Unione Sudafricana...) e le indipendenze. Dove i dati non segnano nessuno stato (fino al 1885 gran parte dell'Africa interna, e nel 1886-1899 le terre non ancora spartite) ci sono i "Regni dell'Africa orientale / australe / centrale / occidentale": a sud del Sahara non c'è terra di nessuno. Le isole di una o due caselle (Mauritius, Seychelles, Sant'Elena, São Tomé) nelle epoche si uniscono al vicino, come già Malta e Capo Verde.
+- Il file passa da 4,1 a circa 6,5 MB (soprattutto i confini storici). Una partita nuova, misurata in Chromium su computer: piccola 0,4 s, media 1,1 s, gigante 2,3 s.
+- La Guinea Equatoriale e São Tomé hanno la capitale vera su un'isola di poche caselle: il loro impero nasce dove c'è spazio (sul continente, a Príncipe).
+- Bandiere per tutti i paesi nuovi e per le colonie (britanniche, francesi, portoghesi, tedesche, belghe...).
+- Le partite salvate dalla v84 alla v88 si aprono sulla mappa nuova: l'Africa compare con i suoi villaggi liberi, senza imperi.
 
 v88 (formato di salvataggio invariato, v18): **le bandiere vere di ogni paese**.
 

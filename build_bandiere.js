@@ -52,6 +52,10 @@ const AUSTRIA_IMP = 'H:#000/#fc0';
 const REICH = 'H:#000/#fff/#dd0000';
 const PRUSSIA = 'bg:#fff + aquila:#111';
 const POLONIA = 'bg:#dc143c + aquila:#fff';
+const PORTOGALLO = [[0, 'portogallo'], [1910, 'iso:pt']];
+const OLANDA_VOC = 'H:#f60/#fff/#21468b';
+const SUDAFRICA_1928 = 'H:#f60/#fff/#002395';
+const MERINA = 'H:#fff/#c8102e';
 const ISLAM = c => `bg:${c} + lunastella:#fff`;
 const TABELLA = {
   'ADE|Aden britannica': 'iso:gb', 'APR|Protettorato di Aden': 'iso:gb',
@@ -226,6 +230,42 @@ const TABELLA = {
   'SEL|Impero selgiuchide': 'bg:#1d3f94 + aquila2:#fff', 'SEL|Sultanato selgiuchide': 'bg:#1d3f94 + aquila2:#fff',
   'SEL|Sultanato selgiuchide di Rum': 'bg:#1d3f94 + aquila2:#fff',
   'ORD|Orda d\'Oro': 'bg:#f2c300 + tridente:#c8102e',
+  // v89: l'Africa sotto gli 11,5°
+  'AGO|Angola portoghese': PORTOGALLO, 'AGO|Angola': 'iso:ao', 'MOZ|Mozambico portoghese': PORTOGALLO, 'MOZ|Mozambico': 'iso:mz',
+  'DEL|Baia di Delagoa portoghese': PORTOGALLO, 'STP|São Tomé portoghese': PORTOGALLO, 'STP|São Tomé e Príncipe': 'iso:st',
+  'GES|Guinea spagnola': SPAGNA, 'GES|Guinea Equatoriale': 'iso:gq',
+  'CAP|Colonia del Capo': 'iso:gb', 'CAP|Colonia olandese del Capo': OLANDA_VOC, 'GOL|Costa d\'Oro olandese': OLANDA_VOC,
+  'NAT|Colonia del Natal': 'iso:gb', 'BAS|Basutoland britannico': 'iso:gb', 'BAS|Regno del Lesotho': 'iso:ls',
+  'BEC|Bechuanaland britannico': 'iso:gb', 'BBE|Colonia del Bechuanaland': 'iso:gb', 'BEC|Botswana': 'iso:bw',
+  'TRA|Repubblica Sudafricana (Transvaal)': 'H:#c8102e/#fff/#1d3f94 + quadro:#007a4d', 'TRA|Colonia del Transvaal': 'iso:gb',
+  'ORA|Stato Libero dell\'Orange': 'Hn:#fff/#f60:7', 'ORA|Colonia del Fiume Orange': 'iso:gb',
+  'ZAF|Unione Sudafricana': SUDAFRICA_1928, 'ZAF|Sudafrica': [[1961, SUDAFRICA_1928], [1994, 'iso:za']],
+  'NAM|Africa Tedesca del Sud-Ovest': REICH, 'NAM|Africa del Sud-Ovest': SUDAFRICA_1928, 'NAM|Namibia': 'iso:na',
+  'SWZ|Regno dello Swaziland': 'iso:sz', 'SWZ|Swaziland britannico': 'iso:gb',
+  'RHO|Rhodesia': [[1886, 'iso:gb'], [1968, 'V:#00843d/#fff/#00843d']], 'RHO|Rhodesia del Sud': 'iso:gb', 'RHO|Zimbabwe': 'iso:zw',
+  'RHN|Rhodesia del Nord': 'iso:gb', 'RHN|Zambia': 'iso:zm', 'RNE|Rhodesia nord-orientale': 'iso:gb', 'RNO|Rhodesia nord-occidentale': 'iso:gb',
+  'FRN|Federazione della Rhodesia e del Nyasaland': 'iso:gb', 'NYA|Nyasaland britannico': 'iso:gb', 'NYA|Malawi': 'iso:mw',
+  'TAN|Africa Orientale Tedesca': REICH, 'TAN|Tanganica britannico': 'iso:gb', 'TAN|Tanganica': 'H:#1eb53a/#000/#1eb53a', 'TAN|Tanzania': 'iso:tz',
+  'ZAN|Sultanato di Zanzibar': 'bg:#c8102e', 'ZAN|Zanzibar': 'bg:#c8102e',
+  'KEN|Africa Orientale Britannica': 'iso:gb', 'KEN|Colonia del Kenya': 'iso:gb', 'KEN|Kenya': 'iso:ke',
+  'UGA|Protettorato dell\'Uganda': 'iso:gb', 'UGA|Uganda': 'iso:ug', 'RUR|Ruanda-Urundi belga': 'iso:be', 'RUA|Ruanda': 'iso:rw',
+  'BUR|Regno del Burundi': 'iso:bi', 'BUR|Burundi': 'iso:bi',
+  'CBE|Stato Libero del Congo': 'bg:#1d3f94 + stella:#f2c300', 'CBE|Congo Belga': 'bg:#1d3f94 + stella:#f2c300',
+  'CBE|Repubblica del Congo-Léopoldville': 'bg:#1d3f94 + stella:#f2c300', 'CBE|Zaire': 'bg:#00843d + disco:#f2c300',
+  'CBE|Repubblica Democratica del Congo': 'iso:cd',
+  'CFR|Congo francese': 'iso:fr', 'CFR|Repubblica del Congo': 'iso:cg', 'CFR|Repubblica Popolare del Congo': 'bg:#c8102e + stella:#f2c300@0.2,0.25,0.25',
+  'GAB|Gabon francese': 'iso:fr', 'GAB|Gabon': 'iso:ga', 'OUB|Ubangi-Sciari francese': 'iso:fr', 'OUB|Repubblica Centrafricana': 'iso:cf',
+  'OUB|Impero centrafricano': 'iso:cf', 'COM|Comore francesi': 'iso:fr', 'COM|Comore': 'iso:km', 'REU|Riunione francese': 'iso:fr',
+  'MAD|Madagascar francese': 'iso:fr', 'MAD|Madagascar': 'iso:mg', 'MAD|Regno del Madagascar': MERINA,
+  'MER|Regno merina': MERINA, 'MER|Regno di Imerina': MERINA,
+  'MRZ|Mauritius britannica': 'iso:gb', 'MRZ|Mauritius': 'iso:mu', 'SEY|Seychelles britanniche': 'iso:gb', 'SEY|Seychelles': 'iso:sc',
+  'SHE|Sant\'Elena britannica': 'iso:gb',
+  'GCO|Costa d\'Oro britannica': 'iso:gb', 'GCO|Ghana': 'iso:gh', 'TOG|Togo tedesco': REICH, 'TOG|Togo anglo-francese': 'iso:gb',
+  'TBR|Togo britannico': 'iso:gb', 'TOF|Togo francese': 'iso:fr', 'TOF|Togo': 'iso:tg',
+  'CIV|Costa d\'Avorio francese': 'iso:fr', 'CIV|Costa d\'Avorio': 'iso:ci', 'SLE|Sierra Leone': 'iso:sl', 'LBR|Liberia': 'iso:lr',
+  'LAG|Colonia di Lagos': 'iso:gb', 'NGS|Nigeria meridionale britannica': 'iso:gb', 'COT|Cotonou francese': 'iso:fr',
+  'OIL|Protettorato dei Fiumi dell\'Olio': 'iso:gb', 'OIL|Protettorato della Costa del Niger': 'iso:gb',
+  'ASA|Impero ashanti': 'H:#f2c300/#00843d/#000', 'HAR|Harar egiziano': 'bg:#c8102e + lunastella:#fff',
 };
 // chi non e' in tabella: un drappo col simbolo dello stato e due colori scelti dal suo codice
 const DRAPPI = {
