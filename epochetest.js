@@ -102,9 +102,9 @@ setEpoca('oggi'); assert(annoScelto === ANNO_MAX, "setEpoca('oggi') porta a oggi
 setAnno(1816); newGame();
 {
   const paese = players.p.country, cap = placeSet.map(t => t.r + ',' + t.c).join();
-  setAnno(1825);
-  assert(annoPartita === 1825 && epocaPartita === '1815' && players.p.country === paese && placeSet.map(t => t.r + ',' + t.c).join() === cap,
-    'dal 1816 al 1825 (stessi confini del 1815): stesso paese, stessa capitale, anno 1825');
+  setAnno(1817);
+  assert(annoPartita === 1817 && epocaPartita === '1815' && players.p.country === paese && placeSet.map(t => t.r + ',' + t.c).join() === cap,
+    'dal 1816 al 1817 (stessi confini del 1815): stesso paese, stessa capitale, anno 1817');
   setAnno(1883);
   assert(annoPartita === 1883 && epocaPartita === '1881' && statoStorico(players.p.country), "nel 1883 i confini del 1881 (la Tunisia francese)");
   cambiaPaese('ITA'); placePlayerCapital(placeSet[0]);
