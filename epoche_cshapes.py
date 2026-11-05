@@ -80,7 +80,7 @@ NOMI = {
   'Hungary': [(1918, 'UNG', 'Ungheria', '🏛️'), (1920, 'UNG', "Regno d'Ungheria", '🏰'),
               (1946, 'UNG', 'Ungheria', '🚩'), (1989, 'UNG', 'Ungheria', '🏛️')],
   'Iceland': [(1886, 'ISL', 'Islanda danese', '🏰'), (1918, 'ISL', "Regno d'Islanda", '🏰'), (1944, 'ISL', 'Islanda', '🏛️')],
-  'India': [(1886, 'IND', 'India britannica', '🏰')],
+  'India': [(1886, 'IND', 'India britannica', '🏰'), (1947, 'IND', 'India', '🏛️')],
   'Iran (Persia)': [(1886, 'PER', 'Persia', '🌙'), (1935, 'PER', 'Iran', '🌙')],
   'Iraq': [(1920, 'IRQ', 'Iraq britannico', '🏰'), (1932, 'IRQ', "Regno dell'Iraq", '🏰'), (1958, 'IRQ', 'Iraq', '🏛️')],
   'Ireland': [(1921, 'IRL', "Stato libero d'Irlanda", '🏛️'), (1937, 'IRL', 'Irlanda', '🏛️')],
@@ -224,6 +224,48 @@ NOMI = {
   'Uganda': [(1886, 'UGA', "Protettorato dell'Uganda", '🏰'), (1962, 'UGA', 'Uganda', '🏛️')],
   'Zambia': [(1886, 'RHN', 'Rhodesia del Nord', '🏰'), (1964, 'RHN', 'Zambia', '🏛️')],
   'Zanzibar': [(1886, 'ZAN', 'Sultanato di Zanzibar', '🌙')],
+  # v90: l'Asia
+  'China': [(1886, 'QIN', 'Impero Qing', '👑'), (1912, 'CIN', 'Repubblica di Cina', '🏛️'), (1949, 'CIN', 'Repubblica Popolare Cinese', '🚩')],
+  'Mongolia': [(1921, 'MGL', 'Mongolia', '🚩'), (1990, 'MGL', 'Mongolia', '🏛️')],
+  'Tibet': [(1913, 'TBT', 'Tibet', '🏰')],
+  'Taiwan': [(1895, 'TWN', 'Taiwan giapponese', '🏰'), (1949, 'TWN', 'Repubblica di Cina (Taiwan)', '🏛️')],
+  'Japan': [(1886, 'GIA', 'Impero del Giappone', '👑'), (1947, 'GIA', 'Giappone', '🏛️')],
+  'Southern Sakhalin Island': [(1905, 'SKH', 'Karafuto giapponese', '🏰')],
+  'Korea': [(1886, 'KOR', 'Regno di Joseon (Corea)', '🏰'), (1897, 'KOR', 'Impero coreano', '👑'), (1910, 'KOR', 'Corea giapponese', '🏰')],
+  "Korea, People's Republic of": [(1945, 'PRK', 'Corea del Nord (occupazione sovietica)', '🚩'), (1948, 'PRK', 'Corea del Nord', '🚩')],
+  'Korea, Republic of': [(1945, 'ROK', 'Corea del Sud (occupazione americana)', '🏛️'), (1948, 'ROK', 'Corea del Sud', '🏛️')],
+  'Kyrgyz Republic': [(1991, 'KGZ', 'Kirghizistan', '🏛️')],
+  'Tajikistan': [(1991, 'TJK', 'Tagikistan', '🏛️')],
+  'Jammu and Kashmir': [(1947, 'JKS', 'Jammu e Kashmir', '🏰')],
+  'Kashmir (North, Azad)': [(1947, 'AZK', 'Azad Kashmir', '🏰')],
+  'Nepal': [(1886, 'NEP', 'Regno del Nepal', '🏰')],
+  'Bhutan': [(1886, 'BHU', 'Bhutan', '🏰')],
+  'Bangladesh': [(1971, 'BGD', 'Bangladesh', '🏛️')],
+  'Sri Lanka (Ceylon)': [(1886, 'CEY', 'Ceylon britannica', '🏰'), (1948, 'CEY', 'Ceylon', '🏛️'), (1972, 'CEY', 'Sri Lanka', '🏛️')],
+  'Maldives': [(1887, 'MDV', 'Maldive britanniche', '🏰'), (1965, 'MDV', 'Maldive', '🌙')],
+  'Myanmar (Burma)': [(1937, 'BIR', 'Birmania britannica', '🏰'), (1948, 'BIR', 'Birmania', '🏛️'), (1989, 'BIR', 'Myanmar', '🏛️')],
+  'Thailand': [(1886, 'SIA', 'Regno del Siam', '🏰'), (1939, 'SIA', 'Thailandia', '🏰')],
+  'Laos': [(1893, 'LAO', 'Laos francese', '🏰'), (1953, 'LAO', 'Regno del Laos', '🏰'), (1975, 'LAO', 'Laos', '🚩')],
+  'Cambodia (Kampuchea)': [(1886, 'KHM', 'Cambogia francese', '🏰'), (1953, 'KHM', 'Regno di Cambogia', '🏰'),
+                           (1970, 'KHM', 'Repubblica khmer', '🏛️'), (1975, 'KHM', 'Kampuchea democratica', '🚩'),
+                           (1979, 'KHM', 'Repubblica Popolare di Kampuchea', '🚩'), (1993, 'KHM', 'Regno di Cambogia', '🏰')],
+  'Vietnam (Annam/Cochin China/Tonkin)': [(1886, 'ICF', 'Indocina francese', '🏰')],
+  'Vietnam, Democratic Republic of': [(1954, 'VNM', 'Vietnam del Nord', '🚩'), (1976, 'VNM', 'Vietnam', '🚩')],
+  'Vietnam, Republic of': [(1954, 'RVN', 'Vietnam del Sud', '🏛️')],
+  'Straits Settlements': [(1886, 'STS', 'Insediamenti dello Stretto', '🏰')],
+  'Federated Malay States': [(1896, 'FMS', 'Stati malesi federati', '🏰')],
+  'Unfederated Malay States': [(1886, 'UMS', 'Stati malesi non federati', '🏰')],
+  'Pahang': [(1886, 'FMS', 'Stati malesi protetti', '🏰')], 'Perak': [(1886, 'FMS', 'Stati malesi protetti', '🏰')],
+  'Selangore': [(1886, 'FMS', 'Stati malesi protetti', '🏰')],
+  'Malaysia': [(1946, 'MLS', 'Unione malese', '🏰'), (1948, 'MLS', 'Federazione della Malesia', '🏰'), (1963, 'MLS', 'Malesia', '🏛️')],
+  'Singapore': [(1946, 'SGP', 'Colonia di Singapore', '🏰'), (1965, 'SGP', 'Singapore', '🏛️')],
+  'Sabah (North Borneo)': [(1888, 'NBO', 'Borneo del Nord britannico', '🏰')],
+  'Sarawak': [(1888, 'SRW', 'Raj di Sarawak', '🏰'), (1946, 'SRW', 'Colonia di Sarawak', '🏰')],
+  'Brunei': [(1888, 'BRU', 'Brunei britannico', '🏰'), (1984, 'BRU', 'Sultanato del Brunei', '🌙')],
+  'Indonesia': [(1886, 'IOO', 'Indie orientali olandesi', '🏰'), (1945, 'IDN', 'Indonesia', '🏛️')],
+  'West Irian (Dutch New Guinea)': [(1949, 'NGO', 'Nuova Guinea olandese', '🏰'), (1962, 'NGO', 'Irian occidentale (ONU)', '🏰')],
+  'East Timor': [(1886, 'TMP', 'Timor portoghese', '🏰'), (2002, 'TMP', 'Timor Est', '🏛️')],
+  'Philippines': [(1886, 'FIL', 'Filippine spagnole', '🏰'), (1898, 'FIL', 'Filippine americane', '🏰'), (1946, 'FIL', 'Filippine', '🏛️')],
   'Zimbabwe (Rhodesia)': [(1886, 'RHO', 'Rhodesia', '🏰'), (1923, 'RHO', 'Rhodesia del Sud', '🏰'), (1965, 'RHO', 'Rhodesia', '🏰'),
                           (1980, 'RHO', 'Zimbabwe', '🏛️')],
 }
@@ -270,7 +312,9 @@ def leggi(path):
             a = arcs[i] if i >= 0 else arcs[~i][::-1]
             out.extend(a if not out else a[1:])
         return out
-    B = box(-27, -36, 67, 73)  # la mappa del gioco, larga (v84: fino allo Yemen e al Sahel; v89: tutta l'Africa)
+    # la mappa del gioco, larga (v84: fino allo Yemen e al Sahel; v89: tutta l'Africa; v90: tutta l'Asia,
+    # anche la punta della Cukotka oltre i 180°)
+    B = box(-27, -48, 180, 79).union(box(-180, 60, -169, 79))
     feats = []
     for g in o['geometries']:
         if g['type'] == 'Polygon':

@@ -1,6 +1,6 @@
 # Piccoli Imperi
 
-Gioco di strategia a turni su esagoni, in stile Polytopia, su una mappa geografica reale dell'Europa, del Medio Oriente e di tutta l'Africa: dall'Islanda e dalle Canarie agli Urali e all'Iran, fino al Capo di Buona Speranza e al Madagascar. A inizio partita scegli l'anno, uno qualsiasi dal 1000 a oggi, e tocchi sulla mappa il paese da guidare: il suo territorio è la tua patria. **Ogni altro paese è un impero guidato dall'IA**, in guerra con tutti. Un impero cade quando perde la capitale; vinci quando sono caduti tutti. Nella schermata iniziale si può scegliere anche il duello: un solo nemico, l'"Impero Cremisi", in un paese vicino.
+Gioco di strategia a turni su esagoni, in stile Polytopia, su una mappa geografica reale dell'Europa, dell'Africa e di tutta l'Asia: dall'Islanda e dalle Canarie al Giappone e alla Čukotka, dalla penisola del Tajmyr all'Indonesia, fino al Capo di Buona Speranza e al Madagascar. L'Oceania per ora è mare: lo spazio sulla mappa c'è già. A inizio partita scegli l'anno, uno qualsiasi dal 1000 a oggi, e tocchi sulla mappa il paese da guidare: il suo territorio è la tua patria. **Ogni altro paese è un impero guidato dall'IA**, in guerra con tutti. Un impero cade quando perde la capitale; vinci quando sono caduti tutti. Nella schermata iniziale si può scegliere anche il duello: un solo nemico, l'"Impero Cremisi", in un paese vicino.
 
 ## Come giocare
 
@@ -12,11 +12,14 @@ In locale: apri `piccoli_imperi.html` nel browser con un doppio clic. Non serve 
 
 - `piccoli_imperi.html`: il gioco completo (HTML, CSS e JavaScript in un unico file).
 - `index.html`: pagina d'ingresso per GitHub Pages, rimanda subito a `piccoli_imperi.html`.
-- `stub.js`, `shiptest.js`, `savetest.js`, `playtest.js`, `aitest.js`, `paesitest.js`, `imperitest.js`, `difficoltatest.js`, `mappatest.js`, `diplotest.js`, `conquistatest.js`, `capitalitest.js`, `paesinuovitest.js`, `microstatitest.js`, `vaticanotest.js`, `popolazionetest.js`, `biomitest.js`, `epochetest.js`, `browser_check.js`, `mobile_check.js`, `pantest.js`, `conquista_check.js`, `citta_check.js`, `unitatest.js`, `stabilita_check.js`, `mappefissetest.js`, `caricamento_check.js`, `cheattest.js`, `cheat_check.js`, `capitaletest.js`, `capitale_check.js`, `anno_check.js`, `popstoricatest.js`, `popstorica_check.js`, `medioorientetest.js`, `madeiratest.js`, `madeira_check.js`, `canarie_check.js`, `bandieretest.js`, `bandiere_check.js`, `africatest.js`, `africa_check.js`: test automatici (`mobile_check.js` prova il gioco su un iPhone emulato con Playwright, `pantest.js` lo spostamento nella mappa col mouse, le frecce e il dito).
+- `stub.js`, `shiptest.js`, `savetest.js`, `playtest.js`, `aitest.js`, `paesitest.js`, `imperitest.js`, `difficoltatest.js`, `mappatest.js`, `diplotest.js`, `conquistatest.js`, `capitalitest.js`, `paesinuovitest.js`, `microstatitest.js`, `vaticanotest.js`, `popolazionetest.js`, `biomitest.js`, `epochetest.js`, `browser_check.js`, `mobile_check.js`, `pantest.js`, `conquista_check.js`, `citta_check.js`, `unitatest.js`, `stabilita_check.js`, `mappefissetest.js`, `caricamento_check.js`, `cheattest.js`, `cheat_check.js`, `capitaletest.js`, `capitale_check.js`, `anno_check.js`, `popstoricatest.js`, `popstorica_check.js`, `medioorientetest.js`, `madeiratest.js`, `madeira_check.js`, `canarie_check.js`, `bandieretest.js`, `bandiere_check.js`, `africatest.js`, `africa_check.js`, `asiatest.js`, `asia_check.js`: test automatici (`mobile_check.js` prova il gioco su un iPhone emulato con Playwright, `pantest.js` lo spostamento nella mappa col mouse, le frecce e il dito).
 - `build_russia.js`: script che ha estratto il confine della Russia dal dataset Natural Earth.
 - `build_paesi_nord.py`: estrae da Natural Earth i confini dei paesi aggiunti nella v65 (`POLY_NORD`, `SEMI_NORD`).
 - `build_paesi_est.py`: estrae da Natural Earth i confini del Medio Oriente, del Sahel e dell'Asia centrale (v84: `POLY_EST`, `SEMI_EST`).
 - `build_paesi_africa.py`: estrae da Natural Earth (versione con i laghi) i confini dell'Africa sotto gli 11,5° N, del Madagascar e delle isole, e i grandi laghi (v89: `POLY_AFRICA`, `SEMI_AFRICA`, `LAGHI_AFRICA`).
+- `build_paesi_asia.py`: estrae da Natural Earth (versione con i laghi) i confini dell'Asia a est dei 63,5° E e a nord dei 71,3° N, con le isole dal Giappone all'Indonesia, e i grandi laghi (v90: `POLY_ASIA`, `SEMI_ASIA`, `LAGHI_ASIA`).
+- `build_fiumi_asia.py`: i grandi fiumi dell'Asia da Natural Earth (v90: il blocco tra `// FIUMI_ASIA_INIZIO` e `// FIUMI_ASIA_FINE`).
+- `build_biomi_asia.py`: i biomi dell'Asia aggiunta nella v90, dai dati da satellite come per l'Africa, con la tundra a nord.
 - `build_biomi_africa.py`: i biomi dell'Africa aggiunta nella v89, direttamente dai dati da satellite (ESA WorldCover e Copernicus DEM).
 - `build_biomi_est.py`: i biomi OpenStreetMap delle terre aggiunte nella v84 (e di Madeira, v86), senza toccare quelli di prima.
 - `build_canarie.py`: i contorni veri delle isole Canarie da Natural Earth 10m (v87: `POLY_CANARIE`) e i biomi delle loro caselle nuove.
@@ -66,6 +69,8 @@ cat stub.js game.js madeiratest.js > _run.js && node _run.js   # Madeira e Porto
 cat stub.js game.js bandieretest.js > _run.js && node _run.js   # le bandiere (v88): pochi secondi
 cat stub.js game.js africatest.js > _run.js && node _run.js   # tutta l'Africa (v89): circa un minuto
 node africa_check.js   # l'Africa nel browser, solo computer (v89)
+cat stub.js game.js asiatest.js > _run.js && node _run.js   # tutta l'Asia (v90): circa un minuto
+node asia_check.js   # l'Asia nel browser, solo computer (v90)
 node madeira_check.js   # Madeira nel browser, computer e tablet (Playwright)
 node canarie_check.js   # le Canarie nel browser, computer e tablet (Playwright)
 node cheat_check.js   # il pannello dei cheat nel browser, computer e tablet col tocco (Playwright)
@@ -114,6 +119,19 @@ Nella schermata iniziale (e nella scelta del paese, prima di fondare la capitale
 Ogni modifica alla mappa va verificata con `mappatest.js`, che controlla anche che due partite abbiano la stessa mappa.
 
 ## Versione
+
+v90 (formato di salvataggio invariato, v18; le partite salvate prima si caricano ancora): **tutta l'Asia**.
+
+- La mappa va ora dagli Urali e dall'Iran fino al Giappone e allo stretto di Bering (la Čukotka, che passa il 180° meridiano, compresa), e dal Tajmyr (78° nord) fino a Giava e a Timor. Il riquadro scende già fino a 47,5° sud: lo spazio per l'Oceania c'è, ma per ora è mare (anche la metà orientale della Nuova Guinea). Svalbard, la Groenlandia e l'Alaska restano mare, e le isole artiche oltre i 78° nord sono fuori. Nuove dimensioni: piccola 687×622, media 1383×1252, gigante 2080×1885 (sulla gigante 3,9 milioni di caselle). Le righe nuove in alto spostano la mappa di prima in basso, intera.
+- 25 paesi nuovi, ognuno con il suo impero IA e la sua capitale vera: Cina (Pechino), Mongolia, Corea del Nord e del Sud, Giappone, Taiwan, Kirghizistan, Tagikistan, India (Nuova Delhi), Nepal, Bhutan, Bangladesh, Sri Lanka, Maldive, Myanmar, Thailandia, Laos, Cambogia, Vietnam, Malesia, Singapore, Brunei, Indonesia, Timor Est, Filippine. Russia, Kazakistan, Uzbekistan, Turkmenistan, Afghanistan e Pakistan si completano a est, con le loro capitali vere (Astana, Tashkent, Kabul, Islamabad). In tutto 147 paesi.
+- Laghi (Bajkal, Balqaš, Issyk-Kul, Khanka, Tonlé Sap...) e grandi fiumi: Ob' e Irtyš, Enisej e Angara, Lena, Amur, Kolyma, Fiume Giallo, Fiume Azzurro, Fiume delle Perle, Mekong, Irrawaddy, Brahmaputra, Gange, Indo, Amu Darya, Syr Darya, Chao Phraya... Stretti con i ponti fra le isole del Giappone, verso Hainan, Sachalin, Bali e Sri Lanka.
+- Città vere da 100.000 abitanti in su anche qui (la lista passa da 2.699 a 4.311 città), con gli abitanti dell'anno scelto. In Siberia e in Estremo Oriente, prima del 1750, le città russe non c'erano ancora. Le città omonime si distinguono (Hyderabad del Sindh, Suzhou dell'Anhui...).
+- Biomi dai dati da satellite (`build_biomi_asia.py`), come per l'Africa, con la tundra a nord: taiga, steppa, il Gobi e il Taklamakan, l'Himalaya e il Tibet, le foreste del sud-est asiatico.
+- Le epoche coprono anche l'Asia: Song, Liao e Jin, l'impero mongolo e gli Yuan, Ming e Qing, il Tibet, Goryeo e Joseon, gli shogunati del Giappone, il sultanato di Delhi, l'impero moghul, i Maratha, Vijayanagara, Pagan e Ava, Ayutthaya, l'impero khmer, Đại Việt, Majapahit, Malacca...; dal 1886 i confini esatti di CShapes con le colonie (India britannica, Indocina francese, Indie orientali olandesi, Filippine americane...) e le indipendenze. Dieci fatti storici nuovi: la caduta dei Jin (1234) e dei Song (1279), i Ming (1368), Babur (1526), lo shogunato Tokugawa (1603), i Qing a Pechino (1644), i Maratha sconfitti (1818), Awadh (1856), il Raj britannico (1858), la restaurazione Meiji (1868).
+- Bandiere per i paesi nuovi e per gli stati storici asiatici più importanti.
+- Il file passa da 6,5 a circa 9,9 MB (soprattutto i confini storici). I turni dell'IA con 146 imperi restano svelti: la lista delle unità di ogni impero, la capitale e la lista dei ponti ora si ricordano invece di ricalcolarle.
+- La Cina e l'India, con tante città vere, partono molto ricche (piccola: Cina +872⭐ a turno, India +416, Russia +207).
+- Le partite salvate dalla v84 alla v89 si aprono sulla mappa nuova: l'Asia compare con i suoi villaggi liberi, senza imperi.
 
 v89 (formato di salvataggio invariato, v18; le partite salvate prima si caricano ancora): **tutta l'Africa**.
 

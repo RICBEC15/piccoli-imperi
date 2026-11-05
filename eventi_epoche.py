@@ -202,3 +202,18 @@ EVENTI = [
   (1881, 'la Francia prende la Tunisia', [('a', 'TUN', {'da': ['OTT'], 'paesi': ['TN']})], {'TUN': ('Tunisia francese', '🌙')}),
   (1885, 'la Rumelia orientale si unisce alla Bulgaria', [('a', 'BUL', {'da': ['OTT'], 'paesi': ['BG']})], {}),
 ]
+
+# v90: i fatti dell'Asia fra un'istantanea e l'altra
+EVENTI += [
+  (1234, 'i Mongoli prendono la Cina del nord dei Jin', [('a', 'MGL', {'da': ['JIN', 'XIA']})], {}),
+  (1279, "Kublai Khan prende la Cina dei Song: l'Impero Yuan", [('a', 'MGL', {'da': ['SNG', 'NAN']}), ('nome', 'MGL', 'Impero Yuan', '👑')], {}),
+  (1368, 'i Ming cacciano gli Yuan dalla Cina', [('a', 'MIN', {'da': ['YUA'], 'paesi': ['CN']}), ('nome', 'YUA', 'Yuan settentrionali', '⛺')],
+   {'MIN': ('Impero Ming', '👑')}),
+  (1526, 'Babur vince a Panipat: nasce l\'Impero moghul', [('a', 'MOG', {'da': ['DLH']})], {'MOG': ('Impero moghul', '👑')}),
+  (1603, 'Tokugawa Ieyasu shogun: il Giappone unito', [('nome', 'GIA', 'Shogunato Tokugawa', '🏰')], {}),
+  (1644, 'i Manciu prendono Pechino: la Cina dei Qing', [('a', 'QIN', {'da': ['MIN'], 'paesi': ['CN']})], {'QIN': ('Impero Qing', '👑')}),
+  (1818, "la Compagnia delle Indie vince i Maratha", [('a', 'EIC', {'da': ['MRA']})], {}),
+  (1856, "la Compagnia delle Indie si prende l'Awadh", [('a', 'EIC', {'da': ['AWA']})], {}),
+  (1858, "l'India passa alla Corona: il Raj britannico", [('nome', 'EIC', 'Raj britannico', '👑')], {}),
+  (1868, 'la restaurazione Meiji: l\'Impero del Giappone', [('nome', 'GIA', 'Impero del Giappone', '👑')], {}),
+]

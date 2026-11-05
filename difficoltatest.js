@@ -8,8 +8,8 @@ Math.random = () => { seme = (seme * 1103515245 + 12345) & 0x7fffffff; return se
 // questo test gioca il duello (un solo nemico, come prima) in un paese a caso
 setAvversari('duello');
 const A = () => imperiIA()[0]; // l'impero nemico
-// (v89: fra i paesi di prima dell'Africa del sud, cosi' il seme pesca le stesse partite di prima)
-function sceltaACaso() { const l = Object.keys(paesiInfo()).filter(cc => !PAESI_V89[cc]); cambiaPaese(l[Math.floor(Math.random() * l.length)]); }
+// (v89: fra i paesi di prima dell'Africa del sud e, v90, dell'Asia, cosi' il seme pesca le stesse partite di prima)
+function sceltaACaso() { const l = Object.keys(paesiInfo()).filter(cc => !PAESI_V89[cc] && !PAESI_V90[cc]); cambiaPaese(l[Math.floor(Math.random() * l.length)]); }
 
 // gioca con il giocatore fermo; cambi = { turno: livello } da applicare durante la partita
 function partita(seed, livello, cambi = {}, maxTurni = 90) {
@@ -40,12 +40,13 @@ assert(r.difficile === income(A()) && r.facile <= r.normale && r.normale <= r.di
 // 2. tre partite con lo stesso seme: piu' facile = capitale presa piu' tardi
 const esiti = {};
 for (const l of ['facile', 'normale', 'difficile']) {
-  esiti[l] = partita(5, l);
+  esiti[l] = partita(1, l);
   console.log(l, 'capitale presa al turno', esiti[l].presa, '| al turno 20:', JSON.stringify(esiti[l].al20));
 }
 // v85: il nemico e' uno dei 5 paesi vicini pescato a caso, e quale esce dipende dai numeri casuali gia'
 // usati per la mappa: con i biomi corretti la Tunisia (seme 5) pesca l'Italia, oltre il mare, invece
 // della Libia, e serve qualche turno in piu' per sbarcare. Resta: difficile prende la capitale ben prima di normale.
+// v90: con l'Asia i numeri casuali pescano altri paesi; il seme 1 (l'Azerbaigian contro la Georgia) mostra la stessa cosa.
 assert(esiti.difficile.presa < 30 && esiti.difficile.presa < esiti.normale.presa - 10, "difficile: l'IA attacca subito, come la v54");
 assert(esiti.normale.presa >= AI_LIVELLI.normale.tregua && esiti.normale.presa > esiti.difficile.presa + 10,
   'normale: niente attacchi alla capitale prima della fine della tregua');

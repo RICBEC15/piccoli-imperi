@@ -10,18 +10,33 @@
   const fs = require('fs');
   const NE = JSON.parse(fs.readFileSync(process.env.NE, 'utf8')).features;
   const tenute = new Map();
+  const VIA = { 'Noginsk@91.23': 1, 'Nachodka@77.52': 1, 'Pyongyang@126.39': 1, 'Bandar Lampung@105.27': 1, 'Denpasar@115.18': 1 };
+  const DOPPI = {
+    'Hyderabad@68.37': 'Hyderabad del Sindh', 'Suzhou@116.98': "Suzhou dell'Anhui", 'Jingmen@112.20': 'Zhongxiang',
+    'Jining@113.08': 'Ulanqab', 'Yulin@109.73': 'Yulin dello Shaanxi', 'Aurangabad@84.38': 'Aurangabad del Bihar',
+    'Yichun@128.90': 'Yichun dello Heilongjiang', 'Pingxiang@106.76': 'Pingxiang del Guangxi', 'Fuyang@119.95': 'Fuyang di Hangzhou',
+    'Baicheng@106.61': 'Baise', 'Dali@109.94': 'Dali dello Shaanxi', 'Ilam@87.93': 'Ilam del Nepal', 'Gaya@85.00': 'Gaya del Bihar',
+    "Oktjabr'skij@156.24": "Oktjabr'skij di Kamčatka",
+  };
+  const RINOMINA = { 'Nur-Sultan': 'Astana' }; // v90: i nomi cambiati dopo i dati (Astana dal 2022)
   for (const taglia of Object.keys(MAP_SIZES)) {
     setMapSize(taglia); newGame();
     const g = geoSetup(), W = OFFX * 2 + S * SQ3 * COLS, H = OFFY * 2 + S * 1.5 * ROWS;
     for (const f of NE) {
       const p = f.properties, [lon, lat] = f.geometry.coordinates;
       const ab = Math.round(p.POP_MAX || 0);
-      if (ab < 1000 || lon < -26 || lon > 64.5 || lat < -36 || lat > 72) continue;
+      if (ab < 1000 || lon < -26 || lon > 190.5 || lat < -48 || lat > 78) continue; // v90: fino allo stretto di Bering
       const q = geoToPx(lon, lat, g);
       if (q.x < 0 || q.y < 0 || q.x > W || q.y > H) continue;
       const t = tileAtGeo(lon, lat, g);
       if (![t, ...neighbors(t)].some(x => x.country && x.terrain !== 'water')) continue;
-      const nome = (p.NAME_IT || p.NAME).trim();
+      let nome = RINOMINA[(p.NAME_IT || p.NAME).trim()] || (p.NAME_IT || p.NAME).trim();
+      // v90: nomi ripetuti in Asia. Le copie sbagliate di Natural Earth (stesso nome e stessi abitanti
+      // di un'altra citta', o due punti a pochi km) si tolgono; le citta' diverse con lo stesso nome
+      // si distinguono con la regione (quelle di prima della v90 tengono il loro nome)
+      const chiave = nome + '@' + (+lon.toFixed(3)).toFixed(2);
+      if (VIA[chiave]) continue;
+      if (DOPPI[chiave]) nome = DOPPI[chiave];
       tenute.set(p.NE_ID, [nome, +lon.toFixed(3), +lat.toFixed(3), ab]);
     }
   }

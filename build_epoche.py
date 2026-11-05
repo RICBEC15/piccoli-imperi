@@ -691,11 +691,179 @@ REGIONI_V89_NOMI = {'AFW': ("Regni dell'Africa occidentale", '🏰'), 'AFC': ("R
 def regione_v89(t):
     return REGIONI_V89.get(t[4]) if t[3] < 11.5 else None
 
+# v90: gli stati dell'Asia oltre il vecchio margine (63,5° E) e del Tajmyr. Come per l'Africa, questi
+# nomi valgono in ogni epoca; OVERRIDE_V90 li cambia per epoca.
+NOMI_V90 = {
+    # la Cina, la Mongolia e la steppa
+    'Song Empire': ('SNG', 'Impero Song', '👑'), 'Liao': ('LIA', 'Impero Liao', '👑'),
+    'Xixia': ('XIA', 'Regno degli Xia occidentali', '🏰'), 'Nan Chao': ('NAN', 'Regno di Dali', '🏰'),
+    'Mongols': ('MGL', 'Tribù mongole', '⛺'), 'Mongol Empire': ('MGL', 'Impero mongolo', '👑'),
+    'Great Khanate': ('YUA', 'Impero Yuan', '👑'), 'Ming Chinese Empire': ('MIN', 'Impero Ming', '👑'),
+    'Post-Ming Warlords': ('MIM', 'Ming meridionali e signori della guerra', '🏰'),
+    'Manchu Empire': ('QIN', 'Impero Qing', '👑'), 'Qing Empire': ('QIN', 'Impero Qing', '👑'),
+    'Hong Kong': ('QIN', 'Impero Qing', '👑'), 'Tibet': ('TBT', 'Tibet', '🏰'), 'Hainan': ('HNN', 'Hainan', '⛺'),
+    'Oirat Confederation': ('OIR', 'Confederazione degli Oirati', '⛺'),
+    'Taiwanese Tribes': ('TWA', 'Aborigeni di Taiwan', '⛺'), 'Taiwan': ('TWA', 'Aborigeni di Taiwan', '⛺'),
+    'Dutch Formosa': ('FOR', 'Formosa olandese', '🏰'),
+    # la Corea e il Giappone
+    'Korea': ('KOR', 'Regno di Joseon (Corea)', '🏰'), 'Goryeo': ('KOR', 'Regno di Goryeo (Corea)', '🏰'),
+    'Imperial Japan (Fujiwara)': ('GIA', 'Giappone (periodo Heian)', '👑'),
+    'Shogun Japan (Kamakura)': ('GIA', 'Shogunato di Kamakura', '🏰'), 'Japan': ('GIA', 'Shogunato Tokugawa', '🏰'),
+    'Japan (Warring States)': ('GIA', 'Giappone (periodo Sengoku)', '🏰'), 'Tokugawa shogunate': ('GIA', 'Shogunato Tokugawa', '🏰'),
+    'Imperial Japan': ('GIA', 'Impero del Giappone', '👑'), 'Ainu': ('AIN', 'Ainu', '⛺'), 'Ainus': ('AIN', 'Ainu', '⛺'),
+    'Kuril Islands': ('AIN', 'Ainu', '⛺'), 'Hokuzan': ('RYU', 'Regno di Hokuzan (Ryukyu)', '🏰'),
+    # la Siberia e l'Artico
+    'Siberians': ('SIB', 'Popoli siberiani', '⛺'), 'Khanate of Sibir': ('SBI', 'Khanato di Sibir', '⛺'),
+    'Arctic marine mammal hunters': ('ART', "Cacciatori dell'Artico", '⛺'), 'Tungusic Tribes': ('EVE', 'Tribù tunguse', '⛺'),
+    'Chukchi': ('CUK', 'Ciukci', '⛺'), 'Koryaks': ('KOK', 'Coriachi', '⛺'), 'Itelmen': ('ITE', 'Itelmeni', '⛺'),
+    'Yukagir': ('YUK', 'Iukaghiri', '⛺'), 'Nganasan': ('NGN', 'Nganasani', '⛺'), 'Enets': ('ENE', 'Enzi', '⛺'),
+    'Nenets': ('NEN', 'Nenezi', '⛺'), 'Khanty': ('KHA', 'Chanty', '⛺'), 'Komi': ('KMI', 'Komi', '⛺'),
+    'Inupiaq': ('INU', 'Inupiat', '⛺'), 'United States of America': ('USA', "Stati Uniti d'America", '🏛️'),
+    # l'Asia centrale
+    'Khwarazmian dynasty': ('KWZ', 'Impero corasmio', '🌙'), 'Buyid Emirate': ('BUY', 'Emirati buyidi', '🌙'),
+    'Buyid dynasty': ('BUY', 'Emirati buyidi', '🌙'), 'Bukara Khanate': ('BUK', 'Khanato di Bukhara', '🌙'),
+    'central Asian khanates': ('KAZ', "Khanati dell'Asia centrale", '⛺'), 'Soomra Emirate': ('SOO', 'Emirato soomra', '🌙'),
+    # l'India
+    'Sultanate of Delhi': ('DLH', 'Sultanato di Delhi', '🌙'), 'Mughal Empire': ('MOG', 'Impero moghul', '👑'),
+    'Maratha Confederacy': ('MRA', 'Confederazione maratha', '🏰'), 'Maratha': ('MRA', 'Impero maratha', '🏰'),
+    'Mahratta states': ('MRA', 'Confederazione maratha', '🏰'),
+    'Rajput kingdoms': ('RJP', 'Regni rajput', '🏰'), 'Rajputs': ('RJP', 'Regni rajput', '🏰'),
+    'Rajastan': ('RJP', 'Regni rajput', '🏰'), 'Rajputana': ('RJP', 'Regni rajput', '🏰'),
+    'Sikhs': ('SIK', 'Impero sikh', '🏰'), 'Lahore': ('SIK', 'Confederazione sikh', '🏰'),
+    'British East India Company': ('EIC', 'Compagnia britannica delle Indie orientali', '🏰'),
+    'Madras': ('EIC', 'Compagnia britannica delle Indie orientali', '🏰'),
+    'Circars': ('EIC', 'Compagnia britannica delle Indie orientali', '🏰'),
+    'Carnatic': ('CRN', 'Nawab del Carnatic', '🌙'), 'Bengal': ('BNG', 'Sultanato del Bengala', '🌙'),
+    'Oudh': ('AWA', "Nawab dell'Awadh", '🌙'), 'Multan': ('MUL', 'Multan', '🌙'), 'Sind': ('SND', 'Emirato del Sindh', '🌙'),
+    'Sindh': ('SND', 'Emirato del Sindh', '🌙'), 'Bahawalpur': ('BHW', 'Nawab di Bahawalpur', '🌙'),
+    'Bundelkhand': ('BDK', 'Bundelkhand', '🏰'), 'Mysore': ('MYS', 'Regno di Mysore', '🏰'),
+    'Mysore (Indian princely state)': ('MYS', 'Stato principesco di Mysore', '🏰'),
+    'Golkonda': ('HYD', 'Sultanato di Golconda', '🌙'), 'Golconda': ('HYD', 'Stato di Hyderabad (il Nizam)', '🌙'),
+    "Nizam's Dominions": ('HYD', 'Stato di Hyderabad (il Nizam)', '🌙'),
+    'Ahmadnagar': ('AHM', 'Sultanato di Ahmadnagar', '🌙'), 'Bijapur': ('BIJ', 'Sultanato di Bijapur', '🌙'),
+    'Bidar': ('BID', 'Sultanato di Bidar', '🌙'), 'Vijayanagara': ('VIJ', 'Impero di Vijayanagara', '👑'),
+    'Chola Empire': ('CHO', 'Impero chola', '👑'), 'Cholas': ('CHO', 'Impero chola', '👑'),
+    'Chalukya Empire': ('CLK', 'Impero chalukya', '👑'), 'Western Chalukyas': ('CLK', 'Chalukya occidentali', '👑'),
+    'Pratiharas': ('PRA', 'Impero pratihara', '👑'), 'Palas': ('PLA', 'Impero pala', '👑'), 'Senas': ('SNA', 'Dinastia sena', '🏰'),
+    'Paramas': ('PAM', 'Regno dei Paramara', '🏰'), 'Chandellas': ('CDL', 'Regno dei Chandela', '🏰'),
+    'Klachuris': ('KLC', 'Regno dei Kalachuri', '🏰'), 'Solankis': ('SOL', 'Regno dei Chaulukya', '🏰'),
+    'Chauhans': ('CHU', 'Regno dei Chauhan', '🏰'), 'Kalinga': ('KLG', 'Ganga orientali (Kalinga)', '🏰'),
+    'Orissa': ('ODI', "Regno dell'Orissa", '🏰'), 'Kamarupa': ('KMR', 'Regno di Kamarupa', '🏰'),
+    'Assam': ('ASM', 'Regno ahom (Assam)', '🏰'), 'Pandya state': ('PAN', 'Regno pandya', '🏰'),
+    'Kashmir and Ladakh': ('KSH', 'Kashmir e Ladakh', '🏰'), 'Hindu kingdoms': ('HIN', 'Regni indù', '🏰'),
+    'minor Hindu kingdoms': ('HIN', 'Regni indù', '🏰'), 'minor Hindu and Buddhist kingdoms': ('HBU', 'Regni indù e buddisti', '🏰'),
+    'minor Hindu and Buddhist states': ('HBU', 'Regni indù e buddisti', '🏰'),
+    'Nepal': ('NEP', 'Regno del Nepal', '🏰'), 'Bhutan': ('BHU', 'Bhutan', '🏰'),
+    'Sikkim (Indian princely state)': ('SKK', 'Sikkim', '🏰'), 'Travancore': ('TRV', 'Regno di Travancore', '🏰'),
+    'Cochin': ('COC', 'Regno di Cochin', '🏰'), 'Malabar': ('MLB', 'Malabar', '🏰'), 'Kanara': ('KNR', 'Kanara', '🏰'),
+    'Gooty': ('GOO', 'Gooty', '🏰'), 'Ambur': ('AMB', 'Ambur', '🏰'), 'Goa': ('GOA', 'Goa portoghese', '🏰'),
+    'Sinhalese kingdom': ('SIN', 'Regni singalesi', '🏰'), 'Sinhalese kingdoms': ('SIN', 'Regni singalesi', '🏰'),
+    'Saylan': ('SIN', 'Regni singalesi', '🏰'), 'Kandy': ('KDY', 'Regno di Kandy', '🏰'),
+    'Ceylon (Dutch)': ('CEO', 'Ceylon olandese', '🏰'), 'Ceylon': ('CEY', 'Ceylon britannica', '🏰'),
+    # la Birmania, il Siam, l'Indocina
+    'Kingdom of Pagan': ('PAG', 'Regno di Pagan', '👑'), 'Pagan': ('PAG', 'Regno di Pagan', '👑'),
+    'Bagan': ('PAG', 'Regno di Pagan', '👑'), 'Pyu state': ('PYU', 'Città-stato pyu', '🏰'), 'Mon state': ('MNS', 'Regni mon', '🏰'),
+    'Burmese kingdoms': ('BIR', 'Regni birmani', '🏰'), 'Ava': ('AVA', 'Regno di Ava', '🏰'), 'Pegu': ('PEG', 'Regno di Pegu', '🏰'),
+    'Shan states': ('SHA', 'Stati shan', '🏰'), 'Arakan': ('ARK', 'Regno di Arakan', '🏰'),
+    'Arakan (Indian princely state)': ('ARK', 'Regno di Arakan', '🏰'), 'Burma': ('BIR', 'Regno di Birmania', '👑'),
+    'Kingdom of Sukhotai': ('SUK', 'Regno di Sukhothai', '🏰'), 'Sukhothai': ('SUK', 'Regno di Sukhothai', '🏰'),
+    'Ayutthaya': ('AYU', 'Regno di Ayutthaya', '🏰'), 'Rattanakosin Kingdom': ('SIA', 'Regno del Siam', '🏰'),
+    'Lan Na': ('LNA', 'Regno di Lanna', '🏰'), 'Harapunchai': ('HRP', 'Regno di Hariphunchai', '🏰'),
+    'Haripunjaya': ('HRP', 'Regno di Hariphunchai', '🏰'), 'Dvaravati': ('DVA', 'Regni di Dvaravati', '🏰'),
+    'Lopburi Kingdom': ('LOP', 'Regno di Lopburi', '🏰'), 'Laos': ('LAN', 'Regno di Lan Xang', '🏰'),
+    'Laotian states': ('LAN', 'Regni laotiani', '🏰'), 'Khmer Empire': ('KHM', 'Impero khmer', '👑'),
+    'Cambodia': ('KHM', 'Regno di Cambogia', '🏰'), 'Champa': ('CMP', 'Regno di Champa', '🏰'),
+    'Champa City States': ('CMP', 'Regno di Champa', '🏰'), 'Annam': ('VIE', 'Impero del Vietnam (Dai Nam)', '👑'),
+    'Đại Việt': ('VIE', 'Regno del Dai Viet', '🏰'), 'Cochin China': ('CCN', 'Cocincina (signori Nguyen)', '🏰'),
+    'French Indochina': ('ICF', 'Indocina francese', '🏰'),
+    # la Malesia, l'Indonesia, le Filippine
+    'Srivijaya Empire': ('SRV', 'Impero di Srivijaya', '👑'), 'Malays': ('MLY', 'Regni malesi', '🏰'),
+    'Malaysian Islamic states': ('MLY', 'Sultanati malesi', '🌙'), 'Malaya': ('MLY', 'Sultanati malesi', '🌙'),
+    'Malacca': ('MLC', 'Sultanato di Malacca', '🌙'), 'Aceh': ('ACE', 'Sultanato di Aceh', '🌙'),
+    'East Java': ('GIV', 'Regni di Giava', '🏰'), 'Kediri': ('GIV', 'Regno di Kediri', '🏰'),
+    'Brunei': ('BRU', 'Sultanato del Brunei', '🌙'), 'Netherlands Indies': ('IOO', 'Indie orientali olandesi', '🏰'),
+    'Papuans': ('PPU', 'Popoli papuani', '⛺'), 'Papua New Guinea': ('PPU', 'Popoli papuani', '⛺'),
+    'Middag Kingdom': ('MDG', 'Sultanato di Maguindanao', '🌙'), 'Philippines': ('FIL', 'Filippine spagnole', '🏰'),
+    'Luva': ('LUV', 'Luwu', '🏰'),
+}
+OVERRIDE_V90 = {
+    '1000': {'Korea': ('KOR', 'Regno di Goryeo (Corea)', '🏰'), 'Annam': ('VIE', 'Regno del Dai Viet', '🏰')},
+    '1100': {'Korea': ('KOR', 'Regno di Goryeo (Corea)', '🏰')},
+    '1400': {'Great Khanate': ('YUA', 'Yuan settentrionali', '⛺'), 'Shogun Japan (Kamakura)': ('GIA', 'Shogunato Ashikaga', '🏰')},
+    '1500': {'Japan': ('GIA', 'Shogunato Ashikaga', '🏰'), 'Philippines': ('FIL', 'Popoli delle Filippine', '⛺')},
+    '1530': {'Malacca': ('MLC', 'Malacca portoghese', '🏰')},
+    '1600': {'Malacca': ('MLC', 'Malacca portoghese', '🏰')},
+    '1650': {'Ceylon': ('SIN', 'Regni singalesi', '🏰'), 'Golkonda': ('HYD', 'Sultanato di Golconda', '🌙')},
+    '1700': {'Ceylon': ('SIN', 'Regni singalesi', '🏰')},
+    '1715': {'Ceylon': ('SIN', 'Regni singalesi', '🏰')},
+    '1783': {'Bengal': ('EIC', 'Compagnia britannica delle Indie orientali', '🏰')},
+    '1880': {'Taiwan': ('QIN', 'Impero Qing', '👑'), 'Malaya': ('MLY', 'Malesia britannica', '🏰'),
+             'Korea': ('KOR', 'Regno di Joseon (Corea)', '🏰')},
+}
+for _anno, _E in EPOCHE.items():
+    for _nome, (_cod, _it, _emb) in {**NOMI_V90, **OVERRIDE_V90.get(_anno, {})}.items():
+        _E['nomi'][_nome] = _cod
+        ITALIANO_V84[(_anno, _nome)] = (_cod, _it, _emb)
+
+def asia_v90(t):
+    """la casella e' nelle terre aggiunte nella v90 (oltre il vecchio margine dell'Iran, o sopra Capo Nord)"""
+    return t[2] > 63.55 or t[3] > 71.3
+
+# v90: nomi dei dati che in Asia sono un altro stato (gli stessi nomi altrove erano gia' tradotti):
+# le "Indie orientali olandesi" dei dati sono anche la Colonia del Capo, gli "Stati islamici" anche il Belucistan
+REGIONALI_V90 = {
+    'Dutch East Indies': ('IOO', "Compagnia olandese delle Indie orientali", '🏰'),
+    'Paleo-Siberian hunter-gatherers': ('PSB', 'Popoli paleosiberiani', '⛺'),
+    'Karkhanids': ('QAR', 'Khanato dei Qarakhanidi', '🌙'),
+    'Kara Khitai Khaganate': ('KKT', 'Khanato dei Kara Khitai', '⛺'),
+    'Islamic states': ('SDI', 'Sultanati indiani', '🌙'),
+    'Islamic and Hindu states': ('SIH', 'Sultanati e regni indiani', '🌙'),
+    'India': ('EIC', 'Compagnia britannica delle Indie orientali', '🏰'),
+}
+REGIONALI_V90_ANNO = {'1815': {'Dutch East Indies': ('IOO', 'Indie orientali olandesi', '🏰')}}
+
+# v90: dove i dati sbagliano l'anno, per paese di oggi: nel 1400 la Cina e' dei Ming (dal 1368), non piu' del
+# "Gran Khanato" degli Yuan, che resta in Mongolia; nel 1200 la Cina del nord e' dei Jin (i Liao cadono nel 1125)
+PER_PAESE_V90 = {
+    ('1400', 'Great Khanate'): {'MN': ('YUA', 'Yuan settentrionali', '⛺'), 'RU': ('YUA', 'Yuan settentrionali', '⛺'),
+                                'KZ': ('YUA', 'Yuan settentrionali', '⛺'), '*': ('MIN', 'Impero Ming', '👑')},
+    ('1200', 'Liao'): {'*': ('JIN', 'Impero Jin', '👑')},
+}
+
+def regionale_v90(t, anno, n):
+    p = PER_PAESE_V90.get((anno, n))
+    if p: return p.get(t[4]) or p['*']
+    if not asia_v90(t): return None
+    return REGIONALI_V90_ANNO.get(anno, {}).get(n) or REGIONALI_V90.get(n)
+
+# v90: dove historical-basemaps non disegna nessuno stato in Asia (la Siberia dell'anno Mille, Taiwan,
+# le Ryukyu, Sachalin, le isole dell'Insulindia...) la terra va ai popoli della sua regione
+REGIONI_V90 = {}
+for _cc in 'RU'.split(): REGIONI_V90[_cc] = 'PSB'
+for _cc in 'KZ KG TJ UZ TM AF PK IR'.split(): REGIONI_V90[_cc] = 'PAC'
+for _cc in 'CN MN KP KR'.split(): REGIONI_V90[_cc] = 'PAO'
+for _cc in 'IN NP BT BD LK MV UK'.split(): REGIONI_V90[_cc] = 'PIN'
+for _cc in 'MM TH LA KH VN MY SG BN'.split(): REGIONI_V90[_cc] = 'PSE'
+for _cc in 'ID TL'.split(): REGIONI_V90[_cc] = 'INS'
+REGIONI_V90['TW'] = 'TWA'; REGIONI_V90['PH'] = 'FIL'; REGIONI_V90['JP'] = 'RYU'
+REGIONI_V90_NOMI = {'PSB': ('Popoli della Siberia', '⛺'), 'PAC': ("Popoli dell'Asia centrale", '⛺'),
+                    'PAO': ("Popoli dell'Asia orientale", '⛺'), 'PIN': ("Regni dell'India", '🏰'),
+                    'PSE': ('Regni del Sud-est asiatico', '🏰'), 'INS': ("Regni dell'Insulindia", '🏰'),
+                    'TWA': ('Aborigeni di Taiwan', '⛺'), 'FIL': ('Popoli delle Filippine', '⛺'),
+                    'RYU': ('Isole Ryukyu', '⛺'), 'AIN': ('Ainu', '⛺')}
+
+def regione_v90(t, anno):
+    if not asia_v90(t): return None
+    c = REGIONI_V90.get(t[4])
+    if c == 'RYU' and t[3] > 34: return 'AIN'      # Hokkaido e Sachalin giapponese: gli Ainu
+    if c == 'RYU' and int(anno) >= 1429: return 'RYU'  # (il regno delle Ryukyu, dal 1429)
+    return c
+
 # in ordine di anno: il gioco cerca l'ultima istantanea non successiva all'anno scelto
 EPOCHE = dict(sorted(EPOCHE.items(), key=lambda kv: int(kv[0])))
 
 # la lettera dell'i-esimo stato nella griglia (lo stesso alfabeto e' nel gioco)
-ALFABETO = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz!#$%&()*+,-/:;<=>?@[]^_{|}~ÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏÐÑÒÓÔÕÖØÙÚÛÜÝÞßàáâãäåæçèéêëìíîïðñòóôõöøùúûüýþÿ'
+ALFABETO = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz!#$%&()*+,-/:;<=>?@[]^_{|}~ÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏÐÑÒÓÔÕÖØÙÚÛÜÝÞßàáâãäåæçèéêëìíîïðñòóôõöøùúûüýþÿĀāĂăĄąĆćĈĉĊċČčĎďĐđĒēĔĕĖėĘęĚěĜĝĞğĠġĢģĤĥĦħĨĩĪīĬĭĮįİıĲĳĴĵĶķĸĹĺĻļĽľĿŀŁłŃńŅņŇňŉŊŋŌōŎŏŐőŒœŔŕŖŗŘřŚśŜŝŞşŠšŢţŤťŦŧŨũŪūŬŭŮůŰűŲųŴŵŶŷŸŹźŻżŽžſ'
 
 
 def leggi_poligoni(path):
@@ -716,7 +884,8 @@ def assegna(tiles, geoms, nomi):
     """il nome dello stato storico di ogni casella (None = terra di nessuno)"""
     import shapely
     from shapely.strtree import STRtree
-    pts = shapely.points([[t[2], t[3]] for t in tiles])
+    # v90: oltre i 180° (la Cukotka) le longitudini dei dati sono negative
+    pts = shapely.points([[t[2] - 360 if t[2] > 180 else t[2], t[3]] for t in tiles])
     tree = STRtree(geoms)
     aree = np.array([g.area for g in geoms])
     best = np.full(len(tiles), -1)
@@ -869,7 +1038,11 @@ def main():
                 if t[4] in E['correzioni']:
                     codici.append(E['correzioni'][t[4]])
                 elif n is None:
-                    codici.append(regione_v89(t))
+                    codici.append(regione_v89(t) or regione_v90(t, anno))
+                elif regionale_v90(t, anno, n):
+                    cod, it, emb = regionale_v90(t, anno, n)
+                    E['stati'][cod] = (it, emb)
+                    codici.append(cod)
                 elif n in E['nomi']:
                     codici.append(E['nomi'][n])
                 else:
@@ -885,6 +1058,10 @@ def main():
         usati_reg = {c for c in per_taglia['piccola'] if c in REGIONI_V89_NOMI}
         for cod in sorted(usati_reg):
             E['stati'][cod] = REGIONI_V89_NOMI[cod]
+        for cod in sorted({c for c in per_taglia['piccola'] if c in REGIONI_V90_NOMI and c not in E['stati']}):
+            E['stati'][cod] = REGIONI_V90_NOMI[cod]
+        if anno in ('1500', '1530', '1600', '1650', '1700', '1715', '1783', '1800') and 'RYU' in E['stati'] and E['stati']['RYU'][0] == 'Isole Ryukyu':
+            E['stati']['RYU'] = ('Regno delle Ryukyu', '🏰')
         lavori.append((anno, E['titolo'], E['stati'], per_taglia, False))
     lavori = [l + ('',) for l in lavori]
     lavori += fatti_storici(lavori, T, epoche_cshapes.ANNO_PRIMO)
