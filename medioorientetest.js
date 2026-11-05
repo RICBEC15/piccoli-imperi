@@ -53,7 +53,7 @@ for (const taglia of ['piccola', 'media']) {
 setMapSize('piccola');
 newGame();
 const g0 = geoSetup();
-assert(tileAtGeo(12.5, 41.9, g0).r < ROWS - EXTR + EXTR_V80 && COLS - EXTE + EXTE_V80 === 273 && ROWS - EXTR + EXTR_V80 === 220,
+assert(tileAtGeo(12.5, 41.9, g0).r - (EXTN - EXTN_V89) < ROWS_V89 - EXTR_V89 + EXTR_V80 && COLS_V89 - EXTE_V89 + EXTE_V80 === 273 && ROWS_V89 - EXTR_V89 + EXTR_V80 === 220,
   'le righe e le colonne nuove sono in fondo e a destra: la mappa piccola di prima (273×220) resta com\'era');
 
 // giocare in Medio Oriente: l'Iraq, a Baghdad
@@ -73,23 +73,23 @@ tocca('IT');
 placePlayerCapital(placeSet[0]);
 endTurn();
 const nuovo = serialize();
-const R80 = ROWS - (EXTR - EXTR_V80), C80 = COLS - (EXTE - EXTE_V80);
+const dN = EXTN - EXTN_V89, R80 = ROWS_V89 - (EXTR_V89 - EXTR_V80), C80 = COLS_V89 - (EXTE_V89 - EXTE_V80);
 const T = rleGriglia(nuovo.terreno, ROWS * COLS);
 const vecchio = JSON.parse(JSON.stringify(nuovo));
 const g = geoSetup(), terr = [];
-const terraNuova = (r, c) => { const t = map[r][c], q = tileLonLat(t, g); return r >= R80 || c >= C80 || terraNuovaV84(t.paeseOggi || t.country, q.lon, q.lat); };
-for (let r = 0; r < R80; r++) for (let c = 0; c < C80; c++) terr.push(terraNuova(r, c) ? 'w' : String.fromCharCode(T[r * COLS + c]));
+const terraNuova = (r, c) => { const t = map[r][c], q = tileLonLat(t, g); return r < dN || r >= dN + R80 || c >= C80 || terraNuovaV84(t.paeseOggi || t.country, q.lon, q.lat); };
+for (let r = dN; r < dN + R80; r++) for (let c = 0; c < C80; c++) terr.push(terraNuova(r, c) ? 'w' : String.fromCharCode(T[r * COLS + c]));
 vecchio.rows = R80; vecchio.cols = C80; vecchio.terreno = rleCodifica(terr);
-vecchio.ponti = vecchio.ponti.filter(([r, c]) => !terraNuova(r, c));
+vecchio.ponti = vecchio.ponti.filter(([r, c]) => !terraNuova(r, c)).map(([r, c]) => [r - dN, c]);
 const diNuovi = s => [s.y && s.y.o, s.u && s.u.o, s.s && s.s.o, s.q && s.q.o].some(o => o && PAESI_DOPO_V83[o]);
-vecchio.caselle = vecchio.caselle.filter(s => !terraNuova(s.r, s.c) && !diNuovi(s));
+vecchio.caselle = vecchio.caselle.filter(s => !terraNuova(s.r, s.c) && !diNuovi(s)).map(s => Object.assign(s, { r: s.r - dN }));
 vecchio.imperi = vecchio.imperi.filter(o => !PAESI_DOPO_V83[o]);
 for (const o of Object.keys(PAESI_DOPO_V83)) { delete vecchio.stars[o]; delete vecchio.paesi[o]; }
-vecchio.conquiste = vecchio.conquiste.filter(([r, c, o]) => !terraNuova(r, c) && !PAESI_DOPO_V83[o]);
+vecchio.conquiste = vecchio.conquiste.filter(([r, c, o]) => !terraNuova(r, c) && !PAESI_DOPO_V83[o]).map(([r, c, o]) => [r - dN, c, o]);
 vecchio.diplomazia = { base: 'pace', rel: {}, fiducia: {}, rifiuto: {} };
 setMapSize('media'); // si parte da un'altra taglia: il caricamento deve ritrovare quella giusta
 assert(applySave(JSON.parse(JSON.stringify(vecchio))), 'un salvataggio della v82 (senza Medio Oriente) si carica');
-assert(mapMode === 'piccola' && ROWS === R80 + EXTR - EXTR_V80 && COLS === C80 + EXTE - EXTE_V80, 'ed e\' sulla mappa piccola nuova, piu\' grande');
+assert(mapMode === 'piccola' && ROWS === R80 + dN + EXTR - EXTR_V80 && COLS === C80 + EXTE - EXTE_V80, 'ed e\' sulla mappa piccola nuova, piu\' grande');
 assert(pCapital() && pCapital().city.n === 'Roma' && players.p.country === 'IT', 'la tua capitale è ancora Roma');
 const info2 = paesiInfo(), g2 = geoSetup();
 assert(MEDIO_ORIENTE.every(cc => info2[cc]), 'le terre del Medio Oriente tornano dalla mappa nuova');

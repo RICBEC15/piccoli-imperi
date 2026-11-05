@@ -81,12 +81,12 @@ assert(statoA('1300', 30.5, 50.4) !== 'Italia' && statoA('1100', 30.5, 50.4) ===
 assert(statoA('1600', 11.25, 43.78) === 'Granducato di Toscana', 'Firenze nel 1600: Granducato di Toscana');
 
 // v80: si sceglie un anno qualsiasi, anno per anno; vale l'ultima istantanea non successiva
-const casi = [[1000, '1000'], [1017, '1000'], [1099, '1086'], [1100, '1100'], [1492, '1492'], [1500, '1500'], [1856, '1852'],
+const casi = [[1000, '1000'], [1017, '1000'], [1099, '1086'], [1100, '1100'], [1492, '1492'], [1500, '1500'], [1855, '1852'],
   [1914, '1914'], [1919, '1919'], [1938, '1937'], [1941, '1941'], [1991, '1991'], [1992, '1992'], [2007, '2006'], [2008, 'oggi'], [2026, 'oggi']];
 for (const [a, k] of casi) assert(epocaDellAnno(a) === k, `anno ${a}: confini ${k}`);
-setAnno(1856);
-assert(annoScelto === 1856 && epocaScelta === '1852', "setAnno(1856): l'anno resta 1856, i confini sono dell'ultimo cambio (1852)");
-assert(descriviAnno(1856).startsWith('Anno 1856 · Il Congresso di Vienna (ultimo cambio nel 1852: '), 'descrizione: ' + descriviAnno(1856));
+setAnno(1855);
+assert(annoScelto === 1855 && epocaScelta === '1852', "setAnno(1855): l'anno resta 1855, i confini sono dell'ultimo cambio (1852)");
+assert(descriviAnno(1855).startsWith('Anno 1855 · Il Congresso di Vienna (ultimo cambio nel 1852: '), 'descrizione: ' + descriviAnno(1855));
 assert(descriviAnno(1950) === 'Anno 1950 · La guerra fredda', 'dal 1886 confini esatti: ' + descriviAnno(1950));
 assert(Object.keys(EPOCHE).every(k => { const e = EPOCHE[k], g = EPOCHE[e.come || k]; return g.griglia && (!g.base || EPOCHE[g.base].griglia && !EPOCHE[g.base].base); }),
   'ogni anno ha la sua griglia, al massimo con una base scritta per intero');

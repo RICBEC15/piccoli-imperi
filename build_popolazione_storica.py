@@ -168,6 +168,10 @@ for i, (nome, lon, lat, ab) in enumerate(citta):
                 p0 = lerp_log(s, primo)
                 zp = lerp_log(z, primo)
                 vals.append(min(p0, max(p0 / 10, p0 * z[a] / zp)) if zp > 0 else p0)
+    # v90: in Siberia, nell'Estremo Oriente russo e a Hokkaido le citta' senza dati sono fondazioni recenti
+    # (Novosibirsk 1893, Vladivostok 1860, Sapporo 1868): prima del 1750 non c'erano
+    if (not noti or min(noti) >= 1750) and ((lat > 49.5 and lon > 60.5) or (lon > 130.5 and lat > 42.5)):
+        vals = [MINIMO if a < 1750 else v for a, v in zip(ANNI, vals)]
     tabella.append([max(MINIMO, v) for v in vals])
 
 def cento(v):  # in centinaia di abitanti, due o tre cifre significative
